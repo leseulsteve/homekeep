@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional
 
-from .const import CURRENT_STORAGE_VERSION
+from .const import CURRENT_STORAGE_VERSION, STORAGE_KEY
 from .models import (
     ChoreCompletion,
     ChoreDefinition,
@@ -273,3 +273,35 @@ def _parse_scalar(value: str) -> Any:
         return int(value)
     except ValueError:
         return value
+
+
+class HomekeepStorage:
+    """Home Assistant storage adapter for the validated Homekeep store."""
+
+    def __init__(self, hass: Any, entry: Any) -> None:
+        from homeassistant.helpers.storage import Store
+
+        self._store = Store(
+            hass,
+            CURRENT_STORAGE_VERSION,
+            f"{STORAGE_KEY}.{entry.entry_id}",
+        )
+        self.store = load_store_dict(None)
+        self.data = dump_store_dict(self.store)
+
+    async def async_load(self) -> HomekeepStore:
+        """Load, migrate, validate, and repair Homekeep storage."""
+
+        raw = await self._store.async_load()
+        self.store = load_store_dict(raw)
+        self.data = dump_store_dict(self.store)
+
+        if raw != self.data:
+            await self.async_save()
+        return self.store
+
+    async def async_save(self) -> None:
+        """Persist the current Homekeep store."""
+
+        self.data = dump_store_dict(self.store)
+        await self._store.async_save(self.data)

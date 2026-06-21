@@ -7,19 +7,21 @@ Use it as the resume point for future sessions. Do not rely on chat memory.
 ## Current Status
 
 ```yaml
-current_phase: 1
-current_phase_name: Models and storage
+current_phase: 2
+current_phase_name: Health and adaptive intervals
 last_updated: 2026-06-21
 last_codex_summary: >
-  Steve directed a bounded Phase 1 pass before the full Phase 0 Home Assistant
-  scaffold existed. Added pure Python Homekeep core models, validation helpers,
-  versioned storage migration/load helpers, sample chore loading for tests, and
-  focused standard-library tests. Phase 0 remains incomplete.
+  Phase 0 scaffold has been restored/applied on top of the Phase 1 core
+  models/storage work. Homekeep now has a Home Assistant integration skeleton,
+  config flow, manifest, service metadata, empty schema-validated service
+  handlers, a Home Assistant storage adapter around the versioned core store,
+  and focused scaffold tests. The next incomplete implementation area is
+  derived health and adaptive interval behavior.
 ```
 
 ## Phase Checklist
 
-- [ ] Phase 0: Scaffold
+- [x] Phase 0: Scaffold
 - [x] Phase 1: Models and storage
 - [ ] Phase 2: Health and adaptive intervals
 - [ ] Phase 3: Chore Session lifecycle
@@ -97,6 +99,53 @@ Known gaps / next prompt:
   Home/Area Health derivation remain for the next bounded implementation pass.
 - Pytest and PyYAML are not installed in this environment; current tests use
   standard-library `unittest`.
+
+### 2026-06-21 - Phase 0: Scaffold
+
+Status: completed
+
+Implemented:
+- Added the Home Assistant custom integration scaffold:
+  `manifest.json`, `config_flow.py`, `services.yaml`, and `strings.json`.
+- Expanded `const.py` with Homekeep domain metadata, platform list, service
+  names, service attributes, and allowed enum values used by service schemas.
+- Implemented `async_setup`, `async_setup_entry`, and `async_unload_entry` in
+  `__init__.py` with empty Phase 0 handlers and schema-validated service
+  registration.
+- Registered data-producing services with `SupportsResponse.ONLY` and mutation
+  or refresh services with `SupportsResponse.OPTIONAL`; no recommendation or
+  session logic was implemented.
+- Added `HomekeepStorage`, a Home Assistant storage adapter around the existing
+  versioned core store, so load paths migrate, validate, repair, and save the
+  canonical storage shape.
+- Added `tests/test_homekeep_scaffold.py` for manifest, config flow, response
+  support wiring, service metadata, and HA storage adapter checks.
+
+Tests/checks run:
+- `python3 -m unittest discover -s tests -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+
+Docs updated:
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Home Assistant and Voluptuous are not installed in this local environment, so
+  Home Assistant APIs were verified against official Home Assistant developer
+  docs instead of installed package source.
+- Kept Home Assistant imports lazy in `__init__.py` and `storage.py` so the
+  pure core tests remain runnable without a local Home Assistant install.
+- Used the backed-up GitHub Phase 0 scaffold as historical reference only; the
+  implementation was adapted to the current Homekeep service names and storage
+  version `2`.
+
+Known gaps / next prompt:
+- The scaffold services intentionally return no-op scaffold responses and do
+  not generate recommendations, create sessions, or mutate chore state.
+- Full Home Assistant integration tests were not run because Home Assistant,
+  Voluptuous, and pytest are not installed locally.
+- Next recommended prompt: Implement Phase 2 health/adaptive interval helpers:
+  completion credit application, adaptive interval training, derived Staleness,
+  Home Health, Area Health, and focused tests.
 
 ## Resume Instructions
 

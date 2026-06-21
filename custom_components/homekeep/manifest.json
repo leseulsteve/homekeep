@@ -1,0 +1,14 @@
+{
+  "domain": "homekeep",
+  "name": "Homekeep",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/leseulsteve/homekeep",
+  "integration_type": "hub",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/leseulsteve/homekeep/issues",
+  "requirements": ["python-dateutil>=2.8.2"],
+  "single_config_entry": true,
+  "version": "0.0.1"
+}

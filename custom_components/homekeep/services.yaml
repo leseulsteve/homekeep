@@ -1,0 +1,133 @@
+generate_smart_chore_list:
+  name: Generate smart chore list
+  description: Scaffold service for future Smart Chore List generation.
+  fields:
+    recommendation_mode:
+      required: false
+      example: ready_now
+      selector:
+        select:
+          options:
+            - ready_now
+            - scheduled_suggestion
+    target_time_window:
+      required: false
+      example: "2026-06-21T14:00:00-04:00/2026-06-21T15:00:00-04:00"
+      selector:
+        text:
+
+start_recommendation:
+  name: Start recommendation
+  description: Scaffold service for future recommendation materialization.
+  fields:
+    recommendation_snapshot_id:
+      required: true
+      selector:
+        text:
+    recommendation_id:
+      required: true
+      selector:
+        text:
+
+start_chore_bundle:
+  name: Start chore bundle
+  description: Compatibility scaffold for future bundle materialization.
+  fields:
+    recommendation_snapshot_id:
+      required: true
+      selector:
+        text:
+    bundle_id:
+      required: true
+      selector:
+        text:
+
+complete_chore:
+  name: Complete chore
+  description: Scaffold service for future chore completion handling.
+  fields:
+    chore_id:
+      required: true
+      selector:
+        text:
+
+skip_chore:
+  name: Skip chore
+  description: Scaffold service for future chore skip handling.
+  fields:
+    chore_id:
+      required: true
+      selector:
+        text:
+
+snooze_chore:
+  name: Snooze chore
+  description: Scaffold service for future chore snooze handling.
+  fields:
+    chore_id:
+      required: true
+      selector:
+        text:
+    snooze_minutes:
+      required: true
+      selector:
+        number:
+          min: 5
+          max: 1440
+          mode: box
+
+dismiss_chore:
+  name: Dismiss chore
+  description: Scaffold service for future chore dismissal handling.
+  fields:
+    chore_id:
+      required: true
+      selector:
+        text:
+
+refresh_calendar_context:
+  name: Refresh calendar context
+  description: Scaffold service for future Calendar Context refresh handling.
+  fields:
+    target_time_window:
+      required: false
+      selector:
+        text:
+
+pause_session:
+  name: Pause session
+  description: Scaffold service for future Chore Session pause handling.
+  fields:
+    session_id:
+      required: true
+      selector:
+        text:
+
+accept_bonus_chore:
+  name: Accept bonus chore
+  description: Scaffold service for future Bonus Chore acceptance handling.
+  fields:
+    session_id:
+      required: true
+      selector:
+        text:
+    chore_id:
+      required: true
+      selector:
+        text:
+
+end_session:
+  name: End session
+  description: Scaffold service for future Chore Session ending.
+  fields:
+    session_id:
+      required: true
+      selector:
+        text:
+    status:
+      required: true
+      selector:
+        select:
+          options:
+            - completed
+            - cancelled

@@ -1,0 +1,22 @@
+{
+  "title": "Homekeep",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Homekeep",
+        "description": "Set up Homekeep."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Homekeep is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Homekeep options",
+        "description": "Homekeep has no options yet."
+      }
+    }
+  }
+}
