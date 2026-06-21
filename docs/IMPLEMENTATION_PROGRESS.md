@@ -406,6 +406,40 @@ Known gaps / next prompt:
 - Next implementation work remains Phase 5 Home Assistant service wiring unless
   Steve asks to revise Mood/Readiness Context docs further.
 
+### 2026-06-21 - Mood And Readiness Feature Plan
+
+Status: completed
+
+Implemented:
+- Added `docs/MOOD_READINESS_FEATURE_PLAN.md` as the coherent
+  post-prototype plan for evolving Mood Context into Readiness Context.
+- Consolidated session modes, chore-friction learning, safer explanation
+  wording, Home Assistant signals, opt-in wearable signals, open-source/local
+  source options, storage/privacy rules, implementation phases, and tests.
+- Replaced the long post-prototype note in `docs/MOOD_CONTEXT.md` with a
+  pointer to the dedicated feature plan.
+- Updated `docs/DECISION_LOG.md` to reference the new plan.
+
+Tests/checks run:
+- `git diff --check -- docs/MOOD_READINESS_FEATURE_PLAN.md docs/MOOD_CONTEXT.md docs/DECISION_LOG.md docs/IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/MOOD_READINESS_FEATURE_PLAN.md`
+- `docs/MOOD_CONTEXT.md`
+- `docs/DECISION_LOG.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- MVP Mood Context remains unchanged.
+- Post-prototype Readiness Context should expose session posture to users
+  rather than claiming to know the user's mood.
+- Wearable and Home Assistant signals must be opt-in, derived, short-lived, and
+  subordinate to explicit user choices.
+
+Known gaps / next prompt:
+- Next implementation work remains Phase 6 Calendar Context unless Steve asks
+  for further Mood/Readiness planning.
+
 ### 2026-06-21 - Phase 6: Calendar Context
 
 Status: completed
