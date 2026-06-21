@@ -2,7 +2,7 @@
 
 DOMAIN = "homekeep"
 NAME = "Homekeep"
-PLATFORMS: list[str] = []
+PLATFORMS: list[str] = ["sensor", "binary_sensor", "todo"]
 
 CURRENT_STORAGE_VERSION = 2
 STORAGE_KEY = f"{DOMAIN}.store"

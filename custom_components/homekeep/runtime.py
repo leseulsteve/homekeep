@@ -1,0 +1,230 @@
+"""Homekeep service runtime used by Home Assistant handlers and tests."""
+
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from typing import Any, Optional, Protocol
+
+from .const import (
+    ATTR_AREA_ID,
+    ATTR_BUNDLE_ID,
+    ATTR_CALENDAR_ENTITY_IDS,
+    ATTR_CHORE_ID,
+    ATTR_COMPLETED_BY,
+    ATTR_ENERGY_LEVEL,
+    ATTR_GOAL,
+    ATTR_INCLUDE_ALTERNATES,
+    ATTR_INFER_MOOD,
+    ATTR_MOOD,
+    ATTR_OFFER_BONUS_CHORE,
+    ATTR_RECOMMENDATION_ID,
+    ATTR_RECOMMENDATION_MODE,
+    ATTR_RECOMMENDATION_SNAPSHOT_ID,
+    ATTR_REQUEST_ID,
+    ATTR_SESSION_ID,
+    ATTR_SESSION_ITEM_ID,
+    ATTR_SNOOZE_MINUTES,
+    ATTR_SOURCE,
+    ATTR_STATUS,
+    ATTR_TARGET_TIME_WINDOW,
+    ATTR_TIME_BUDGET_MINUTES,
+    ATTR_USER_ID,
+    ATTR_VARIANT,
+    SERVICE_ACCEPT_BONUS_CHORE,
+    SERVICE_COMPLETE_CHORE,
+    SERVICE_DISMISS_CHORE,
+    SERVICE_END_SESSION,
+    SERVICE_GENERATE_SMART_CHORE_LIST,
+    SERVICE_PAUSE_SESSION,
+    SERVICE_REFRESH_CALENDAR_CONTEXT,
+    SERVICE_SKIP_CHORE,
+    SERVICE_SNOOZE_CHORE,
+    SERVICE_START_CHORE_BUNDLE,
+    SERVICE_START_RECOMMENDATION,
+)
+from .models import HomekeepValidationError
+from .recommendations import RecommendationEngine
+from .sessions import SessionEngine
+from .storage import HomekeepStore
+
+
+class SupportsSave(Protocol):
+    """Storage protocol used by the service runtime."""
+
+    store: HomekeepStore
+
+    async def async_save(self) -> None:
+        """Persist the current store."""
+
+
+class HomekeepServiceRuntime:
+    """Thin async service facade over the synchronous Homekeep engines."""
+
+    def __init__(self, storage: SupportsSave) -> None:
+        self.storage = storage
+
+    @property
+    def store(self) -> HomekeepStore:
+        """Return the active in-memory store."""
+
+        return self.storage.store
+
+    async def async_handle(
+        self, service_name: str, data: dict[str, Any]
+    ) -> dict[str, Any] | None:
+        """Handle one validated Home Assistant service call."""
+
+        if service_name == SERVICE_GENERATE_SMART_CHORE_LIST:
+            result = self._recommendations().generate_smart_chore_list(
+                recommendation_mode=data.get(ATTR_RECOMMENDATION_MODE, "ready_now"),
+                target_time_window=data.get(ATTR_TARGET_TIME_WINDOW),
+                time_budget_minutes=data.get(ATTR_TIME_BUDGET_MINUTES),
+                energy_level=data.get(ATTR_ENERGY_LEVEL),
+                goal=data.get(ATTR_GOAL),
+                area_id=data.get(ATTR_AREA_ID),
+                mood=(
+                    data.get(ATTR_MOOD)
+                    if data.get(ATTR_INFER_MOOD, True)
+                    else data.get(ATTR_MOOD)
+                ),
+                user_id=data.get(ATTR_USER_ID),
+                include_alternates=data.get(ATTR_INCLUDE_ALTERNATES, True),
+            )
+            await self.storage.async_save()
+            return result
+
+        if service_name in {
+            SERVICE_START_RECOMMENDATION,
+            SERVICE_START_CHORE_BUNDLE,
+        }:
+            recommendation_id = data.get(ATTR_RECOMMENDATION_ID) or data.get(
+                ATTR_BUNDLE_ID
+            )
+            if not recommendation_id:
+                raise HomekeepValidationError("recommendation_id is required")
+            result = self._recommendations().start_recommendation(
+                data[ATTR_RECOMMENDATION_SNAPSHOT_ID],
+                recommendation_id,
+                user_id=data.get(ATTR_USER_ID),
+                request_id=data.get(ATTR_REQUEST_ID),
+            )
+            await self.storage.async_save()
+            return result
+
+        if service_name == SERVICE_COMPLETE_CHORE:
+            result = self._sessions().complete_chore(
+                data[ATTR_CHORE_ID],
+                session_id=data.get(ATTR_SESSION_ID),
+                session_item_id=data.get(ATTR_SESSION_ITEM_ID),
+                variant=data.get(ATTR_VARIANT, "normal"),
+                completed_by=data.get(ATTR_COMPLETED_BY),
+                source=data.get(ATTR_SOURCE, "service"),
+                request_id=data.get(ATTR_REQUEST_ID),
+            )
+            await self.storage.async_save()
+            return result
+
+        if service_name == SERVICE_SKIP_CHORE:
+            session_id = _required(data, ATTR_SESSION_ID)
+            session_item_id = _required(data, ATTR_SESSION_ITEM_ID)
+            result = self._sessions().skip_chore(
+                data[ATTR_CHORE_ID],
+                session_id=session_id,
+                session_item_id=session_item_id,
+                request_id=data.get(ATTR_REQUEST_ID),
+            )
+            await self.storage.async_save()
+            return result
+
+        if service_name == SERVICE_SNOOZE_CHORE:
+            result = self._sessions().snooze_chore(
+                data[ATTR_CHORE_ID],
+                snooze_minutes=data[ATTR_SNOOZE_MINUTES],
+                session_id=data.get(ATTR_SESSION_ID),
+                session_item_id=data.get(ATTR_SESSION_ITEM_ID),
+                request_id=data.get(ATTR_REQUEST_ID),
+            )
+            await self.storage.async_save()
+            return result
+
+        if service_name == SERVICE_DISMISS_CHORE:
+            result = self._sessions().dismiss_chore(
+                data[ATTR_CHORE_ID],
+                session_id=data.get(ATTR_SESSION_ID),
+                session_item_id=data.get(ATTR_SESSION_ITEM_ID),
+                request_id=data.get(ATTR_REQUEST_ID),
+            )
+            await self.storage.async_save()
+            return result
+
+        if service_name == SERVICE_PAUSE_SESSION:
+            result = self._sessions().pause_session(
+                data[ATTR_SESSION_ID],
+                request_id=data.get(ATTR_REQUEST_ID),
+            )
+            await self.storage.async_save()
+            return result
+
+        if service_name == SERVICE_ACCEPT_BONUS_CHORE:
+            result = self._sessions().accept_bonus_chore(
+                data[ATTR_SESSION_ID],
+                data[ATTR_CHORE_ID],
+                request_id=data.get(ATTR_REQUEST_ID),
+            )
+            await self.storage.async_save()
+            return result
+
+        if service_name == SERVICE_END_SESSION:
+            result = self._sessions().end_session(
+                data[ATTR_SESSION_ID],
+                status=data[ATTR_STATUS],
+                offer_bonus_chore=data.get(ATTR_OFFER_BONUS_CHORE, False),
+                bonus_chore_id=self._bonus_chore_for_session(data[ATTR_SESSION_ID]),
+                request_id=data.get(ATTR_REQUEST_ID),
+            )
+            await self.storage.async_save()
+            return result
+
+        if service_name == SERVICE_REFRESH_CALENDAR_CONTEXT:
+            result = self._refresh_calendar_context(data)
+            await self.storage.async_save()
+            return result
+
+        raise HomekeepValidationError(f"unknown Homekeep service: {service_name}")
+
+    def _sessions(self) -> SessionEngine:
+        return SessionEngine(self.store)
+
+    def _recommendations(self) -> RecommendationEngine:
+        return RecommendationEngine(self.store, self._sessions())
+
+    def _bonus_chore_for_session(self, session_id: str) -> Optional[str]:
+        session = self.store.sessions.get(session_id)
+        if not session:
+            return None
+        selected = set(session.get("selected_chores", []))
+        for chore_id, chore in sorted(self.store.chores.items()):
+            if chore.enabled and chore_id not in selected:
+                return chore_id
+        return None
+
+    def _refresh_calendar_context(self, data: dict[str, Any]) -> dict[str, Any]:
+        now = datetime.now(timezone.utc)
+        entity_ids = data.get(ATTR_CALENDAR_ENTITY_IDS) or []
+        context = {
+            "calendar_context_id": f"calendar_{int(now.timestamp())}",
+            "refreshed_at": now.isoformat(),
+            "target_time_window": data.get(ATTR_TARGET_TIME_WINDOW),
+            "calendar_entity_count": len(entity_ids),
+            "has_guests_soon": False,
+            "has_busy_block_soon": False,
+        }
+        self.store.calendar_context = context
+        return {"status": "refreshed", "calendar_context": context}
+
+
+def _required(data: dict[str, Any], key: str) -> str:
+    value = data.get(key)
+    if not isinstance(value, str) or not value:
+        raise HomekeepValidationError(f"{key} is required")
+    return value

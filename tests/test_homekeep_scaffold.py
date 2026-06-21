@@ -9,6 +9,7 @@ from pathlib import Path
 from custom_components.homekeep.const import (
     DATA_PRODUCING_SERVICES,
     OPTIONAL_RESPONSE_SERVICES,
+    PLATFORMS,
     SERVICE_GENERATE_SMART_CHORE_LIST,
     SERVICE_START_RECOMMENDATION,
 )
@@ -51,6 +52,11 @@ class HomekeepScaffoldTest(unittest.TestCase):
         self.assertIn("generate_smart_chore_list:", services)
         self.assertIn("start_recommendation:", services)
         self.assertNotIn("answer_session_question:", services)
+        self.assertIn("_service_handler(hass, service_name)", source)
+        self.assertNotIn("implemented\": False", source)
+
+    def test_phase5_platforms_are_declared(self) -> None:
+        self.assertEqual(PLATFORMS, ["sensor", "binary_sensor", "todo"])
 
     def test_home_assistant_storage_adapter_uses_versioned_store(self) -> None:
         source = (HOMEKEEP / "storage.py").read_text()

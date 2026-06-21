@@ -53,6 +53,7 @@ from .const import (
     SOURCES,
     VARIANTS,
 )
+from .models import HomekeepValidationError
 from .storage import HomekeepStorage
 
 
@@ -82,7 +83,7 @@ async def async_setup(hass: Any, config: dict[str, Any]) -> bool:
         hass.services.async_register(
             DOMAIN,
             service_name,
-            _phase0_service_handler(service_name),
+            _service_handler(hass, service_name),
             **register_kwargs,
         )
 
@@ -117,22 +118,40 @@ async def async_unload_entry(hass: Any, entry: Any) -> bool:
     return unload_ok
 
 
-def _phase0_service_handler(service_name: str) -> Callable[[Any], Any]:
-    """Return a no-op scaffold service handler."""
+def _service_handler(hass: Any, service_name: str) -> Callable[[Any], Any]:
+    """Return a Home Assistant service handler."""
 
     async def handle_service(call: Any) -> dict[str, Any] | None:
-        response = {
-            "service": service_name,
-            "status": "scaffold",
-            "implemented": False,
-        }
+        from .runtime import HomekeepServiceRuntime
+
+        try:
+            runtime = HomekeepServiceRuntime(_first_storage(hass))
+            response = await runtime.async_handle(service_name, dict(call.data))
+        except HomekeepValidationError as err:
+            raise _service_validation_error(str(err)) from err
+
         if service_name in DATA_PRODUCING_SERVICES:
-            return response
+            return response or {}
         if getattr(call, "return_response", False):
-            return response
+            return response or {"status": "ok"}
         return None
 
     return handle_service
+
+
+def _first_storage(hass: Any) -> HomekeepStorage:
+    stores = hass.data.get(DOMAIN, {})
+    if not stores:
+        raise HomekeepValidationError("Homekeep is not loaded")
+    return next(iter(stores.values()))
+
+
+def _service_validation_error(message: str) -> Exception:
+    try:
+        from homeassistant.exceptions import ServiceValidationError
+    except ModuleNotFoundError:
+        return HomekeepValidationError(message)
+    return ServiceValidationError(message)
 
 
 def _build_service_schemas() -> dict[str, Any]:

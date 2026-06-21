@@ -166,6 +166,26 @@ implementation pass.
 - Idempotency storage is capped at 1000 records after pruning expired records.
 - Duplicate valid retries return the stored result, not a recomputed result.
 
+## Home Assistant Services And To-do Projections
+
+- Home Assistant service handlers are thin adapters around the local Homekeep
+  service runtime, which delegates durable mutations to `SessionEngine` and
+  recommendation work to `RecommendationEngine`.
+- Service payload validation is split between Home Assistant voluptuous schemas
+  and core Homekeep validation so unit tests can exercise behavior without a
+  live Home Assistant runtime.
+- Data-producing Homekeep services use Home Assistant service responses.
+  Mutation services may return optional action responses when the caller asks
+  for one.
+- Home Assistant To-do entities are projections, not source of truth.
+- To-do entities expose update support so projected item completion can write
+  through to Homekeep.
+- To-do creates, deletes, edits/renames, and moves/reorders are rejected and the
+  projection refreshes from Homekeep storage.
+- Recommendation To-do items are launchable suggestions only in Phase 5; only
+  active-session To-do items with valid Homekeep projection metadata can be
+  completed directly from Home Assistant.
+
 ## MVP Scope
 
 - Stay inside MVP unless Steve explicitly expands scope.

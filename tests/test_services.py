@@ -1,0 +1,174 @@
+"""Tests for Homekeep Home Assistant service facade behavior."""
+
+from __future__ import annotations
+
+import unittest
+from dataclasses import dataclass
+from datetime import timedelta
+
+from custom_components.homekeep.const import (
+    ATTR_CHORE_ID,
+    ATTR_RECOMMENDATION_ID,
+    ATTR_RECOMMENDATION_SNAPSHOT_ID,
+    ATTR_REQUEST_ID,
+    ATTR_SESSION_ID,
+    ATTR_SESSION_ITEM_ID,
+    ATTR_SNOOZE_MINUTES,
+    ATTR_STATUS,
+    SERVICE_COMPLETE_CHORE,
+    SERVICE_GENERATE_SMART_CHORE_LIST,
+    SERVICE_SKIP_CHORE,
+    SERVICE_SNOOZE_CHORE,
+    SERVICE_START_RECOMMENDATION,
+)
+from custom_components.homekeep.health import apply_completion_to_state, utc_datetime
+from custom_components.homekeep.models import (
+    ChoreDefinition,
+    ChoreState,
+    HomekeepValidationError,
+)
+from custom_components.homekeep.runtime import HomekeepServiceRuntime
+from custom_components.homekeep.sessions import SessionEngine
+from custom_components.homekeep.storage import HomekeepStore
+
+
+def chore_data(name: str, *, area_id: str = "kitchen", minutes: int = 5) -> dict:
+    return {
+        "name": name,
+        "area_id": area_id,
+        "group_id": "default",
+        "base_interval_days": 7,
+        "min_interval_days": 3,
+        "max_interval_days": 14,
+        "estimated_minutes": minutes,
+        "energy": "normal",
+        "visibility": "high",
+        "health_weight": 1.0,
+        "variants": {"normal": {"label": name, "credit": 1.0}},
+        "pairs_with": [],
+        "enabled": True,
+    }
+
+
+def make_store() -> HomekeepStore:
+    chores = {
+        chore_id: ChoreDefinition.from_dict(chore_id, data)
+        for chore_id, data in {
+            "empty_compost": chore_data("Empty compost", minutes=2),
+            "wipe_counters": chore_data("Wipe counters", minutes=5),
+        }.items()
+    }
+    now = utc_datetime(2026, 6, 21, 9)
+    states = {
+        chore_id: apply_completion_to_state(
+            chore,
+            ChoreState.new_for_chore(chore),
+            now - timedelta(days=20),
+            "normal",
+        )
+        for chore_id, chore in chores.items()
+    }
+    return HomekeepStore(chores=chores, states=states)
+
+
+@dataclass
+class FakeStorage:
+    store: HomekeepStore
+    save_count: int = 0
+
+    async def async_save(self) -> None:
+        self.save_count += 1
+
+
+class HomekeepServiceRuntimeTest(unittest.IsolatedAsyncioTestCase):
+    def setUp(self) -> None:
+        self.storage = FakeStorage(make_store())
+        self.runtime = HomekeepServiceRuntime(self.storage)
+
+    async def test_generate_and_start_recommendation_service(self) -> None:
+        recommendation = await self.runtime.async_handle(
+            SERVICE_GENERATE_SMART_CHORE_LIST,
+            {"time_budget_minutes": 10},
+        )
+        assert recommendation is not None
+        started = await self.runtime.async_handle(
+            SERVICE_START_RECOMMENDATION,
+            {
+                ATTR_RECOMMENDATION_SNAPSHOT_ID: recommendation["snapshot_id"],
+                ATTR_RECOMMENDATION_ID: recommendation["best_single_chore"][
+                    "recommendation_id"
+                ],
+                ATTR_REQUEST_ID: "start-1",
+            },
+        )
+
+        assert started is not None
+        self.assertIn(started["session_id"], self.storage.store.sessions)
+        self.assertEqual(self.storage.save_count, 2)
+
+    async def test_malformed_payload_is_rejected_without_save(self) -> None:
+        with self.assertRaisesRegex(HomekeepValidationError, "snooze_minutes"):
+            await self.runtime.async_handle(
+                SERVICE_SNOOZE_CHORE,
+                {
+                    ATTR_CHORE_ID: "empty_compost",
+                    ATTR_SNOOZE_MINUTES: 4,
+                },
+            )
+
+        self.assertEqual(self.storage.save_count, 0)
+        self.assertEqual(len(self.storage.store.completions), 0)
+
+    async def test_unknown_chore_id_is_rejected_without_crashing(self) -> None:
+        with self.assertRaisesRegex(HomekeepValidationError, "unknown chore_id"):
+            await self.runtime.async_handle(
+                SERVICE_COMPLETE_CHORE,
+                {ATTR_CHORE_ID: "missing"},
+            )
+
+        self.assertEqual(self.storage.save_count, 0)
+
+    async def test_session_service_idempotency_returns_same_result(self) -> None:
+        session = SessionEngine(self.storage.store).start_session(["empty_compost"])
+        item = session["items"][0]
+
+        first = await self.runtime.async_handle(
+            SERVICE_COMPLETE_CHORE,
+            {
+                ATTR_CHORE_ID: item["chore_id"],
+                ATTR_SESSION_ID: session["session_id"],
+                ATTR_SESSION_ITEM_ID: item["session_item_id"],
+                ATTR_REQUEST_ID: "complete-once",
+            },
+        )
+        second = await self.runtime.async_handle(
+            SERVICE_COMPLETE_CHORE,
+            {
+                ATTR_CHORE_ID: item["chore_id"],
+                ATTR_SESSION_ID: session["session_id"],
+                ATTR_SESSION_ITEM_ID: item["session_item_id"],
+                ATTR_REQUEST_ID: "complete-once",
+            },
+        )
+
+        self.assertEqual(first, second)
+        self.assertEqual(len(self.storage.store.completions), 1)
+        self.assertEqual(self.storage.save_count, 2)
+
+    async def test_skip_requires_session_metadata(self) -> None:
+        with self.assertRaisesRegex(HomekeepValidationError, "session_id"):
+            await self.runtime.async_handle(
+                SERVICE_SKIP_CHORE,
+                {ATTR_CHORE_ID: "empty_compost"},
+            )
+
+    async def test_end_session_unknown_id_is_rejected(self) -> None:
+        with self.assertRaisesRegex(HomekeepValidationError, "unknown session_id"):
+            await self.runtime.async_handle(
+                "end_session",
+                {ATTR_SESSION_ID: "missing", ATTR_STATUS: "completed"},
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()

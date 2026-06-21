@@ -307,6 +307,77 @@ Known gaps / next prompt:
 - Next recommended prompt: Implement Phase 5 Home Assistant service wiring and
   initial entities/to-do projections around the existing core engine.
 
+### 2026-06-21 - Phase 5: Home Assistant services and entities
+
+Status: completed
+
+Implemented:
+- Replaced the Phase 0 scaffold service handler with real Homekeep service
+  handlers that load the active integration store, call a small
+  `HomekeepServiceRuntime`, persist successful mutations, and translate core
+  validation errors to Home Assistant service validation errors when Home
+  Assistant is installed.
+- Added `custom_components/homekeep/runtime.py` as a testable adapter over
+  `RecommendationEngine` and `SessionEngine` for Smart Chore List generation,
+  recommendation/session starts, complete/skip/snooze/dismiss, pause, accept
+  Bonus Chore, end session, and a minimized calendar-context refresh stub.
+- Enabled Phase 5 platforms: `sensor`, `binary_sensor`, and `todo`.
+- Added initial sensors for Home Health, due Chore count, best next Chore, and
+  minimized calendar context.
+- Added per-Chore due binary sensors.
+- Added To-do projections for latest recommendations and the active Chore
+  Session. Active-session projected completions write through with Homekeep
+  metadata; create/delete/edit/rename/move/reorder attempts refresh the
+  projection and raise a Homekeep mutation error.
+- Added tests for malformed service payloads, unknown IDs, service
+  idempotency, valid projected To-do completion, invalid projection completion,
+  and To-do mutation traps.
+
+Home Assistant API verification:
+- Home Assistant is not installed in the local test environment, so Phase 5 API
+  assumptions were verified against official Home Assistant developer docs.
+- Verified service action registration/response support expectations from the
+  Home Assistant service developer docs.
+- Verified `TodoListEntity`, `TodoItem`, `TodoItemStatus`, supported feature
+  flags, and async create/delete/update/move handlers from the official To-do
+  entity developer docs.
+- Verified the basic sensor and binary sensor entity patterns from the official
+  entity developer docs.
+
+Tests/checks run:
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components/homekeep`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest discover -s tests -v`
+
+Docs updated:
+- `docs/DECISION_LOG.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Kept service behavior small and local: Home Assistant handlers adapt payloads
+  and persistence, while existing Homekeep engines remain authoritative for
+  durable mutations and recommendation behavior.
+- To-do projections advertise update support only so Home Assistant can send
+  completion updates; updates that are actually edits/renames are rejected and
+  refreshed from storage.
+- Recommendation To-do items remain non-completable suggestions until a
+  recommendation is materialized into a session; active-session To-do items are
+  the write-through completion surface.
+- Calendar refresh remains a minimized Phase 5 stub with no raw calendar event
+  details; the full Calendar Context phase still owns real calendar snapshot
+  behavior.
+
+Known gaps / next prompt:
+- Home Assistant package is not installed locally, so Phase 5 was verified with
+  unit tests plus official docs rather than an in-process Home Assistant test
+  harness.
+- Entity coverage is intentionally MVP-minimal; unload/reload behavior,
+  dynamic entity additions after chore import, and richer action response
+  payloads should be hardened in the Phase 9 test/reload pass.
+- Calendar Context, Bubble Card dashboard wiring, and To-do area projections
+  remain later phases.
+- Next recommended prompt: Implement Phase 6 Calendar Context with minimized
+  durable snapshots, freshness checks, entity invalidation, and tests.
+
 ### 2026-06-21 - Mood Context Post-Prototype Planning
 
 Status: completed
