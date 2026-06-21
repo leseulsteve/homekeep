@@ -164,9 +164,9 @@ Gate 4 partial live result on 2026-06-21:
 
 ## Gate 5: To-do Projection Smoke Test
 
-- [ ] `todo.homekeep_recommendations` mirrors the latest Smart Chore List
-- [ ] `todo.homekeep_active_session` mirrors active session items
-- [ ] Completing a valid To-do item attached to an active session writes
+- [x] `todo.homekeep_recommendations` mirrors the latest Smart Chore List
+- [x] `todo.homekeep_active_session` mirrors active session items
+- [x] Completing a valid To-do item attached to an active session writes
   through to Homekeep
 - [ ] Completing an item without valid Homekeep metadata is rejected
 - [ ] Creating a To-do item is rejected or snaps back
@@ -196,6 +196,9 @@ Gate 5 partial live result on 2026-06-21:
 - Follow-up hardening: To-do projections now set explicit documented entity ids
   and updated unique ids for `todo.homekeep_active_session` and
   `todo.homekeep_recommendations`.
+- After updating through HACS, Steve confirmed `todo.homekeep_active_session`
+  exists. A fresh active session populated the entity and To-do UI completion
+  wrote through successfully.
 
 ## Gate 6: Calendar Context Smoke Test
 
