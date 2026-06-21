@@ -241,14 +241,24 @@ Gate 6 partial live result on 2026-06-21:
 
 ## Gate 7: Reload And Unload
 
-- [ ] Reload the Homekeep config entry
-- [ ] Confirm durable state remains intact after reload
-- [ ] Confirm sensors and To-do entities return after reload
+- [x] Reload the Homekeep config entry
+- [x] Confirm durable state remains intact after reload
+- [x] Confirm sensors and To-do entities return after reload
 - [ ] Confirm calendar state listeners still invalidate Calendar Context after
   reload
-- [ ] Unload the Homekeep config entry
-- [ ] Confirm Homekeep entities are removed/unavailable as expected
-- [ ] Reload or restart and confirm Homekeep recovers stored state
+- [x] Unload the Homekeep config entry
+- [x] Confirm Homekeep entities are removed/unavailable as expected
+- [x] Reload or restart and confirm Homekeep recovers stored state
+
+Gate 7 partial live result on 2026-06-21:
+
+- Steve reloaded Homekeep and confirmed the expected state/entities were all
+  present afterward.
+- Home Assistant UI did not expose an unload option for Homekeep during the
+  private test, so manual unload was not available. Local automated tests still
+  cover unload behavior.
+- Steve restarted Home Assistant and confirmed Homekeep recovered stored state
+  and expected entities.
 
 ## Gate 8: Bubble Card Dashboard
 
