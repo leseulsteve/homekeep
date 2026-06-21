@@ -676,7 +676,7 @@ Known gaps / next prompt:
 
 ### 2026-06-21 - Private HACS live-test due-state repair
 
-Status: completed locally
+Status: completed and live-confirmed
 
 Implemented:
 - Updated bundled sample Chore seeding so synthetic Chore states are
@@ -698,9 +698,9 @@ Important decisions:
   updating through HACS and restarting with dev mode enabled.
 
 Known gaps / next prompt:
-- Push this repair, then update/re-download Homekeep through HACS and restart.
-  The due-count sensor should become positive without manually resetting sample
-  data.
+- Gate 3 synthetic data setup is live-confirmed on the private HACS install.
+- Next prompt: run Gate 4 service smoke tests from Developer Tools > Actions,
+  starting with `homekeep.generate_smart_chore_list`.
 
 ## Resume Instructions
 

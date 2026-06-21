@@ -72,21 +72,31 @@ Install method selected by Steve: HACS custom repository.
 
 ## Gate 3: Synthetic Data Setup
 
-- [ ] Confirm Homekeep options show Developer mode enabled after install
-- [ ] Confirm bundled synthetic Chores loaded automatically on setup
+- [x] Confirm Homekeep options show Developer mode enabled after install
+- [x] Confirm bundled synthetic Chores loaded automatically on setup
 - [ ] If a reset is needed, use Developer Tools > Actions:
   `homekeep.load_sample_chores` with `replace_existing: true`
-- [ ] Do not use real private room routines or private schedule details
-- [ ] Confirm Homekeep storage contains Chore definitions and Chore state
-- [ ] Confirm sensors exist:
-  - [ ] `sensor.homekeep_home_health`
-  - [ ] `sensor.homekeep_due_chore_count`
-  - [ ] `sensor.homekeep_best_next_chore`
-  - [ ] `sensor.homekeep_next_calendar_context`
-- [ ] Confirm To-do entities exist:
-  - [ ] `todo.homekeep_recommendations`
-  - [ ] `todo.homekeep_active_session`
-- [ ] Confirm per-Chore due binary sensors are created for synthetic Chores
+- [x] Do not use real private room routines or private schedule details
+- [x] Confirm Homekeep storage contains Chore definitions and Chore state
+- [x] Confirm sensors exist:
+  - [x] `sensor.homekeep_home_health`
+  - [x] `sensor.homekeep_due_chore_count`
+  - [x] `sensor.homekeep_best_next_chore`
+  - [x] `sensor.homekeep_next_calendar_context`
+- [x] Confirm To-do entities exist:
+  - [x] `todo.homekeep_recommendations`
+  - [x] `todo.homekeep_active_session`
+- [x] Confirm per-Chore due binary sensors are created for synthetic Chores
+
+Gate 3 live result on 2026-06-21:
+
+- HACS-installed Homekeep loaded bundled synthetic Chores.
+- Per-Chore due binary sensors were present.
+- Due count initially stayed at `0` because first-pass sample states had
+  `next_due_at=null`.
+- Commit `0ca0245` repaired the private dev-mode sample states so unstarted
+  bundled sample Chores become immediately due.
+- Steve confirmed after update/restart that counts and binary sensors are good.
 
 ## Gate 4: Service Smoke Test
 
