@@ -198,6 +198,10 @@ implementation pass.
 - Private dev mode defaults to enabled during setup and options. When enabled,
   `async_setup_entry` seeds bundled sample Chores only if Homekeep storage has
   no existing Chores; it must not overwrite existing data during normal setup.
+- Bundled sample Chore seed/repair behavior may mark unstarted synthetic sample
+  Chores immediately due so private live testing has non-empty due sensors and
+  recommendations. This does not change normal `ChoreState.new_for_chore`
+  semantics.
 
 ## Bubble Card Dashboard
 

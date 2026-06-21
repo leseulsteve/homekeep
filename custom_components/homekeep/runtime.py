@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from dataclasses import replace
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Optional, Protocol
 
@@ -223,6 +224,34 @@ class HomekeepServiceRuntime:
         await self.storage.async_save()
         return result
 
+    async def async_mark_sample_chores_due_if_unstarted(self) -> dict[str, Any]:
+        """Mark existing bundled sample chores due when they have no schedule yet."""
+
+        sample_chores = load_sample_chores(Path(__file__).with_name("sample_chores.yaml"))
+        now = datetime.now(timezone.utc)
+        updated: list[str] = []
+        for chore_id in sample_chores:
+            state = self.store.states.get(chore_id)
+            if (
+                chore_id in self.store.chores
+                and state is not None
+                and state.last_completed_at is None
+                and state.next_due_at is None
+            ):
+                self.store.states[chore_id] = replace(
+                    state,
+                    next_due_at=now - timedelta(seconds=1),
+                )
+                updated.append(chore_id)
+
+        if updated:
+            await self.storage.async_save()
+        return {
+            "status": "updated" if updated else "skipped",
+            "chore_count": len(updated),
+            "chore_ids": sorted(updated),
+        }
+
     def _sessions(self) -> SessionEngine:
         return SessionEngine(self.store)
 
@@ -302,8 +331,9 @@ class HomekeepServiceRuntime:
             self.store.idempotency_records.clear()
 
         self.store.chores.update(chores)
+        now = datetime.now(timezone.utc)
         for chore_id, chore in chores.items():
-            self.store.states.setdefault(chore_id, ChoreState.new_for_chore(chore))
+            self.store.states.setdefault(chore_id, _sample_chore_state(chore, now))
 
         return {
             "status": "loaded",
@@ -311,6 +341,15 @@ class HomekeepServiceRuntime:
             "chore_ids": sorted(chores),
             "replace_existing": replace_existing,
         }
+
+
+def _sample_chore_state(chore: Any, now: datetime) -> ChoreState:
+    """Create live-test sample state that is immediately due."""
+
+    return replace(
+        ChoreState.new_for_chore(chore),
+        next_due_at=now - timedelta(seconds=1),
+    )
 
 
 def _required(data: dict[str, Any], key: str) -> str:

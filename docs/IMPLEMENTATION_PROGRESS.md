@@ -674,6 +674,34 @@ Known gaps / next prompt:
 - Push the private dev-mode seeding update, then update/re-download Homekeep
   through HACS and run Gate 3 by confirming automatic synthetic Chore setup.
 
+### 2026-06-21 - Private HACS live-test due-state repair
+
+Status: completed locally
+
+Implemented:
+- Updated bundled sample Chore seeding so synthetic Chore states are
+  immediately due for private live testing instead of having `next_due_at=null`.
+- Added a dev-mode setup repair for existing previously seeded sample Chores:
+  if a bundled sample Chore exists, has no completion history, and has no
+  `next_due_at`, setup marks it due without replacing Chore definitions or
+  touching completed/scheduled Chores.
+- Added regression coverage using the actual due-count sensor and per-Chore
+  binary sensor classes.
+
+Tests/checks run:
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_reload_unload tests.test_services tests.test_storage -v`
+
+Important decisions:
+- Kept normal `ChoreState.new_for_chore` unchanged. Only private bundled sample
+  seed/repair behavior marks chores immediately due.
+- Existing live-test stores from the first seed pass can be repaired by
+  updating through HACS and restarting with dev mode enabled.
+
+Known gaps / next prompt:
+- Push this repair, then update/re-download Homekeep through HACS and restart.
+  The due-count sensor should become positive without manually resetting sample
+  data.
+
 ## Resume Instructions
 
 When resuming implementation:

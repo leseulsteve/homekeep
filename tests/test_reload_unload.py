@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import unittest
+from pathlib import Path
 from types import SimpleNamespace
 
 from custom_components.homekeep import (
@@ -12,7 +13,12 @@ from custom_components.homekeep import (
 )
 from custom_components.homekeep.const import DOMAIN, OPTION_DEV_MODE, PLATFORMS
 from custom_components.homekeep.models import ChoreDefinition, ChoreState
-from custom_components.homekeep.storage import HomekeepStore
+from custom_components.homekeep.sensor import HomekeepDueChoreCountSensor
+from custom_components.homekeep.binary_sensor import HomekeepChoreDueBinarySensor
+from custom_components.homekeep.storage import HomekeepStore, load_sample_chores
+
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 class FakeConfigEntries:
@@ -112,6 +118,10 @@ class ReloadUnloadTest(unittest.IsolatedAsyncioTestCase):
         self.assertGreaterEqual(len(storage.store.chores), 20)
         self.assertIn("empty_compost", storage.store.chores)
         self.assertEqual(set(storage.store.chores), set(storage.store.states))
+        self.assertGreater(HomekeepDueChoreCountSensor(storage).native_value, 0)
+        self.assertTrue(
+            HomekeepChoreDueBinarySensor(storage, "empty_compost").is_on
+        )
         self.assertEqual(storage.save_count, 1)
 
     async def test_dev_mode_seed_does_not_replace_existing_chores(self) -> None:
@@ -125,6 +135,28 @@ class ReloadUnloadTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(set(storage.store.chores), {"existing_chore"})
         self.assertEqual(storage.save_count, 0)
+
+    async def test_dev_mode_repairs_existing_unstarted_sample_chores(self) -> None:
+        entry = SimpleNamespace(data={OPTION_DEV_MODE: True}, options={})
+        storage = FakeStorage()
+        sample_chores = load_sample_chores(
+            ROOT / "custom_components" / "homekeep" / "sample_chores.yaml"
+        )
+        storage.store.chores.update(sample_chores)
+        storage.store.states.update(
+            {
+                chore_id: ChoreState.new_for_chore(chore)
+                for chore_id, chore in sample_chores.items()
+            }
+        )
+
+        await _async_seed_sample_chores_for_dev_mode(storage, entry)
+
+        self.assertGreater(HomekeepDueChoreCountSensor(storage).native_value, 0)
+        self.assertTrue(
+            HomekeepChoreDueBinarySensor(storage, "empty_compost").is_on
+        )
+        self.assertEqual(storage.save_count, 1)
 
     async def test_dev_mode_seed_can_be_disabled(self) -> None:
         entry = SimpleNamespace(data={OPTION_DEV_MODE: False}, options={})
