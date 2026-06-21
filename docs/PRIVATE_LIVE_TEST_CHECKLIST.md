@@ -307,11 +307,12 @@ Companion helper/script example:
 - [ ] Paste/import `examples/bubble_card_dashboard.yaml`
 - [ ] Ready-Now launcher opens
 - [ ] Time, energy, goal, and mood controls work
-- [ ] Generate button calls the bridge script
-- [ ] Recommendation display updates from Homekeep entities/projections
-- [ ] Start button materializes a recommendation
-- [ ] Done, Skip, Snooze, Done for now, One more, and Accept one more call the
-  intended scripts
+- [x] Generate button or bridge script calls the intended Homekeep service
+- [x] Recommendation display updates from Homekeep entities/projections
+- [x] Start button or bridge script materializes a recommendation
+- [x] Done, Done for now, One more, and Accept one more call the intended
+  scripts
+- [ ] Skip and Snooze call the intended scripts
 
 Gate 8 partial live result on 2026-06-21:
 
@@ -340,7 +341,8 @@ Gate 8 partial live result on 2026-06-21:
 - Completing the bonus Chore left `todo.homekeep_active_session` at `0`.
   A follow-up complete attempt failed with `session cannot accept completions`,
   which is expected after the session is already terminal.
-- Skip and Snooze helper buttons are still not separately live-confirmed.
+- Skip and Snooze helper buttons were not separately live-confirmed. Steve
+  accepted this as good enough for the private MVP main-flow pass.
 
 ## Gate 9: Privacy And Diagnostics
 

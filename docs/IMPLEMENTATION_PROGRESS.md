@@ -16,9 +16,9 @@ last_codex_summary: >
   context when selected calendar events change even if the Home Assistant
   calendar entity state stays unchanged. Calendar signal matching now includes
   English and basic French terms, Gate 6 is live-confirmed in the private HACS
-  test instance, and Gate 8 main Bubble Card helper flow is live-confirmed
-  except for separate Skip/Snooze button checks. No deploy or release was
-  performed.
+  test instance, and Gate 8 main Bubble Card helper flow is live-confirmed.
+  Steve accepted untested Skip/Snooze helper buttons as good enough for the
+  private MVP pass. No deploy or release was performed.
 ```
 
 ## Phase Checklist
@@ -944,7 +944,7 @@ Known gaps / next prompt:
 
 ### 2026-06-21 - Gate 8 Bubble Card main flow confirmation
 
-Status: completed with remaining Skip/Snooze live checks
+Status: completed for private MVP main flow
 
 Implemented:
 - No code change in this pass; recorded private HACS live-test evidence for
@@ -972,7 +972,7 @@ Important decisions:
 
 Known gaps / next prompt:
 - Bubble Card Skip and Snooze helper buttons still need separate live
-  confirmation if full dashboard readiness is required.
+  confirmation if full dashboard readiness becomes a release target.
 - Calendar listener behavior after reload remains not separately
   live-confirmed.
 - Home Assistant package-backed automated tests remain a public-release

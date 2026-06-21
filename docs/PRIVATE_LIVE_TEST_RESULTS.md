@@ -68,7 +68,8 @@ not a public release note.
 - Manual unload was not available in the Home Assistant UI; local automated
   unload tests cover this path.
 - Bubble Card Skip and Snooze helper buttons were not separately live-tested in
-  this pass.
+  this pass; Steve accepted the main-flow coverage as good enough for private
+  MVP testing.
 - Home Assistant package-backed automated integration tests are still missing.
 
 ## Release Blockers
@@ -78,6 +79,6 @@ not a public release note.
   package-backed tests for config flow, services, entities, To-do projections,
   calendar invalidation, reload/unload, and service responses.
 - Complete Bubble Card Skip and Snooze helper live testing if full dashboard
-  readiness is part of the release target.
+  readiness becomes part of a release target.
 - Update mock adequacy review for the release diff.
 - Get explicit Steve approval before any release, deploy, publish, or tag.
