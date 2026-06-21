@@ -139,12 +139,12 @@ script:
         target:
           entity_id: input_text.homekeep_session_item_id
         data:
-          value: "{{ homekeep_start.items[0].session_item_id if homekeep_start.items else '' }}"
+          value: "{{ homekeep_start['items'][0].session_item_id if homekeep_start['items'] else '' }}"
       - action: input_text.set_value
         target:
           entity_id: input_text.homekeep_chore_id
         data:
-          value: "{{ homekeep_start.items[0].chore_id if homekeep_start.items else '' }}"
+          value: "{{ homekeep_start['items'][0].chore_id if homekeep_start['items'] else '' }}"
 
   homekeep_complete_selected_session_item:
     alias: Homekeep Complete Selected Session Item

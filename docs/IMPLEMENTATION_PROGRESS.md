@@ -886,6 +886,34 @@ Known gaps / next prompt:
 - Run focused tests, commit, push, update through HACS, then paste/create the
   helpers/scripts and dashboard YAML in Home Assistant for Gate 8 live testing.
 
+### 2026-06-21 - Bubble Card start helper template fix
+
+Status: completed locally, pending private HACS live retest
+
+Implemented:
+- Fixed `examples/bubble_card_helpers.yaml` to reference the
+  `start_recommendation` response `items` key with bracket notation. Home
+  Assistant Jinja treats `homekeep_start.items` as the dictionary method, so
+  the bridge must use `homekeep_start['items']`.
+- Recorded the partial Gate 8 live result: Generate succeeded, Start created a
+  session, and helper storage failed only at the script template layer.
+
+Tests/checks run:
+- Pending in this pass.
+
+Docs updated:
+- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Kept using service response data instead of scraping To-do projection
+  internals. The fix is purely the Jinja access form for a response key named
+  `items`.
+
+Known gaps / next prompt:
+- Commit and push the helper fix, update/reload scripts in Home Assistant, then
+  continue Gate 8 with Done, Skip/Snooze, Done for now, and One more actions.
+
 ## Resume Instructions
 
 When resuming implementation:

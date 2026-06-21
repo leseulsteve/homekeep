@@ -313,6 +313,22 @@ Companion helper/script example:
 - [ ] Done, Skip, Snooze, Done for now, One more, and Accept one more call the
   intended scripts
 
+Gate 8 partial live result on 2026-06-21:
+
+- `script.homekeep_generate_ready_now` successfully called
+  `homekeep.generate_smart_chore_list` and stored
+  `snapshot_306157fd3c58eb03` plus `rec_06d153e2911dc47e` in the helper
+  entities.
+- `script.homekeep_start_selected_recommendation` successfully called
+  `homekeep.start_recommendation` and created
+  `session_b06f642c98e44222afec0a1b864370d8` with materialized item
+  `item_9d0d810cf4be4c9faae58803a625813b` for
+  `wipe_kitchen_counters`.
+- The first script version failed while storing the materialized item because
+  Home Assistant Jinja treated `homekeep_start.items` as the dictionary
+  `items()` method. The helper example now uses bracket notation
+  `homekeep_start['items']`.
+
 ## Gate 9: Privacy And Diagnostics
 
 - [x] No raw calendar descriptions are stored in durable Homekeep storage
