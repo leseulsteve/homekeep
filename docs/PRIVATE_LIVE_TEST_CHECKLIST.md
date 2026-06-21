@@ -168,12 +168,12 @@ Gate 4 partial live result on 2026-06-21:
 - [x] `todo.homekeep_active_session` mirrors active session items
 - [x] Completing a valid To-do item attached to an active session writes
   through to Homekeep
-- [ ] Completing an item without valid Homekeep metadata is rejected
-- [ ] Creating a To-do item is rejected or snaps back
-- [ ] Deleting a To-do item is rejected or snaps back
-- [ ] Renaming/editing a To-do item is rejected or snaps back
-- [ ] Reordering a To-do item is rejected or snaps back
-- [ ] Unsupported To-do mutations do not alter Homekeep storage
+- [x] Completing an item without valid Homekeep metadata is rejected
+- [x] Creating a To-do item is rejected or snaps back
+- [x] Deleting a To-do item is rejected or snaps back
+- [x] Renaming/editing a To-do item is rejected or snaps back
+- [x] Reordering a To-do item is rejected or snaps back
+- [x] Unsupported To-do mutations do not alter Homekeep storage
 
 Gate 5 partial live result on 2026-06-21:
 
@@ -199,6 +199,19 @@ Gate 5 partial live result on 2026-06-21:
 - After updating through HACS, Steve confirmed `todo.homekeep_active_session`
   exists. A fresh active session populated the entity and To-do UI completion
   wrote through successfully.
+- Renaming/editing a Homekeep To-do item was rejected with Home Assistant
+  validation: `Entity does not support setting field: description`.
+- Creating a new item was unavailable in the Home Assistant UI for the
+  Homekeep To-do projection, so unsupported create was blocked at the frontend.
+- Deleting a projected item was unavailable in the Home Assistant UI, so
+  unsupported delete was blocked at the frontend.
+- Reordering projected items was unavailable in the Home Assistant UI, so
+  unsupported reorder was blocked at the frontend.
+- Unsupported create/delete/reorder mutations were not exposed by the UI, and
+  unsupported edit was rejected before Homekeep storage could be mutated.
+- Invalid-metadata completion remains covered by automated tests; the live UI
+  did not expose a practical way to create a projected item without Homekeep
+  metadata.
 
 ## Gate 6: Calendar Context Smoke Test
 
