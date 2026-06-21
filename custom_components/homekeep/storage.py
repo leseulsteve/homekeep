@@ -1,0 +1,275 @@
+"""Versioned Homekeep storage helpers."""
+
+from __future__ import annotations
+
+import copy
+from dataclasses import dataclass, field
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, Mapping, Optional
+
+from .const import CURRENT_STORAGE_VERSION
+from .models import (
+    ChoreCompletion,
+    ChoreDefinition,
+    ChoreState,
+    HomekeepValidationError,
+)
+
+
+class UnsupportedStorageVersionError(HomekeepValidationError):
+    """Raised when a store was written by a newer unsupported Homekeep version."""
+
+
+def empty_store_dict() -> Dict[str, Any]:
+    """Return the canonical empty versioned store shape."""
+
+    return {
+        "version": CURRENT_STORAGE_VERSION,
+        "chores": {},
+        "states": {},
+        "completions": [],
+        "sessions": {},
+        "recommendations": {},
+        "calendar_context": {},
+        "user_preference_stats": {},
+        "idempotency_records": {},
+    }
+
+
+@dataclass(frozen=True)
+class HomekeepStore:
+    """Validated in-memory Homekeep store."""
+
+    version: int = CURRENT_STORAGE_VERSION
+    chores: Dict[str, ChoreDefinition] = field(default_factory=dict)
+    states: Dict[str, ChoreState] = field(default_factory=dict)
+    completions: list[ChoreCompletion] = field(default_factory=list)
+    sessions: Dict[str, Any] = field(default_factory=dict)
+    recommendations: Dict[str, Any] = field(default_factory=dict)
+    calendar_context: Dict[str, Any] = field(default_factory=dict)
+    user_preference_stats: Dict[str, Any] = field(default_factory=dict)
+    idempotency_records: Dict[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def from_dict(
+        cls, data: Mapping[str, Any], now: Optional[datetime] = None
+    ) -> "HomekeepStore":
+        """Build and validate a store from migrated raw data."""
+
+        chores_raw = data.get("chores", {})
+        if not isinstance(chores_raw, Mapping):
+            raise HomekeepValidationError("chores must be a mapping")
+
+        chores = {
+            chore_id: ChoreDefinition.from_dict(chore_id, chore_data)
+            for chore_id, chore_data in chores_raw.items()
+        }
+
+        states_raw = data.get("states", {})
+        if not isinstance(states_raw, Mapping):
+            raise HomekeepValidationError("states must be a mapping")
+
+        states: Dict[str, ChoreState] = {}
+        for chore_id, state_data in states_raw.items():
+            chore = chores.get(chore_id)
+            if chore is None:
+                continue
+            states[chore_id] = ChoreState.from_dict(
+                chore_id, state_data, chore, now=now
+            )
+
+        for chore_id, chore in chores.items():
+            states.setdefault(chore_id, ChoreState.new_for_chore(chore))
+
+        completions_raw = data.get("completions", [])
+        if not isinstance(completions_raw, list):
+            raise HomekeepValidationError("completions must be a list")
+        completions = [
+            ChoreCompletion.from_dict(completion) for completion in completions_raw
+        ]
+
+        return cls(
+            version=CURRENT_STORAGE_VERSION,
+            chores=chores,
+            states=states,
+            completions=completions,
+            sessions=_dict_field(data, "sessions"),
+            recommendations=_dict_field(data, "recommendations"),
+            calendar_context=_dict_field(data, "calendar_context"),
+            user_preference_stats=_dict_field(data, "user_preference_stats"),
+            idempotency_records=_dict_field(data, "idempotency_records"),
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize this store to JSON-safe data."""
+
+        return {
+            "version": self.version,
+            "chores": {
+                chore_id: chore.to_dict() for chore_id, chore in self.chores.items()
+            },
+            "states": {
+                chore_id: state.to_dict() for chore_id, state in self.states.items()
+            },
+            "completions": [
+                completion.to_dict() for completion in self.completions
+            ],
+            "sessions": copy.deepcopy(self.sessions),
+            "recommendations": copy.deepcopy(self.recommendations),
+            "calendar_context": copy.deepcopy(self.calendar_context),
+            "user_preference_stats": copy.deepcopy(self.user_preference_stats),
+            "idempotency_records": copy.deepcopy(self.idempotency_records),
+        }
+
+
+def _dict_field(data: Mapping[str, Any], field_name: str) -> Dict[str, Any]:
+    value = data.get(field_name, {})
+    if not isinstance(value, Mapping):
+        raise HomekeepValidationError(f"{field_name} must be a mapping")
+    return copy.deepcopy(dict(value))
+
+
+def migrate_store_dict(data: Mapping[str, Any]) -> Dict[str, Any]:
+    """Run explicit storage migrations and return a version 2 store dict."""
+
+    migrated = copy.deepcopy(dict(data))
+    version = migrated.get("version")
+    if version is None:
+        if "states" not in migrated:
+            raise HomekeepValidationError("storage version is missing")
+        version = 1
+
+    if not isinstance(version, int):
+        raise HomekeepValidationError("storage version must be an integer")
+    if version > CURRENT_STORAGE_VERSION:
+        raise UnsupportedStorageVersionError(
+            f"unsupported Homekeep storage version {version}"
+        )
+
+    while version < CURRENT_STORAGE_VERSION:
+        if version == 1:
+            migrated = _migrate_v1_to_v2(migrated)
+            version = 2
+            migrated["version"] = version
+        else:
+            raise UnsupportedStorageVersionError(
+                f"unsupported Homekeep storage version {version}"
+            )
+
+    for key, value in empty_store_dict().items():
+        migrated.setdefault(key, copy.deepcopy(value))
+    migrated["version"] = CURRENT_STORAGE_VERSION
+    return migrated
+
+
+def _migrate_v1_to_v2(data: Mapping[str, Any]) -> Dict[str, Any]:
+    """Migrate early ChoreState counters to bounded timestamp-list fields."""
+
+    migrated = copy.deepcopy(dict(data))
+    states = migrated.setdefault("states", {})
+    if not isinstance(states, Mapping):
+        raise HomekeepValidationError("states must be a mapping")
+
+    for state in states.values():
+        if not isinstance(state, dict):
+            continue
+        state.setdefault("snoozed_until", None)
+        state.setdefault("dismissal_events", [])
+        state.setdefault("snooze_events", [])
+        state.setdefault("last_dismissed_at", None)
+        state.setdefault("last_snoozed_at", None)
+        state.pop("recent_dismissals", None)
+        state.pop("recent_snoozes", None)
+
+    return migrated
+
+
+def load_store_dict(
+    data: Optional[Mapping[str, Any]], now: Optional[datetime] = None
+) -> HomekeepStore:
+    """Migrate and validate raw storage data."""
+
+    if data is None:
+        data = empty_store_dict()
+    migrated = migrate_store_dict(data)
+    return HomekeepStore.from_dict(migrated, now=now)
+
+
+def dump_store_dict(store: HomekeepStore) -> Dict[str, Any]:
+    """Serialize a validated store."""
+
+    return store.to_dict()
+
+
+def load_sample_chores(path: str | Path) -> Dict[str, ChoreDefinition]:
+    """Load sample Chore definitions from the repository YAML fixture.
+
+    The parser intentionally supports the small YAML subset used by
+    examples/sample_chores.yaml so tests do not need a runtime PyYAML install.
+    """
+
+    data = _parse_sample_yaml(Path(path).read_text(encoding="utf-8"))
+    chores_raw = data.get("chores", {})
+    if not isinstance(chores_raw, Mapping):
+        raise HomekeepValidationError("sample chores file must contain chores")
+    return {
+        chore_id: ChoreDefinition.from_dict(chore_id, chore_data)
+        for chore_id, chore_data in chores_raw.items()
+    }
+
+
+def _parse_sample_yaml(text: str) -> Dict[str, Any]:
+    """Parse the YAML subset used by examples/sample_chores.yaml."""
+
+    root: Dict[str, Any] = {}
+    stack: list[tuple[int, Any]] = [(-1, root)]
+
+    for raw_line in text.splitlines():
+        if not raw_line.strip() or raw_line.lstrip().startswith("#"):
+            continue
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        stripped = raw_line.strip()
+
+        while stack and indent <= stack[-1][0]:
+            stack.pop()
+        parent = stack[-1][1]
+
+        if stripped.startswith("- "):
+            if not isinstance(parent, list):
+                raise HomekeepValidationError("invalid sample chores list item")
+            parent.append(_parse_scalar(stripped[2:]))
+            continue
+
+        key, separator, value = stripped.partition(":")
+        if not separator:
+            raise HomekeepValidationError("invalid sample chores mapping")
+
+        if value.strip() == "":
+            next_container: Any = [] if key == "pairs_with" else {}
+            if isinstance(parent, dict):
+                parent[key] = next_container
+            else:
+                raise HomekeepValidationError("invalid sample chores nesting")
+            stack.append((indent, next_container))
+        else:
+            if not isinstance(parent, dict):
+                raise HomekeepValidationError("invalid sample chores scalar")
+            parent[key] = _parse_scalar(value.strip())
+
+    return root
+
+
+def _parse_scalar(value: str) -> Any:
+    if value == "true":
+        return True
+    if value == "false":
+        return False
+    if value == "null":
+        return None
+    try:
+        if "." in value:
+            return float(value)
+        return int(value)
+    except ValueError:
+        return value
