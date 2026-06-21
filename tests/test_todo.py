@@ -90,7 +90,13 @@ class HomekeepTodoProjectionTest(unittest.IsolatedAsyncioTestCase):
         recommendations = TestableRecommendationsTodo(self.storage)
 
         self.assertEqual(self.entity._attr_name, "Homekeep Active Session")
+        self.assertEqual(self.entity._attr_unique_id, "homekeep_active_session")
+        self.assertEqual(self.entity._attr_entity_id, "todo.homekeep_active_session")
         self.assertEqual(recommendations._attr_name, "Homekeep Recommendations")
+        self.assertEqual(recommendations._attr_unique_id, "homekeep_recommendations")
+        self.assertEqual(
+            recommendations._attr_entity_id, "todo.homekeep_recommendations"
+        )
 
     async def test_active_session_projection_completes_valid_item(self) -> None:
         item = self.entity.todo_items[0]

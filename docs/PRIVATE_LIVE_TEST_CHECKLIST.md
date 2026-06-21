@@ -193,6 +193,9 @@ Gate 5 partial live result on 2026-06-21:
 - `todo.homekeep_active_session` was missing in the live entity list. Patched
   To-do projection names to include the Homekeep prefix so Home Assistant
   generates the documented entity ids.
+- Follow-up hardening: To-do projections now set explicit documented entity ids
+  and updated unique ids for `todo.homekeep_active_session` and
+  `todo.homekeep_recommendations`.
 
 ## Gate 6: Calendar Context Smoke Test
 

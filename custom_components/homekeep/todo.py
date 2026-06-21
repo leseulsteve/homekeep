@@ -76,10 +76,11 @@ class HomekeepTodoProjectionEntity(TodoListEntity):
     _attr_has_entity_name = True
     _attr_supported_features = TodoListEntityFeature.UPDATE_TODO_ITEM
 
-    def __init__(self, storage: Any, key: str, name: str) -> None:
+    def __init__(self, storage: Any, key: str, name: str, entity_id: str) -> None:
         self.storage = storage
         self._attr_unique_id = f"homekeep_{key}"
         self._attr_name = name
+        self._attr_entity_id = entity_id
         self._metadata_by_uid: dict[str, ProjectionMetadata] = {}
 
     @property
@@ -176,7 +177,12 @@ class HomekeepActiveSessionTodoEntity(HomekeepTodoProjectionEntity):
     """Projection of active Chore Session items."""
 
     def __init__(self, storage: Any) -> None:
-        super().__init__(storage, "active_session_todo", "Homekeep Active Session")
+        super().__init__(
+            storage,
+            "active_session",
+            "Homekeep Active Session",
+            "todo.homekeep_active_session",
+        )
 
     def _project_items(self) -> list[tuple[str, TodoItem, ProjectionMetadata]]:
         projected: list[tuple[str, TodoItem, ProjectionMetadata]] = []
@@ -205,7 +211,12 @@ class HomekeepRecommendationsTodoEntity(HomekeepTodoProjectionEntity):
     """Projection of the latest Smart Chore List recommendations."""
 
     def __init__(self, storage: Any) -> None:
-        super().__init__(storage, "recommendations_todo", "Homekeep Recommendations")
+        super().__init__(
+            storage,
+            "recommendations",
+            "Homekeep Recommendations",
+            "todo.homekeep_recommendations",
+        )
 
     def _project_items(self) -> list[tuple[str, TodoItem, ProjectionMetadata]]:
         snapshot = _latest_snapshot(self.storage.store.recommendations)
