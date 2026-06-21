@@ -209,6 +209,20 @@ class HomekeepServiceRuntime:
 
         raise HomekeepValidationError(f"unknown Homekeep service: {service_name}")
 
+    async def async_seed_sample_chores_if_empty(self) -> dict[str, Any]:
+        """Load bundled sample chores for private dev mode when storage is empty."""
+
+        if self.store.chores:
+            return {
+                "status": "skipped",
+                "reason": "existing_chores",
+                "chore_count": len(self.store.chores),
+            }
+
+        result = self._load_sample_chores({ATTR_REPLACE_EXISTING: False})
+        await self.storage.async_save()
+        return result
+
     def _sessions(self) -> SessionEngine:
         return SessionEngine(self.store)
 

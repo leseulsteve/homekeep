@@ -7,6 +7,8 @@ PLATFORMS: list[str] = ["sensor", "binary_sensor", "todo"]
 CURRENT_STORAGE_VERSION = 2
 STORAGE_KEY = f"{DOMAIN}.store"
 
+OPTION_DEV_MODE = "dev_mode"
+
 SERVICE_GENERATE_SMART_CHORE_LIST = "generate_smart_chore_list"
 SERVICE_START_RECOMMENDATION = "start_recommendation"
 SERVICE_START_CHORE_BUNDLE = "start_chore_bundle"

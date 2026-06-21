@@ -472,6 +472,10 @@ snapshot exceeds its max age.
 Private live-test helper that loads bundled synthetic Chore definitions from
 the installed integration package.
 
+During private live testing, the config entry `dev_mode` option defaults to
+true and setup automatically loads these bundled Chores when Homekeep storage
+is empty. This service remains available for explicit reset flows.
+
 Response support:
 
 ```text

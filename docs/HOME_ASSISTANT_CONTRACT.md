@@ -102,6 +102,11 @@ final answers.
 synthetic Chores from the installed integration package. It is not a general
 import API and must not be used with real household data.
 
+The config entry exposes a private `dev_mode` boolean that defaults to true.
+When `dev_mode` is enabled, setup seeds bundled synthetic Chores automatically
+only if Homekeep storage is empty. The options flow exposes the same toggle
+after install and reloads the integration when changed.
+
 ## Action Response Rules
 
 Homekeep must use Home Assistant action/service responses for services that

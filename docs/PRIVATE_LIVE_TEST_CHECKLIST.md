@@ -72,8 +72,10 @@ Install method selected by Steve: HACS custom repository.
 
 ## Gate 3: Synthetic Data Setup
 
-- [ ] Load bundled synthetic chores from Developer Tools > Actions:
-  `homekeep.load_sample_chores`
+- [ ] Confirm Homekeep options show Developer mode enabled after install
+- [ ] Confirm bundled synthetic Chores loaded automatically on setup
+- [ ] If a reset is needed, use Developer Tools > Actions:
+  `homekeep.load_sample_chores` with `replace_existing: true`
 - [ ] Do not use real private room routines or private schedule details
 - [ ] Confirm Homekeep storage contains Chore definitions and Chore state
 - [ ] Confirm sensors exist:

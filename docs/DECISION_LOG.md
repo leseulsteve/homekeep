@@ -195,6 +195,9 @@ implementation pass.
   general Chore import surface. It loads bundled synthetic fixtures, refuses to
   overwrite existing chores unless `replace_existing=true`, and may clear
   durable Homekeep test state when replacement is requested.
+- Private dev mode defaults to enabled during setup and options. When enabled,
+  `async_setup_entry` seeds bundled sample Chores only if Homekeep storage has
+  no existing Chores; it must not overwrite existing data during normal setup.
 
 ## Bubble Card Dashboard
 

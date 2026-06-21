@@ -632,8 +632,11 @@ Status: completed
 Implemented:
 - Added bundled synthetic Chore fixtures to the installed integration package
   for private HACS testing.
+- Added a private `dev_mode` config/options toggle, defaulting to true, so a
+  new config entry seeds bundled sample Chores automatically when storage is
+  empty. The options flow reloads Homekeep when the toggle changes.
 - Added `homekeep.load_sample_chores` with a `replace_existing` guard so the
-  private test instance can seed or reset synthetic Homekeep data from
+  private test instance can explicitly reset synthetic Homekeep data from
   Developer Tools > Actions.
 - Expanded the bundled fixture to 22 synthetic Chores across kitchen,
   bathroom, living room, entryway, laundry, bedroom, plants, office, hallway,
@@ -643,6 +646,7 @@ Implemented:
   public-user expectations.
 
 Tests/checks run:
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_homekeep_scaffold tests.test_reload_unload tests.test_services tests.test_storage -v`
 - `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_services tests.test_storage -v`
 - `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest discover -s tests -v`
 - `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
@@ -659,13 +663,16 @@ Docs updated:
 Important decisions:
 - Kept sample loading as a private test seed helper, not a general Chore import
   API.
+- Automatic setup seeding is gated by private dev mode and only runs when
+  Homekeep storage has no Chores, so install/reload does not overwrite existing
+  live-test data.
 - The helper refuses to overwrite existing stored Chores unless
   `replace_existing=true`, and replacement intentionally resets other durable
   Homekeep test state to avoid mixed old/new synthetic data.
 
 Known gaps / next prompt:
-- Push the private live-test seed helper, then update/re-download Homekeep
-  through HACS and run Gate 3 with `homekeep.load_sample_chores`.
+- Push the private dev-mode seeding update, then update/re-download Homekeep
+  through HACS and run Gate 3 by confirming automatic synthetic Chore setup.
 
 ## Resume Instructions
 
