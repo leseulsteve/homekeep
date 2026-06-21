@@ -7,23 +7,22 @@ Use it as the resume point for future sessions. Do not rely on chat memory.
 ## Current Status
 
 ```yaml
-current_phase: 2
-current_phase_name: Health and adaptive intervals
+current_phase: 3
+current_phase_name: Chore Session lifecycle
 last_updated: 2026-06-21
 last_codex_summary: >
-  Phase 0 scaffold has been restored/applied on top of the Phase 1 core
-  models/storage work. Homekeep now has a Home Assistant integration skeleton,
-  config flow, manifest, service metadata, empty schema-validated service
-  handlers, a Home Assistant storage adapter around the versioned core store,
-  and focused scaffold tests. The next incomplete implementation area is
-  derived health and adaptive interval behavior.
+  Phase 2 derived health and adaptive interval helpers are complete. Homekeep
+  now derives Staleness, Home Health, Area Health, Projected Impact, completion
+  scheduling relief, area-health event thresholds, and adaptive interval
+  training from durable ChoreDefinition and ChoreState facts without storing
+  authoritative health or staleness values.
 ```
 
 ## Phase Checklist
 
 - [x] Phase 0: Scaffold
 - [x] Phase 1: Models and storage
-- [ ] Phase 2: Health and adaptive intervals
+- [x] Phase 2: Health and adaptive intervals
 - [ ] Phase 3: Chore Session lifecycle
 - [ ] Phase 4: Recommendation Engine V1
 - [ ] Phase 5: Home Assistant services and entities
@@ -146,6 +145,55 @@ Known gaps / next prompt:
 - Next recommended prompt: Implement Phase 2 health/adaptive interval helpers:
   completion credit application, adaptive interval training, derived Staleness,
   Home Health, Area Health, and focused tests.
+
+### 2026-06-21 - Phase 2: Health and adaptive intervals
+
+Status: completed
+
+Implemented:
+- Added `custom_components/homekeep/health.py` with pure derived functions for
+  Staleness, display/priority Staleness, Chore Health, Home Health, Area
+  Health, Area Health buckets, Area Health event threshold decisions, and
+  Projected Impact.
+- Added adaptive interval helpers using the documented v1 formula:
+  `old * 0.70 + actual_gap * 0.30`, clamped to each Chore's
+  `[min_interval_days, max_interval_days]`.
+- Added completion scheduling helpers for Chore Variant credit and
+  `next_due_at` derivation, including tiny completions that update schedule
+  relief without training adaptive intervals.
+- Added explicit non-completion action handling so skip, snooze, dismiss, and
+  cancel preserve `adaptive_interval_days`.
+- Kept health and staleness out of durable storage; the implementation derives
+  values from durable Chore definitions and Chore state on read.
+- Added `tests/test_health.py` covering cache loss/restart recomputation,
+  completion-followed-by-restart recomputation, min/max interval clamping,
+  first completion behavior, tiny/normal/deep completion effects, non-training
+  actions, Projected Impact, and Area Health event thresholds.
+
+Tests/checks run:
+- `python3 -m unittest tests.test_health -v`
+- `python3 -m unittest discover -s tests -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+
+Docs updated:
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Used deterministic MVP health formulas where planning docs were qualitative:
+  Chore Health is `100 - capped_display_staleness`; Home Health and Area
+  Health are enabled-Chore, health-weighted averages.
+- Treated missing completion history as fully stale for derived display health,
+  while never persisting that staleness result.
+- Kept Phase 2 pure Python and independent from Home Assistant runtime APIs.
+
+Known gaps / next prompt:
+- Session services still do not create completions or mutate Chore State; Phase
+  3 should wire Chore Session lifecycle and service behavior through the engine.
+- Group Health is not yet exposed separately because the Phase 2 prompt asked
+  for Home Health, Area Health, Staleness, and Projected Impact.
+- Next recommended prompt: Implement Phase 3 Chore Session lifecycle with
+  materialized Session Items, completion/skip/snooze/dismiss state changes,
+  participant attribution, Bonus Chore lifecycle, and focused tests.
 
 ## Resume Instructions
 
