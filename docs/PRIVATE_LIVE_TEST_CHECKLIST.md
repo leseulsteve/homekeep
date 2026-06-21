@@ -105,19 +105,62 @@ Use Developer Tools > Actions.
 - [ ] `homekeep.refresh_calendar_context` returns derived context only
 - [ ] Calendar Context storage does not include raw event summary, description,
   or location text
-- [ ] `homekeep.generate_smart_chore_list` returns a Smart Chore List response
-- [ ] Response includes `snapshot_id`
-- [ ] Response includes best recommendation ids when chores are available
-- [ ] `homekeep.start_recommendation` starts a Chore Session from a fresh
+- [x] `homekeep.generate_smart_chore_list` returns a Smart Chore List response
+- [x] Response includes `snapshot_id`
+- [x] Response includes best recommendation ids when chores are available
+- [x] `homekeep.start_recommendation` starts a Chore Session from a fresh
   recommendation
-- [ ] Start response includes `session_id`
-- [ ] Start response includes materialized `session_item_id` values
-- [ ] `homekeep.complete_chore` completes a materialized session item
-- [ ] `homekeep.skip_chore` skips a materialized session item
-- [ ] `homekeep.snooze_chore` rejects values below `5`
-- [ ] `homekeep.snooze_chore` rejects values above `1440`
-- [ ] `homekeep.end_session` completes or cancels the session cleanly
-- [ ] Duplicate calls with the same `request_id` do not duplicate completions
+- [x] Start response includes `session_id`
+- [x] Start response includes materialized `session_item_id` values
+- [x] `homekeep.complete_chore` completes a materialized session item
+- [x] `homekeep.skip_chore` skips a materialized session item
+- [x] `homekeep.snooze_chore` rejects values below `5`
+- [x] `homekeep.snooze_chore` rejects values above `1440`
+- [x] `homekeep.snooze_chore` snoozes a materialized session item with a valid
+  duration
+- [x] `homekeep.end_session` completes or cancels the session cleanly
+- [x] Duplicate calls with the same `request_id` do not duplicate completions
+
+Gate 4 partial live result on 2026-06-21:
+
+- `homekeep.generate_smart_chore_list` returned a ready-now
+  RecommendationSnapshot.
+- Response included `snapshot_id`, `best_bundle`, `best_single_chore`,
+  `easiest_chore`, alternates, projected impact, scores, and `empty_state:
+  null`.
+- Snapshot tested: `snapshot_b93db4c5efa1a15b`.
+- `homekeep.start_recommendation` materialized
+  `rec_d1624aaf78ed9387` into
+  `session_f8552dcf5ebc4c80b85261b07eb4b53c`.
+- Start response included materialized session item
+  `item_bf5c684844974a93b6a90dc771b7482b` for
+  `wipe_kitchen_counters`.
+- `homekeep.complete_chore` completed the materialized item and returned
+  `completion_6e042a39da4f47798abcba765ff498df` with `duplicate: false`.
+- Repeating the same completion call with `request_id: live-complete-001`
+  returned the same `completion_id`, confirming no duplicate completion was
+  created. Response still reported `duplicate: false` because the stored
+  response is replayed verbatim; this is a response-polish note, not a data
+  safety blocker.
+- `homekeep.end_session` completed
+  `session_f8552dcf5ebc4c80b85261b07eb4b53c` with `bonus_chore: null`.
+- Generated second ready-now snapshot `snapshot_c647bba6adf099c2` and started
+  `rec_48fc5987fdfbeb9d` as
+  `session_1e0123f1f2d946af95e198ced2aa4ce7` with materialized item
+  `item_34b6df599e8940089a873e1049652c1d` for
+  `tidy_living_room_surfaces`.
+- `homekeep.skip_chore` skipped the materialized `tidy_living_room_surfaces`
+  item in `session_1e0123f1f2d946af95e198ced2aa4ce7`.
+- Generated third ready-now snapshot `snapshot_deb1ee0f2e38b2d1` and started
+  easiest recommendation `rec_f653261c8046801e` as
+  `session_c94456cf8a1f45ddb8dc2926a814eaae` with materialized item
+  `item_4508cac3f0c649a59185b073ea0b9228` for `empty_compost`.
+- `homekeep.snooze_chore` rejected invalid low value `4` and invalid high
+  value `1441` with clear service validation errors.
+- `homekeep.snooze_chore` accepted valid `15` minute snooze for
+  `empty_compost` and returned `snoozed_until`.
+- `homekeep.end_session` cancelled the snooze-test session
+  `session_c94456cf8a1f45ddb8dc2926a814eaae`.
 
 ## Gate 5: To-do Projection Smoke Test
 
