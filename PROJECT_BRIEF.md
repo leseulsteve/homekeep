@@ -214,7 +214,8 @@ The MVP should include:
 - Projected Impact
 - Home Assistant services and sensors
 - Home Assistant To-do projections
-- Bubble Card dashboard flow
+- Chore creation from the Homekeep dashboard
+- Lovelace dashboard flow
 - Calendar Context
 - Session-History Learning
 - Light Sessions and Bonus Chores
@@ -415,27 +416,27 @@ Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
 ### Phase 7 Prompt
 
 ```text
-Implement Homekeep Phase 7: Bubble Card MVP dashboard example.
+Implement Homekeep Phase 7: Lovelace MVP dashboard example.
 
 Follow AGENTS.md Implementation Mode. Resume from docs/IMPLEMENTATION_PROGRESS.md.
 
 Read:
-- docs/BUBBLE_CARD_MVP.md
+- docs/LOVELACE_MVP.md
 - docs/SERVICE_SCHEMAS.md
 - docs/TODO_PROJECTIONS.md
 
-Verify Bubble Card capabilities before writing final YAML.
+Use stock Lovelace cards for the final YAML.
 
 Deliver:
-- examples/bubble_card_dashboard.yaml
+- examples/lovelace_dashboard.yaml
 - Ready-Now launcher
 - time/energy/goal controls
 - recommendation display
+- Add Chore flow
 - active session controls
 - Done for now / One more flow
 
-If Bubble Card cannot represent part of the flow cleanly, document the gap and
-use Home Assistant native controls or entities for the MVP.
+Use Home Assistant native controls, helpers, scripts, and entities for the MVP.
 Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
 ```
 

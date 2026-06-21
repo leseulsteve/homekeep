@@ -12,6 +12,7 @@ OPTION_DEV_MODE = "dev_mode"
 SERVICE_GENERATE_SMART_CHORE_LIST = "generate_smart_chore_list"
 SERVICE_START_RECOMMENDATION = "start_recommendation"
 SERVICE_START_CHORE_BUNDLE = "start_chore_bundle"
+SERVICE_CREATE_CHORE = "create_chore"
 SERVICE_COMPLETE_CHORE = "complete_chore"
 SERVICE_SKIP_CHORE = "skip_chore"
 SERVICE_SNOOZE_CHORE = "snooze_chore"
@@ -31,6 +32,7 @@ DATA_PRODUCING_SERVICES = {
 }
 
 OPTIONAL_RESPONSE_SERVICES = {
+    SERVICE_CREATE_CHORE,
     SERVICE_COMPLETE_CHORE,
     SERVICE_SKIP_CHORE,
     SERVICE_SNOOZE_CHORE,
@@ -43,13 +45,20 @@ OPTIONAL_RESPONSE_SERVICES = {
 ATTR_AREA_ID = "area_id"
 ATTR_BUNDLE_ID = "bundle_id"
 ATTR_CALENDAR_ENTITY_IDS = "calendar_entity_ids"
+ATTR_BASE_INTERVAL_DAYS = "base_interval_days"
 ATTR_CHORE_ID = "chore_id"
 ATTR_COMPLETED_BY = "completed_by"
 ATTR_ENERGY_LEVEL = "energy_level"
+ATTR_ESTIMATED_MINUTES = "estimated_minutes"
 ATTR_GOAL = "goal"
+ATTR_GROUP_ID = "group_id"
+ATTR_HEALTH_WEIGHT = "health_weight"
 ATTR_INCLUDE_ALTERNATES = "include_alternates"
 ATTR_INFER_MOOD = "infer_mood"
+ATTR_MAX_INTERVAL_DAYS = "max_interval_days"
+ATTR_MIN_INTERVAL_DAYS = "min_interval_days"
 ATTR_MOOD = "mood"
+ATTR_NAME = "name"
 ATTR_OFFER_BONUS_CHORE = "offer_bonus_chore"
 ATTR_REASON = "reason"
 ATTR_RECOMMENDATION_ID = "recommendation_id"
@@ -66,11 +75,13 @@ ATTR_TARGET_TIME_WINDOW = "target_time_window"
 ATTR_TIME_BUDGET_MINUTES = "time_budget_minutes"
 ATTR_USER_ID = "user_id"
 ATTR_VARIANT = "variant"
+ATTR_VISIBILITY = "visibility"
 
 ENERGY_LEVELS = ["low", "normal", "high", "quiet"]
 GOALS = ["quick_wins", "overdue", "visible_impact", "prevent_future_mess", "full_reset"]
 MOODS = ["unknown", "calm", "focused", "tired", "overwhelmed", "energized", "auto"]
 RECOMMENDATION_MODES = ["ready_now", "scheduled_suggestion"]
 SESSION_END_STATUSES = ["completed", "cancelled"]
-SOURCES = ["service", "todo", "bubble_card", "voice", "automation"]
+SOURCES = ["service", "todo", "lovelace", "voice", "automation"]
 VARIANTS = ["tiny", "normal", "deep"]
+VISIBILITIES = ["low", "medium", "high"]

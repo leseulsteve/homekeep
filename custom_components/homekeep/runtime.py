@@ -4,20 +4,28 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
+from math import isfinite
 from pathlib import Path
 from typing import Any, Optional, Protocol
 
 from .const import (
     ATTR_AREA_ID,
+    ATTR_BASE_INTERVAL_DAYS,
     ATTR_BUNDLE_ID,
     ATTR_CALENDAR_ENTITY_IDS,
     ATTR_CHORE_ID,
     ATTR_COMPLETED_BY,
     ATTR_ENERGY_LEVEL,
+    ATTR_ESTIMATED_MINUTES,
     ATTR_GOAL,
+    ATTR_GROUP_ID,
+    ATTR_HEALTH_WEIGHT,
     ATTR_INCLUDE_ALTERNATES,
     ATTR_INFER_MOOD,
+    ATTR_MAX_INTERVAL_DAYS,
+    ATTR_MIN_INTERVAL_DAYS,
     ATTR_MOOD,
+    ATTR_NAME,
     ATTR_OFFER_BONUS_CHORE,
     ATTR_RECOMMENDATION_ID,
     ATTR_RECOMMENDATION_MODE,
@@ -33,8 +41,10 @@ from .const import (
     ATTR_TIME_BUDGET_MINUTES,
     ATTR_USER_ID,
     ATTR_VARIANT,
+    ATTR_VISIBILITY,
     SERVICE_ACCEPT_BONUS_CHORE,
     SERVICE_COMPLETE_CHORE,
+    SERVICE_CREATE_CHORE,
     SERVICE_DISMISS_CHORE,
     SERVICE_END_SESSION,
     SERVICE_GENERATE_SMART_CHORE_LIST,
@@ -52,7 +62,7 @@ from .calendar_context import (
     fetch_calendar_events_from_hass,
     selected_calendar_entity_ids,
 )
-from .models import ChoreState, HomekeepValidationError
+from .models import ChoreDefinition, ChoreState, HomekeepValidationError
 from .recommendations import RecommendationEngine
 from .sessions import SessionEngine
 from .storage import HomekeepStore, load_sample_chores
@@ -119,6 +129,15 @@ class HomekeepServiceRuntime:
                 recommendation_id,
                 user_id=data.get(ATTR_USER_ID),
                 request_id=data.get(ATTR_REQUEST_ID),
+            )
+            await self.storage.async_save()
+            return result
+
+        if service_name == SERVICE_CREATE_CHORE:
+            result = self._idempotent(
+                SERVICE_CREATE_CHORE,
+                data.get(ATTR_REQUEST_ID),
+                lambda: self._create_chore(data),
             )
             await self.storage.async_save()
             return result
@@ -353,6 +372,102 @@ class HomekeepServiceRuntime:
             "replace_existing": replace_existing,
         }
 
+    def _create_chore(self, data: dict[str, Any]) -> dict[str, Any]:
+        name = _required(data, ATTR_NAME)
+        chore_id = data.get(ATTR_CHORE_ID) or _slugify_chore_id(name)
+        if not isinstance(chore_id, str) or not chore_id:
+            raise HomekeepValidationError("chore_id is required")
+        if chore_id in self.store.chores:
+            raise HomekeepValidationError(f"chore_id already exists: {chore_id}")
+
+        base_interval_days = _positive_number(
+            data.get(ATTR_BASE_INTERVAL_DAYS, 7), ATTR_BASE_INTERVAL_DAYS
+        )
+        chore_data = {
+            "id": chore_id,
+            "name": name,
+            "area_id": data.get(ATTR_AREA_ID),
+            "group_id": data.get(ATTR_GROUP_ID),
+            "base_interval_days": base_interval_days,
+            "min_interval_days": _positive_number(
+                data.get(ATTR_MIN_INTERVAL_DAYS, max(1, base_interval_days / 2)),
+                ATTR_MIN_INTERVAL_DAYS,
+            ),
+            "max_interval_days": _positive_number(
+                data.get(
+                    ATTR_MAX_INTERVAL_DAYS,
+                    max(base_interval_days, base_interval_days * 2),
+                ),
+                ATTR_MAX_INTERVAL_DAYS,
+            ),
+            "estimated_minutes": _positive_int(
+                data.get(ATTR_ESTIMATED_MINUTES, 10), ATTR_ESTIMATED_MINUTES
+            ),
+            "energy": data.get(ATTR_ENERGY_LEVEL, "normal"),
+            "visibility": data.get(ATTR_VISIBILITY, "medium"),
+            "health_weight": _non_negative_number(
+                data.get(ATTR_HEALTH_WEIGHT, 1.0), ATTR_HEALTH_WEIGHT
+            ),
+            "variants": {
+                "normal": {
+                    "label": name,
+                    "credit": 1.0,
+                }
+            },
+            "pairs_with": [],
+            "enabled": True,
+        }
+        chore = ChoreDefinition.from_dict(chore_id, chore_data)
+        self.store.chores[chore_id] = chore
+        self.store.states[chore_id] = ChoreState.new_for_chore(chore)
+        return {
+            "status": "created",
+            "chore_id": chore_id,
+            "chore": chore.to_dict(),
+        }
+
+    def _idempotent(
+        self,
+        operation: str,
+        request_id: Optional[str],
+        mutate: Any,
+    ) -> dict[str, Any]:
+        now = datetime.now(timezone.utc)
+        self._prune_idempotency(now)
+        if not request_id:
+            return mutate()
+        key = f"{operation}:{request_id}"
+        record = self.store.idempotency_records.get(key)
+        if record and _parse_datetime(record["expires_at"]) > now:
+            return record["result"]
+        result = mutate()
+        self.store.idempotency_records[key] = {
+            "request_id": request_id,
+            "operation": operation,
+            "created_at": now.isoformat(),
+            "expires_at": (now + timedelta(hours=24)).isoformat(),
+            "result": result,
+        }
+        self._prune_idempotency(now)
+        return result
+
+    def _prune_idempotency(self, now: datetime) -> None:
+        records = self.store.idempotency_records
+        expired = [
+            key
+            for key, record in records.items()
+            if _parse_datetime(record["expires_at"]) <= now
+        ]
+        for key in expired:
+            records.pop(key, None)
+        if len(records) <= 1000:
+            return
+        ordered = sorted(
+            records.items(), key=lambda item: _parse_datetime(item[1]["created_at"])
+        )
+        for key, _record in ordered[: len(records) - 1000]:
+            records.pop(key, None)
+
 
 def _sample_chore_state(chore: Any, now: datetime) -> ChoreState:
     """Create live-test sample state that is immediately due."""
@@ -375,3 +490,53 @@ def _required_int(data: dict[str, Any], key: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise HomekeepValidationError(f"{key} is required")
     return value
+
+
+def _positive_int(value: Any, key: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise HomekeepValidationError(f"{key} must be a positive integer")
+    return value
+
+
+def _positive_number(value: Any, key: str) -> float:
+    if isinstance(value, bool):
+        raise HomekeepValidationError(f"{key} must be positive")
+    try:
+        number = float(value)
+    except (TypeError, ValueError) as err:
+        raise HomekeepValidationError(f"{key} must be positive") from err
+    if not isfinite(number) or number <= 0:
+        raise HomekeepValidationError(f"{key} must be positive")
+    return number
+
+
+def _non_negative_number(value: Any, key: str) -> float:
+    if isinstance(value, bool):
+        raise HomekeepValidationError(f"{key} must be non-negative")
+    try:
+        number = float(value)
+    except (TypeError, ValueError) as err:
+        raise HomekeepValidationError(f"{key} must be non-negative") from err
+    if not isfinite(number) or number < 0:
+        raise HomekeepValidationError(f"{key} must be non-negative")
+    return number
+
+
+def _slugify_chore_id(name: str) -> str:
+    slug = "".join(char.lower() if char.isalnum() else "_" for char in name)
+    parts = [part for part in slug.split("_") if part]
+    chore_id = "_".join(parts)
+    if not chore_id:
+        raise HomekeepValidationError("name must contain letters or numbers")
+    return chore_id
+
+
+def _parse_datetime(value: Any) -> datetime:
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, str):
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            return parsed.replace(tzinfo=timezone.utc)
+        return parsed
+    raise HomekeepValidationError("idempotency datetime is invalid")

@@ -71,6 +71,7 @@ item has valid Homekeep metadata.
 homekeep.generate_smart_chore_list
 homekeep.start_recommendation
 homekeep.start_chore_bundle
+homekeep.create_chore
 homekeep.complete_chore
 homekeep.skip_chore
 homekeep.snooze_chore
@@ -85,6 +86,8 @@ homekeep.end_session
 `homekeep.generate_smart_chore_list` creates proposals only.
 `homekeep.start_recommendation` is the only canonical MVP service that creates
 Chore Sessions. There is no MVP `homekeep.start_chore_session` service.
+`homekeep.create_chore` creates a Chore definition for the chore list and does
+not create a Chore Session.
 Scheduled-Suggestion Mode returns saved proposals with `snapshot_id`,
 `target_time_window`, and `expires_at`; it must not return `session_id: null`.
 See `docs/SCHEDULED_SUGGESTION_UX.md`.
@@ -94,7 +97,7 @@ After `homekeep.start_recommendation`, callers must use the materialized
 Smart Chore List `RecommendationItem.session_item_id` values are proposal-only
 and null before materialization.
 
-`homekeep.answer_session_question` is not an MVP service. Bubble Card should
+`homekeep.answer_session_question` is not an MVP service. Lovelace should
 collect context locally and call `homekeep.generate_smart_chore_list` with the
 final answers.
 
@@ -119,6 +122,8 @@ recommendations or created sessions.
   `supports_response=SupportsResponse.ONLY`.
 - Register `homekeep.start_chore_bundle` with
   `supports_response=SupportsResponse.ONLY` if the compatibility alias exists.
+- Register `homekeep.create_chore` with
+  `supports_response=SupportsResponse.OPTIONAL`.
 - Register `homekeep.accept_bonus_chore` and `homekeep.end_session` with
   `supports_response=SupportsResponse.ONLY`.
 - Register `homekeep.refresh_calendar_context` with
@@ -228,13 +233,14 @@ when absolute delta < 10 and bucket is unchanged
 Entity state should still update for smaller changes; the event threshold is
 only to keep automations and logs from becoming noisy.
 
-## Bubble Card MVP
+## Lovelace MVP
 
-Bubble Card is the MVP dashboard layer.
+Lovelace is the MVP dashboard layer.
 
 Expected controls:
 
 - "I'm ready" session launcher
+- Add Chore flow
 - Time selection
 - Energy selection
 - Goal selection
@@ -242,5 +248,5 @@ Expected controls:
 - Start, done, skip, snooze, dismiss, end actions
 - Optional "one more" Bonus Chore action
 
-Bubble Card should call Homekeep services. It should not become the source of
+Lovelace should call Homekeep services. It should not become the source of
 truth.

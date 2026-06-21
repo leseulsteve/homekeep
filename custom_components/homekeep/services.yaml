@@ -42,6 +42,51 @@ start_chore_bundle:
       selector:
         text:
 
+create_chore:
+  name: Create chore
+  description: Create an enabled Homekeep Chore definition for the chore list.
+  fields:
+    chore_id:
+      required: false
+      selector:
+        text:
+    name:
+      required: true
+      selector:
+        text:
+    area_id:
+      required: false
+      selector:
+        text:
+    group_id:
+      required: false
+      selector:
+        text:
+    base_interval_days:
+      required: false
+      default: 7
+      selector:
+        number:
+          min: 1
+          mode: box
+    estimated_minutes:
+      required: false
+      default: 10
+      selector:
+        number:
+          min: 1
+          mode: box
+    energy_level:
+      required: false
+      default: normal
+      selector:
+        select:
+          options:
+            - low
+            - normal
+            - high
+            - quiet
+
 complete_chore:
   name: Complete chore
   description: Scaffold service for future chore completion handling.

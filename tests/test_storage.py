@@ -101,6 +101,27 @@ class StorageTest(unittest.TestCase):
         self.assertIn("idempotency_records", migrated)
         self.assertIn("empty_compost", store.states)
 
+    def test_legacy_dashboard_completion_source_migrates_to_lovelace(self) -> None:
+        raw = empty_store_dict()
+        raw["chores"] = {"empty_compost": chore_data()}
+        raw["completions"] = [
+            {
+                "completion_id": "completion-1",
+                "chore_id": "empty_compost",
+                "session_id": None,
+                "completed_at": "2026-01-01T12:00:00+00:00",
+                "completed_by": None,
+                "variant": "normal",
+                "credit": 1.0,
+                "source": "bubble_card",
+            }
+        ]
+
+        store = load_store_dict(raw)
+
+        self.assertEqual(store.completions[0].source, "lovelace")
+        self.assertEqual(dump_store_dict(store)["completions"][0]["source"], "lovelace")
+
     def test_unknown_stale_state_is_ignored_during_load(self) -> None:
         raw = empty_store_dict()
         raw["chores"] = {"empty_compost": chore_data()}

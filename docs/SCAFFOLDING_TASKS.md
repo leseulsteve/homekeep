@@ -122,9 +122,9 @@ Use this as the first implementation checklist.
   from Homekeep storage.
 - Require valid Homekeep metadata for To-do completion write-through.
 
-## 10. Add Bubble Card Example
+## 10. Add Lovelace Example
 
-- Create `examples/bubble_card_dashboard.yaml`.
+- Create `examples/lovelace_dashboard.yaml`.
 - Include launcher, question controls, recommendation display, session actions.
 
 ## 11. Add Tests

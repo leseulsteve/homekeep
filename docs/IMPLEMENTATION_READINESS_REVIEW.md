@@ -65,7 +65,7 @@ data or only updates entities.
 - Whether MVP exposes per-chore due binary sensors for every chore or only for
 enabled/high-priority chores.
 - Whether area-focused To-do projections are enabled by default or opt-in.
-- Exact Bubble Card YAML after the first entities/services exist.
+- Exact Lovelace YAML after the first entities/services exist.
 
 ## Phase 8 Hardening Notes
 

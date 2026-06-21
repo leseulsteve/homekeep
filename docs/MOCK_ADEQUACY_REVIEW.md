@@ -78,8 +78,8 @@ Home Assistant package-backed tests:
 
 Frontend/dashboard:
 
-- `examples/bubble_card_dashboard.yaml` is parsed and content checked but not
-  rendered in a live Home Assistant dashboard with Bubble Card installed.
+- `examples/lovelace_dashboard.yaml` is parsed and content checked but not
+  rendered in a live Home Assistant dashboard.
 - Helper/script bridge examples are documented but not packaged or tested as
   automations.
 

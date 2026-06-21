@@ -83,7 +83,7 @@ Result dictionary as its action response.
 Homekeep metadata.
 - Direct To-do create, delete, rename, edit, and reorder operations are rejected
 or reverted and do not mutate Homekeep state.
-- Bubble Card can trigger the main Ready-Now flow through Home Assistant
+- Lovelace can trigger the main Ready-Now flow through Home Assistant
 services.
 - Basic sensors expose Home Health, due chore count, best next chore, and
 Calendar Context.

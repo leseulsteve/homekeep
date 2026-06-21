@@ -1,0 +1,581 @@
+# Homekeep Lovelace main view recipe.
+#
+# This is the single consumer-facing example. Paste the package sections
+# (`input_select`, `input_text`, `input_number`, and `script`) into a Home
+# Assistant package or matching helper/script YAML locations. Paste the
+# `lovelace_dashboard` value into a Lovelace dashboard raw editor.
+#
+# The view uses stock Lovelace cards only. It presents Homekeep as a calm,
+# voice-assistant-like surface: choose how you feel, start a session, add
+# Chores to the list, then the same view switches to active-session controls.
+
+input_select:
+  homekeep_time_budget:
+    name: Homekeep Time Budget
+    options:
+      - "2"
+      - "5"
+      - "15"
+      - "30"
+    initial: "15"
+
+  homekeep_energy_level:
+    name: Homekeep Energy Level
+    options:
+      - low
+      - normal
+      - high
+      - quiet
+    initial: normal
+
+  homekeep_goal:
+    name: Homekeep Goal
+    options:
+      - quick_wins
+      - overdue
+      - visible_impact
+      - prevent_future_mess
+      - full_reset
+    initial: visible_impact
+
+  homekeep_mood:
+    name: Homekeep Mood
+    options:
+      - auto
+      - calm
+      - focused
+      - tired
+      - overwhelmed
+      - energized
+    initial: auto
+
+  homekeep_new_chore_energy:
+    name: Homekeep New Chore Energy
+    options:
+      - low
+      - normal
+      - high
+      - quiet
+    initial: normal
+
+input_text:
+  homekeep_recommendation_snapshot_id:
+    name: Homekeep Recommendation Snapshot ID
+    max: 80
+
+  homekeep_recommendation_id:
+    name: Homekeep Recommendation ID
+    max: 80
+
+  homekeep_session_id:
+    name: Homekeep Session ID
+    max: 100
+
+  homekeep_session_item_id:
+    name: Homekeep Session Item ID
+    max: 100
+
+  homekeep_chore_id:
+    name: Homekeep Chore ID
+    max: 100
+
+  homekeep_bonus_chore_id:
+    name: Homekeep Bonus Chore ID
+    max: 100
+
+  homekeep_new_chore_name:
+    name: Homekeep New Chore Name
+    max: 120
+
+  homekeep_new_chore_area:
+    name: Homekeep New Chore Area
+    max: 80
+
+  homekeep_new_chore_group:
+    name: Homekeep New Chore Group
+    max: 80
+
+input_number:
+  homekeep_new_chore_interval_days:
+    name: Homekeep New Chore Interval Days
+    min: 1
+    max: 365
+    step: 1
+    mode: box
+    initial: 7
+
+  homekeep_new_chore_minutes:
+    name: Homekeep New Chore Minutes
+    min: 1
+    max: 240
+    step: 1
+    mode: box
+    initial: 10
+
+script:
+  homekeep_generate_ready_now:
+    alias: Homekeep Generate Ready Now
+    mode: single
+    sequence:
+      - action: homekeep.generate_smart_chore_list
+        data:
+          recommendation_mode: ready_now
+          time_budget_minutes: "{{ states('input_select.homekeep_time_budget') | int(15) }}"
+          energy_level: "{{ states('input_select.homekeep_energy_level') }}"
+          goal: "{{ states('input_select.homekeep_goal') }}"
+          mood: >-
+            {% set value = states('input_select.homekeep_mood') %}
+            {{ none if value == 'auto' else value }}
+          infer_mood: "{{ is_state('input_select.homekeep_mood', 'auto') }}"
+          include_alternates: true
+        response_variable: homekeep_result
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_recommendation_snapshot_id
+        data:
+          value: "{{ homekeep_result.snapshot_id }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_recommendation_id
+        data:
+          value: >-
+            {% set rec = homekeep_result.best_single_chore
+              or homekeep_result.best_bundle
+              or homekeep_result.easiest_chore %}
+            {{ rec.recommendation_id if rec else '' }}
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_id
+        data:
+          value: ""
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_item_id
+        data:
+          value: ""
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_chore_id
+        data:
+          value: ""
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_bonus_chore_id
+        data:
+          value: ""
+
+  homekeep_start_selected_recommendation:
+    alias: Homekeep Start Selected Recommendation
+    mode: single
+    sequence:
+      - action: homekeep.start_recommendation
+        data:
+          recommendation_snapshot_id: "{{ states('input_text.homekeep_recommendation_snapshot_id') }}"
+          recommendation_id: "{{ states('input_text.homekeep_recommendation_id') }}"
+        response_variable: homekeep_start
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_id
+        data:
+          value: "{{ homekeep_start.session_id }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_item_id
+        data:
+          value: "{{ homekeep_start['items'][0].session_item_id if homekeep_start['items'] else '' }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_chore_id
+        data:
+          value: "{{ homekeep_start['items'][0].chore_id if homekeep_start['items'] else '' }}"
+
+  homekeep_create_chore_from_view:
+    alias: Homekeep Create Chore From View
+    mode: queued
+    sequence:
+      - action: homekeep.create_chore
+        data:
+          name: "{{ states('input_text.homekeep_new_chore_name') }}"
+          area_id: >-
+            {% set value = states('input_text.homekeep_new_chore_area') %}
+            {{ none if value in ('', 'unknown', 'unavailable') else value }}
+          group_id: >-
+            {% set value = states('input_text.homekeep_new_chore_group') %}
+            {{ none if value in ('', 'unknown', 'unavailable') else value }}
+          base_interval_days: "{{ states('input_number.homekeep_new_chore_interval_days') | int(7) }}"
+          estimated_minutes: "{{ states('input_number.homekeep_new_chore_minutes') | int(10) }}"
+          energy_level: "{{ states('input_select.homekeep_new_chore_energy') }}"
+          request_id: "{{ now().timestamp() | int }}"
+        response_variable: homekeep_created
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_new_chore_name
+        data:
+          value: ""
+
+  homekeep_complete_selected_session_item:
+    alias: Homekeep Complete Selected Session Item
+    mode: queued
+    sequence:
+      - action: homekeep.complete_chore
+        data:
+          chore_id: "{{ states('input_text.homekeep_chore_id') }}"
+          session_id: "{{ states('input_text.homekeep_session_id') }}"
+          session_item_id: "{{ states('input_text.homekeep_session_item_id') }}"
+          variant: normal
+          source: lovelace
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_item_id
+        data:
+          value: ""
+
+  homekeep_skip_selected_session_item:
+    alias: Homekeep Skip Selected Session Item
+    mode: queued
+    sequence:
+      - action: homekeep.skip_chore
+        data:
+          chore_id: "{{ states('input_text.homekeep_chore_id') }}"
+          session_id: "{{ states('input_text.homekeep_session_id') }}"
+          session_item_id: "{{ states('input_text.homekeep_session_item_id') }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_item_id
+        data:
+          value: ""
+
+  homekeep_snooze_selected_session_item:
+    alias: Homekeep Snooze Selected Session Item
+    mode: queued
+    sequence:
+      - action: homekeep.snooze_chore
+        data:
+          chore_id: "{{ states('input_text.homekeep_chore_id') }}"
+          session_id: "{{ states('input_text.homekeep_session_id') }}"
+          session_item_id: "{{ states('input_text.homekeep_session_item_id') }}"
+          snooze_minutes: 15
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_item_id
+        data:
+          value: ""
+
+  homekeep_end_session_completed:
+    alias: Homekeep End Session Completed
+    mode: single
+    sequence:
+      - action: homekeep.end_session
+        data:
+          session_id: "{{ states('input_text.homekeep_session_id') }}"
+          status: completed
+          offer_bonus_chore: false
+        response_variable: homekeep_end
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_id
+        data:
+          value: ""
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_item_id
+        data:
+          value: ""
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_chore_id
+        data:
+          value: ""
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_bonus_chore_id
+        data:
+          value: ""
+
+  homekeep_offer_bonus_chore:
+    alias: Homekeep Offer Bonus Chore
+    mode: single
+    sequence:
+      - action: homekeep.end_session
+        data:
+          session_id: "{{ states('input_text.homekeep_session_id') }}"
+          status: completed
+          offer_bonus_chore: true
+        response_variable: homekeep_end
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_bonus_chore_id
+        data:
+          value: "{{ homekeep_end.bonus_chore.chore_id if homekeep_end.bonus_chore else '' }}"
+
+  homekeep_accept_bonus_chore:
+    alias: Homekeep Accept Bonus Chore
+    mode: single
+    sequence:
+      - action: homekeep.accept_bonus_chore
+        data:
+          session_id: "{{ states('input_text.homekeep_session_id') }}"
+          chore_id: "{{ states('input_text.homekeep_bonus_chore_id') }}"
+        response_variable: homekeep_bonus
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_chore_id
+        data:
+          value: "{{ homekeep_bonus.chore_id }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_item_id
+        data:
+          value: "{{ homekeep_bonus.session_item_id }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_bonus_chore_id
+        data:
+          value: ""
+
+lovelace_dashboard:
+  title: Homekeep
+  views:
+    - title: Homekeep
+      path: homekeep
+      icon: mdi:home-heart
+      type: sections
+      max_columns: 2
+      sections:
+        - type: grid
+          cards:
+            - type: conditional
+              conditions:
+                - entity: input_select.homekeep_mood
+                  state: auto
+              card:
+                type: tile
+                entity: input_select.homekeep_mood
+                name: Ready when you are.
+                icon: mdi:assistant
+                color: teal
+            - type: conditional
+              conditions:
+                - entity: input_select.homekeep_mood
+                  state: calm
+              card:
+                type: tile
+                entity: input_select.homekeep_mood
+                name: Nice and steady today.
+                icon: mdi:weather-sunny
+                color: green
+            - type: conditional
+              conditions:
+                - entity: input_select.homekeep_mood
+                  state: focused
+              card:
+                type: tile
+                entity: input_select.homekeep_mood
+                name: Let's make this count.
+                icon: mdi:target
+                color: blue
+            - type: conditional
+              conditions:
+                - entity: input_select.homekeep_mood
+                  state: tired
+              card:
+                type: tile
+                entity: input_select.homekeep_mood
+                name: Keep it light.
+                icon: mdi:moon-waning-crescent
+                color: amber
+            - type: conditional
+              conditions:
+                - entity: input_select.homekeep_mood
+                  state: overwhelmed
+              card:
+                type: tile
+                entity: input_select.homekeep_mood
+                name: One small win is enough.
+                icon: mdi:heart
+                color: pink
+            - type: conditional
+              conditions:
+                - entity: input_select.homekeep_mood
+                  state: energized
+              card:
+                type: tile
+                entity: input_select.homekeep_mood
+                name: You've got momentum.
+                icon: mdi:lightning-bolt
+                color: orange
+
+            - type: tile
+              entity: sensor.homekeep_home_health
+              name: Home Health
+              icon: mdi:home-heart
+              color: green
+
+            - type: tile
+              entity: sensor.homekeep_due_chore_count
+              name: Due Chores
+              icon: mdi:counter
+              color: indigo
+
+            - type: tile
+              entity: sensor.homekeep_best_next_chore
+              name: Best Next
+              icon: mdi:creation
+              color: cyan
+
+            - type: conditional
+              conditions:
+                - entity: input_text.homekeep_session_id
+                  state: ""
+              card:
+                type: entities
+                title: Start a Session
+                entities:
+                  - entity: input_select.homekeep_time_budget
+                    name: Time
+                  - entity: input_select.homekeep_energy_level
+                    name: Energy
+                  - entity: input_select.homekeep_goal
+                    name: Goal
+                  - entity: input_select.homekeep_mood
+                    name: Mood
+
+            - type: conditional
+              conditions:
+                - entity: input_text.homekeep_session_id
+                  state: ""
+              card:
+                type: grid
+                title: Session
+                columns: 2
+                square: false
+                cards:
+                  - type: button
+                    name: Generate
+                    icon: mdi:auto-fix
+                    tap_action:
+                      action: call-service
+                      service: script.homekeep_generate_ready_now
+                  - type: button
+                    name: Start
+                    icon: mdi:play-circle
+                    tap_action:
+                      action: call-service
+                      service: script.homekeep_start_selected_recommendation
+
+            - type: conditional
+              conditions:
+                - entity: input_text.homekeep_session_id
+                  state_not: ""
+              card:
+                type: todo-list
+                entity: todo.homekeep_active_session
+                title: Active Session
+
+            - type: conditional
+              conditions:
+                - entity: input_text.homekeep_session_id
+                  state_not: ""
+              card:
+                type: grid
+                title: Active Session
+                columns: 3
+                square: false
+                cards:
+                  - type: button
+                    name: Done
+                    icon: mdi:check
+                    tap_action:
+                      action: call-service
+                      service: script.homekeep_complete_selected_session_item
+                  - type: button
+                    name: Skip
+                    icon: mdi:skip-next
+                    tap_action:
+                      action: call-service
+                      service: script.homekeep_skip_selected_session_item
+                  - type: button
+                    name: Snooze
+                    icon: mdi:clock-plus-outline
+                    tap_action:
+                      action: call-service
+                      service: script.homekeep_snooze_selected_session_item
+                  - type: button
+                    name: Done for now
+                    icon: mdi:stop-circle-outline
+                    tap_action:
+                      action: call-service
+                      service: script.homekeep_end_session_completed
+                  - type: button
+                    name: One more
+                    icon: mdi:plus-circle-outline
+                    tap_action:
+                      action: call-service
+                      service: script.homekeep_offer_bonus_chore
+                  - type: button
+                    name: Accept one more
+                    icon: mdi:plus-check
+                    tap_action:
+                      action: call-service
+                      service: script.homekeep_accept_bonus_chore
+
+        - type: grid
+          cards:
+            - type: conditional
+              conditions:
+                - entity: input_text.homekeep_session_id
+                  state: ""
+              card:
+                type: todo-list
+                entity: todo.homekeep_recommendations
+                title: Recommendations
+
+            - type: conditional
+              conditions:
+                - entity: input_text.homekeep_session_id
+                  state: ""
+              card:
+                type: entities
+                title: Add Chore
+                entities:
+                  - entity: input_text.homekeep_new_chore_name
+                    name: Name
+                  - entity: input_text.homekeep_new_chore_area
+                    name: Area
+                  - entity: input_text.homekeep_new_chore_group
+                    name: Group
+                  - entity: input_number.homekeep_new_chore_interval_days
+                    name: Every n days
+                  - entity: input_number.homekeep_new_chore_minutes
+                    name: Minutes
+                  - entity: input_select.homekeep_new_chore_energy
+                    name: Energy
+
+            - type: conditional
+              conditions:
+                - entity: input_text.homekeep_session_id
+                  state: ""
+              card:
+                type: button
+                name: Add Chore
+                icon: mdi:playlist-plus
+                tap_action:
+                  action: call-service
+                  service: script.homekeep_create_chore_from_view
+
+            - type: conditional
+              conditions:
+                - entity: input_text.homekeep_session_id
+                  state_not: ""
+              card:
+                type: entities
+                title: Session Context
+                entities:
+                  - entity: input_text.homekeep_session_id
+                    name: Session
+                  - entity: input_text.homekeep_chore_id
+                    name: Chore
+                  - entity: input_text.homekeep_session_item_id
+                    name: Session item
+                  - entity: input_text.homekeep_bonus_chore_id
+                    name: Bonus chore

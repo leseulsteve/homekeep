@@ -6,15 +6,22 @@ from typing import Any, Callable
 
 from .const import (
     ATTR_AREA_ID,
+    ATTR_BASE_INTERVAL_DAYS,
     ATTR_BUNDLE_ID,
     ATTR_CALENDAR_ENTITY_IDS,
     ATTR_CHORE_ID,
     ATTR_COMPLETED_BY,
     ATTR_ENERGY_LEVEL,
+    ATTR_ESTIMATED_MINUTES,
     ATTR_GOAL,
+    ATTR_GROUP_ID,
+    ATTR_HEALTH_WEIGHT,
     ATTR_INCLUDE_ALTERNATES,
     ATTR_INFER_MOOD,
+    ATTR_MAX_INTERVAL_DAYS,
+    ATTR_MIN_INTERVAL_DAYS,
     ATTR_MOOD,
+    ATTR_NAME,
     ATTR_OFFER_BONUS_CHORE,
     ATTR_REASON,
     ATTR_RECOMMENDATION_ID,
@@ -42,6 +49,7 @@ from .const import (
     RECOMMENDATION_MODES,
     SERVICE_ACCEPT_BONUS_CHORE,
     SERVICE_COMPLETE_CHORE,
+    SERVICE_CREATE_CHORE,
     SERVICE_DISMISS_CHORE,
     SERVICE_END_SESSION,
     SERVICE_GENERATE_SMART_CHORE_LIST,
@@ -55,6 +63,7 @@ from .const import (
     SESSION_END_STATUSES,
     SOURCES,
     VARIANTS,
+    VISIBILITIES,
 )
 from .models import HomekeepValidationError
 from .storage import HomekeepStorage
@@ -259,6 +268,24 @@ def _build_service_schemas() -> dict[str, Any]:
                 vol.Required(ATTR_RECOMMENDATION_SNAPSHOT_ID): cv.string,
                 vol.Required(ATTR_BUNDLE_ID): cv.string,
                 vol.Optional(ATTR_USER_ID): nullable_string,
+                vol.Optional(ATTR_REQUEST_ID): nullable_string,
+            }
+        ),
+        SERVICE_CREATE_CHORE: vol.Schema(
+            {
+                vol.Optional(ATTR_CHORE_ID): cv.string,
+                vol.Required(ATTR_NAME): cv.string,
+                vol.Optional(ATTR_AREA_ID): nullable_string,
+                vol.Optional(ATTR_GROUP_ID): nullable_string,
+                vol.Optional(ATTR_BASE_INTERVAL_DAYS, default=7): vol.Coerce(float),
+                vol.Optional(ATTR_MIN_INTERVAL_DAYS): vol.Coerce(float),
+                vol.Optional(ATTR_MAX_INTERVAL_DAYS): vol.Coerce(float),
+                vol.Optional(ATTR_ESTIMATED_MINUTES, default=10): cv.positive_int,
+                vol.Optional(ATTR_ENERGY_LEVEL, default="normal"): vol.In(
+                    ENERGY_LEVELS
+                ),
+                vol.Optional(ATTR_VISIBILITY, default="medium"): vol.In(VISIBILITIES),
+                vol.Optional(ATTR_HEALTH_WEIGHT, default=1.0): vol.Coerce(float),
                 vol.Optional(ATTR_REQUEST_ID): nullable_string,
             }
         ),

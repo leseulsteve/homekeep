@@ -7,7 +7,10 @@ from dataclasses import dataclass
 from datetime import timedelta
 
 from custom_components.homekeep.const import (
+    ATTR_BASE_INTERVAL_DAYS,
     ATTR_CHORE_ID,
+    ATTR_ENERGY_LEVEL,
+    ATTR_ESTIMATED_MINUTES,
     ATTR_RECOMMENDATION_ID,
     ATTR_RECOMMENDATION_SNAPSHOT_ID,
     ATTR_REQUEST_ID,
@@ -17,6 +20,7 @@ from custom_components.homekeep.const import (
     ATTR_SNOOZE_MINUTES,
     ATTR_STATUS,
     SERVICE_COMPLETE_CHORE,
+    SERVICE_CREATE_CHORE,
     SERVICE_END_SESSION,
     SERVICE_GENERATE_SMART_CHORE_LIST,
     SERVICE_LOAD_SAMPLE_CHORES,
@@ -118,6 +122,54 @@ class HomekeepServiceRuntimeTest(unittest.IsolatedAsyncioTestCase):
         assert started is not None
         self.assertIn(started["session_id"], self.storage.store.sessions)
         self.assertEqual(self.storage.save_count, 2)
+
+    async def test_create_chore_adds_definition_and_initial_state(self) -> None:
+        result = await self.runtime.async_handle(
+            SERVICE_CREATE_CHORE,
+            {
+                "name": "Water the basil",
+                "area_id": "kitchen",
+                "group_id": "plants",
+                ATTR_BASE_INTERVAL_DAYS: 3,
+                ATTR_ESTIMATED_MINUTES: 2,
+                ATTR_ENERGY_LEVEL: "low",
+                ATTR_REQUEST_ID: "create-basil",
+            },
+        )
+
+        assert result is not None
+        self.assertEqual(result["status"], "created")
+        self.assertEqual(result["chore_id"], "water_the_basil")
+        self.assertIn("water_the_basil", self.storage.store.chores)
+        self.assertIn("water_the_basil", self.storage.store.states)
+        self.assertEqual(
+            self.storage.store.chores["water_the_basil"].name, "Water the basil"
+        )
+        self.assertEqual(self.storage.save_count, 1)
+
+        retried = await self.runtime.async_handle(
+            SERVICE_CREATE_CHORE,
+            {
+                "name": "Water the basil",
+                ATTR_REQUEST_ID: "create-basil",
+            },
+        )
+
+        self.assertEqual(retried, result)
+        self.assertEqual(len(self.storage.store.chores), 3)
+        self.assertEqual(self.storage.save_count, 2)
+
+    async def test_create_chore_rejects_duplicate_chore_id(self) -> None:
+        with self.assertRaisesRegex(HomekeepValidationError, "already exists"):
+            await self.runtime.async_handle(
+                SERVICE_CREATE_CHORE,
+                {
+                    ATTR_CHORE_ID: "empty_compost",
+                    "name": "Empty compost again",
+                },
+            )
+
+        self.assertEqual(self.storage.save_count, 0)
 
     async def test_malformed_payload_is_rejected_without_save(self) -> None:
         with self.assertRaisesRegex(HomekeepValidationError, "snooze_minutes"):

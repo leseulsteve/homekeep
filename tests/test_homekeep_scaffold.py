@@ -11,6 +11,7 @@ from custom_components.homekeep.const import (
     OPTIONAL_RESPONSE_SERVICES,
     PLATFORMS,
     SERVICE_GENERATE_SMART_CHORE_LIST,
+    SERVICE_CREATE_CHORE,
     SERVICE_START_RECOMMENDATION,
 )
 
@@ -52,9 +53,11 @@ class HomekeepScaffoldTest(unittest.TestCase):
         self.assertIn("SupportsResponse.OPTIONAL", source)
         self.assertIn(SERVICE_GENERATE_SMART_CHORE_LIST, DATA_PRODUCING_SERVICES)
         self.assertIn(SERVICE_START_RECOMMENDATION, DATA_PRODUCING_SERVICES)
+        self.assertIn(SERVICE_CREATE_CHORE, OPTIONAL_RESPONSE_SERVICES)
         self.assertIn("complete_chore", OPTIONAL_RESPONSE_SERVICES)
         self.assertIn("generate_smart_chore_list:", services)
         self.assertIn("start_recommendation:", services)
+        self.assertIn("create_chore:", services)
         self.assertNotIn("answer_session_question:", services)
         self.assertIn("_service_handler(hass, service_name)", source)
         self.assertNotIn("implemented\": False", source)

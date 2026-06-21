@@ -240,7 +240,7 @@
 - unsupported reorder triggers an entity state refresh from Homekeep projection
 - To-do entity does not become source of truth
 
-`test_bubble_card_examples.py`
+`test_lovelace_examples.py`
 
 - Scheduled-Suggestion example uses `generate_smart_chore_list` for planning
 - Scheduled-Suggestion example uses Refresh/regenerate when the proposal is

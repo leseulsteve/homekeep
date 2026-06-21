@@ -121,7 +121,7 @@ completed_at: datetime
 completed_by: string | null
 variant: tiny | normal | deep
 credit: float
-source: service | todo | bubble_card | voice | automation
+source: service | todo | lovelace | voice | automation
 ```
 
 Only real completions create `ChoreCompletion` records.

@@ -9,12 +9,15 @@ implementation pass.
 
 ## Service Flow
 
+- `homekeep.create_chore` creates an enabled Chore definition and initial
+  ChoreState for the chore list. It does not create, schedule, or start a
+  Chore Session.
 - `homekeep.generate_smart_chore_list` creates a RecommendationSnapshot and
   returns a Smart Chore List action response.
 - `homekeep.start_recommendation` is the canonical MVP service that creates a
   Chore Session.
 - There is no MVP `homekeep.start_chore_session` service.
-- There is no MVP `homekeep.answer_session_question` service. Bubble Card
+- There is no MVP `homekeep.answer_session_question` service. Lovelace
   collects setup answers locally and calls `generate_smart_chore_list`.
 - `homekeep.start_chore_bundle` may exist only as a compatibility alias for
   bundle callers; new code should use `start_recommendation`.
@@ -40,7 +43,7 @@ implementation pass.
 - `RecommendationItem.session_item_id` is null before materialization.
 - `start_recommendation` returns materialized `SessionItem` records with real
   `session_item_id` values.
-- Bubble Card and other callers must use the `start_recommendation` response
+- Lovelace and other callers must use the `start_recommendation` response
   for `complete_chore`, `skip_chore`, and `snooze_chore`.
 
 ## To-do Projections
@@ -218,20 +221,23 @@ implementation pass.
   recommendations. This does not change normal `ChoreState.new_for_chore`
   semantics.
 
-## Bubble Card Dashboard
+## Lovelace Dashboard
 
-- The Bubble Card MVP dashboard is an example surface, not source of truth.
-- Bubble Card can provide pop-ups, select cards, buttons, sub-buttons, and
-  service actions for the MVP flow.
+- The Lovelace MVP dashboard is an example surface, not source of truth.
+- The dashboard uses stock Home Assistant Lovelace cards for the MVP flow.
 - The dashboard must use Home Assistant helpers or scripts for values that
-  Bubble Card cannot hold cleanly, especially service response ids returned by
-  Homekeep services.
+  Lovelace cards cannot hold cleanly, especially service response ids returned
+  by Homekeep services.
 - The dashboard displays Homekeep sensors and To-do projections instead of
   duplicating recommendation or session state in dashboard-only data.
+- Stored legacy completion records with source `bubble_card` migrate to
+  `lovelace`; new service calls should use `lovelace`.
+- The dashboard Add Chore flow calls `homekeep.create_chore`; it must not use
+  To-do create operations as a write-through path.
 
 ## MVP Scope
 
 - Stay inside MVP unless Steve explicitly expands scope.
-- Bubble Card is the MVP dashboard layer.
+- Lovelace is the MVP dashboard layer.
 - No complex fairness scoring, punitive gamification, or broad future scope in
   MVP.

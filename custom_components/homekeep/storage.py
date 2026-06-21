@@ -159,6 +159,7 @@ def migrate_store_dict(data: Mapping[str, Any]) -> Dict[str, Any]:
 
     for key, value in empty_store_dict().items():
         migrated.setdefault(key, copy.deepcopy(value))
+    _normalize_legacy_completion_sources(migrated)
     migrated["version"] = CURRENT_STORAGE_VERSION
     return migrated
 
@@ -183,6 +184,17 @@ def _migrate_v1_to_v2(data: Mapping[str, Any]) -> Dict[str, Any]:
         state.pop("recent_snoozes", None)
 
     return migrated
+
+
+def _normalize_legacy_completion_sources(data: Dict[str, Any]) -> None:
+    """Normalize old dashboard source labels in durable completion history."""
+
+    completions = data.get("completions", [])
+    if not isinstance(completions, list):
+        return
+    for completion in completions:
+        if isinstance(completion, dict) and completion.get("source") == "bubble_card":
+            completion["source"] = "lovelace"
 
 
 def load_store_dict(

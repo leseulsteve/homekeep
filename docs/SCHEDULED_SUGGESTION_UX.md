@@ -50,9 +50,9 @@ There is no MVP `homekeep.start_chore_session` service and no
 `session_id: null` response. Until `start_recommendation` succeeds, the user
 has a proposal, not a Chore Session.
 
-## Bubble Card Flow
+## Lovelace Flow
 
-Bubble Card should provide a planned-session view:
+Lovelace should provide a planned-session view:
 
 ```text
 Plan chores
@@ -75,7 +75,7 @@ else:
   replace the saved proposal with the new response
 ```
 
-Bubble Card must not call `start_recommendation` silently from an expired
+Lovelace must not call `start_recommendation` silently from an expired
 proposal. It should refresh first, then let the user start one of the new
 recommendations.
 
@@ -127,4 +127,4 @@ Implementation must test:
 - starting a fresh scheduled-suggestion recommendation creates a session
 - starting an expired scheduled-suggestion recommendation is rejected
 - starting an invalidated scheduled-suggestion recommendation is rejected
-- Bubble Card example uses Refresh/regenerate instead of a null session path
+- Lovelace example uses Refresh/regenerate instead of a null session path

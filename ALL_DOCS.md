@@ -163,7 +163,7 @@ Recommended build order:
 5. Implement Recommendation Engine V1.
 6. Wire Home Assistant services, sensors, and To-do projections.
 7. Implement Calendar Context.
-8. Add the Bubble Card MVP dashboard example.
+8. Add the Lovelace MVP dashboard example.
 9. Harden tests, reload/unload behavior, migrations, and release checks.
 
 Ask Steve before proceeding when:
@@ -247,7 +247,7 @@ Git rules:
 - `docs/SERVICE_SCHEMAS.md`: draft Home Assistant service payloads.
 - `docs/TEST_PLAN.md`: unit and integration test plan.
 - `docs/SCAFFOLDING_TASKS.md`: file-by-file first implementation checklist.
-- `docs/BUBBLE_CARD_MVP.md`: dashboard flow and service wiring.
+- `docs/LOVELACE_MVP.md`: dashboard flow and service wiring.
 - `docs/CALENDAR_CONTEXT.md`: calendar freshness and invalidation rules.
 - `docs/ADAPTIVE_INTERVALS.md`: adaptive cadence bounds and update rules.
 - `docs/DERIVED_HEALTH.md`: health/staleness derivation and cache rules.
@@ -510,7 +510,7 @@ The MVP should include:
 - Projected Impact
 - Home Assistant services and sensors
 - Home Assistant To-do projections
-- Bubble Card dashboard flow
+- Lovelace dashboard flow
 - Calendar Context
 - Session-History Learning
 - Light Sessions and Bonus Chores
@@ -711,27 +711,27 @@ Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
 ### Phase 7 Prompt
 
 ```text
-Implement Homekeep Phase 7: Bubble Card MVP dashboard example.
+Implement Homekeep Phase 7: Lovelace MVP dashboard example.
 
 Follow AGENTS.md Implementation Mode. Resume from docs/IMPLEMENTATION_PROGRESS.md.
 
 Read:
-- docs/BUBBLE_CARD_MVP.md
+- docs/LOVELACE_MVP.md
 - docs/SERVICE_SCHEMAS.md
 - docs/TODO_PROJECTIONS.md
 
-Verify Bubble Card capabilities before writing final YAML.
+Use stock Lovelace cards for the final YAML.
 
 Deliver:
-- examples/bubble_card_dashboard.yaml
+- examples/lovelace_dashboard.yaml
 - Ready-Now launcher
 - time/energy/goal controls
 - recommendation display
+- Add Chore flow
 - active session controls
 - Done for now / One more flow
 
-If Bubble Card cannot represent part of the flow cleanly, document the gap and
-use Home Assistant native controls or entities for the MVP.
+Use Home Assistant native controls, helpers, scripts, and entities for the MVP.
 Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
 ```
 

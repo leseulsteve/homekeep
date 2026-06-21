@@ -50,7 +50,7 @@ class CompletionSource(str, Enum):
 
     SERVICE = "service"
     TODO = "todo"
-    BUBBLE_CARD = "bubble_card"
+    LOVELACE = "lovelace"
     VOICE = "voice"
     AUTOMATION = "automation"
 

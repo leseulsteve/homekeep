@@ -28,7 +28,7 @@ before proceeding.
 - [x] Ask Steve which disposable or clearly test-scoped Home Assistant instance
   to use
 - [x] Ask Steve for the Home Assistant version targeted for the private test
-- [x] Ask Steve whether Bubble Card dashboard testing is included
+- [x] Ask Steve whether Lovelace dashboard testing is included
 - [x] Confirm no production automations depend on Homekeep entities yet
 - [x] Confirm selected calendar entities are synthetic or safe
 - [x] Confirm backups/snapshots exist before installing the custom integration
@@ -36,7 +36,7 @@ before proceeding.
 Steve confirmed Gate 1 on 2026-06-21:
 
 - target is Home Assistant OS private live-test instance
-- Bubble Card dashboard testing is included
+- Lovelace dashboard testing is included
 - no production automations depend on Homekeep entities yet
 - selected calendar entities are synthetic or safe
 - backup/snapshot exists before install
@@ -282,14 +282,14 @@ Gate 7 partial live result on 2026-06-21:
 - Steve restarted Home Assistant and confirmed Homekeep recovered stored state
   and expected entities.
 
-## Gate 8: Bubble Card Dashboard
+## Gate 8: Lovelace Dashboard
 
-Use `examples/bubble_card_dashboard.yaml` only after companion helpers/scripts
+Use `examples/lovelace_dashboard.yaml` only after companion helpers/scripts
 exist.
 
-Companion helper/script example:
+Companion helper/script sections live in the one-file recipe:
 
-- `examples/bubble_card_helpers.yaml`
+- `examples/lovelace_dashboard.yaml`
 
 - [x] Create required `input_select` helpers:
   - [x] `input_select.homekeep_time_budget`
@@ -304,7 +304,7 @@ Companion helper/script example:
   - [x] `input_text.homekeep_chore_id`
   - [x] `input_text.homekeep_bonus_chore_id`
 - [x] Create bridge scripts documented in the dashboard example
-- [ ] Paste/import `examples/bubble_card_dashboard.yaml`
+- [ ] Paste/import `examples/lovelace_dashboard.yaml`
 - [ ] Ready-Now launcher opens
 - [ ] Time, energy, goal, and mood controls work
 - [x] Generate button or bridge script calls the intended Homekeep service
@@ -383,7 +383,7 @@ release decision.
 - [x] To-do projection result:
 - [x] Calendar invalidation result:
 - [x] Reload/unload result:
-- [x] Bubble Card result:
+- [x] Lovelace result:
 - [x] Bugs found:
 - [x] Release blockers:
 

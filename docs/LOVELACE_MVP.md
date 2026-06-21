@@ -1,10 +1,10 @@
-# Bubble Card MVP
+# Lovelace MVP
 
-Bubble Card is the MVP dashboard layer. It should trigger Homekeep services and
+Lovelace is the MVP dashboard layer. It should trigger Homekeep services and
 display Homekeep entities; it should not own state.
 
-Bubble Card should collect setup answers locally. It must not call
-`homekeep.answer_session_question` in MVP.
+Lovelace should collect setup answers through Home Assistant helpers. It must
+not call `homekeep.answer_session_question` in MVP.
 
 ## First Dashboard Flow
 
@@ -24,7 +24,7 @@ I'm ready
 ## Scheduled-Suggestion Flow
 
 Scheduled-Suggestion Mode is a planning flow, not a half-started session.
-Bubble Card must never expect `session_id: null`.
+Lovelace must never expect `session_id: null`.
 
 ```text
 Plan chores
@@ -89,6 +89,7 @@ Generate
 Plan
 Refresh
 Start
+Add Chore
 Done
 Skip
 Snooze
@@ -111,6 +112,7 @@ todo.homekeep_active_session
 ```text
 homekeep.generate_smart_chore_list
 homekeep.start_recommendation
+homekeep.create_chore
 homekeep.complete_chore
 homekeep.skip_chore
 homekeep.snooze_chore
@@ -127,28 +129,28 @@ homekeep.end_session
 - If Mood Context is inferred, show it as a soft Auto suggestion and let the
   user override it quickly.
 - Always make "Done for now" a valid success state.
+- Add Chore should add a Chore definition to the chore list. It must not
+  create a Chore Session or rely on To-do create write-through.
 - "One more" should offer a Bonus Chore, not a new full queue.
 - Scheduled-Suggestion proposals must show their target window and expiry.
 - Expired Scheduled-Suggestion proposals must be refreshed before start.
-- After Start, Bubble Card must use materialized `session_item_id` values from
-  the `start_recommendation` response. It must not use cached recommendation
-  item IDs.
+- After Start, Lovelace must use materialized `session_item_id` values from the
+  `start_recommendation` response. It must not use cached recommendation item
+  IDs.
 - Session dismiss actions must pass `session_id` and materialized
   `session_item_id` so history learning uses the correct session context.
 
-## Phase 7 Dashboard Gap
+## Dashboard Bridge
 
-Bubble Card can represent the touch surface with pop-ups, select cards,
-buttons, sub-buttons, and Home Assistant call-service actions. It should not be
-treated as the owner of Homekeep state.
+The MVP dashboard uses stock Lovelace cards with Home Assistant helper entities
+and small scripts as the bridge. Dashboard cards can call services, but they do
+not cleanly persist service response payloads such as `snapshot_id`,
+`recommendation_id`, `session_id`, and `session_item_id` for later button
+calls.
 
-The MVP dashboard example uses Home Assistant helper entities and small scripts
-as a bridge because dashboard cards do not cleanly persist service response
-payloads such as `snapshot_id`, `recommendation_id`, `session_id`, and
-`session_item_id` for later button calls.
-
-The pasteable companion helper/script example lives at
-`examples/bubble_card_helpers.yaml`.
+The pasteable one-file recipe lives at `examples/lovelace_dashboard.yaml`. It
+contains package helper/script sections plus a `lovelace_dashboard` block for
+the dashboard raw editor.
 
 The scripts should:
 
@@ -160,3 +162,14 @@ The scripts should:
 
 The dashboard itself displays Homekeep sensors and To-do projections rather
 than copying recommendation or session state into Lovelace-only data.
+
+## Assistant View
+
+The main view should present itself as a calm, voice-enabled assistant:
+
+- greet the user based on selected Mood Context
+- use mood color to make the state legible at a glance
+- show session setup while no `session_id` helper is active
+- switch to active-session controls when a `session_id` exists
+- keep Add Chore in the idle state so adding list items does not interrupt an
+  active Chore Session

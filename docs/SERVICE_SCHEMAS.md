@@ -19,6 +19,9 @@ homekeep.generate_smart_chore_list
 homekeep.start_recommendation
 -> validates the RecommendationSnapshot and materializes one recommendation
    into a Chore Session
+
+homekeep.create_chore
+-> creates a Chore definition for the chore list without starting a session
 ```
 
 `homekeep.start_chore_session` is intentionally not part of the MVP service
@@ -140,8 +143,8 @@ StartRecommendationResult:
 ```
 
 `MaterializedSessionItem` is the caller-facing session item shape. It is a
-subset of the stored `SessionItem` plus display fields needed by Bubble Card
-and automations.
+subset of the stored `SessionItem` plus display fields needed by Lovelace and
+automations.
 
 ```yaml
 MaterializedSessionItem:
@@ -182,6 +185,63 @@ request_id: string | null
 Validation follows `homekeep.start_recommendation`, but `bundle_id` maps to a
 bundle recommendation in the snapshot.
 
+## `homekeep.create_chore`
+
+Creates an enabled Chore definition and initial ChoreState. This service is for
+adding Chores to the Homekeep chore list; it does not create or schedule a
+Chore Session.
+
+Response support:
+
+```text
+supports_response = SupportsResponse.OPTIONAL
+```
+
+```yaml
+chore_id: string | null
+name: string
+area_id: string | null
+group_id: string | null
+base_interval_days: float
+min_interval_days: float | null
+max_interval_days: float | null
+estimated_minutes: int
+energy_level: low | normal | high | quiet
+visibility: low | medium | high
+health_weight: float
+request_id: string | null
+```
+
+Defaults:
+
+```text
+base_interval_days = 7
+min_interval_days = max(1, base_interval_days / 2)
+max_interval_days = base_interval_days * 2
+estimated_minutes = 10
+energy_level = normal
+visibility = medium
+health_weight = 1.0
+```
+
+Validation:
+
+- If `chore_id` is omitted, Homekeep derives one from `name`.
+- `chore_id` must be unique.
+- `name` must be non-empty.
+- Intervals, estimated minutes, and health weight must be finite values.
+- Interval order must satisfy the normal Chore definition rules.
+- The created Chore gets a normal Chore Variant with credit `1.0`.
+- Duplicate `request_id` retries return the stored result.
+
+Result:
+
+```yaml
+status: created
+chore_id: string
+chore: ChoreDefinition
+```
+
 ## `homekeep.complete_chore`
 
 Marks a chore as completed.
@@ -198,7 +258,7 @@ session_id: string | null
 session_item_id: string | null
 variant: tiny | normal | deep
 completed_by: string | null
-source: service | todo | bubble_card | voice | automation
+source: service | todo | lovelace | voice | automation
 request_id: string | null
 ```
 
@@ -324,14 +384,14 @@ Behavior:
 
 Not implemented in MVP.
 
-This service is reserved for a future multi-step Bubble Card or Assist flow. Do
+This service is reserved for a future multi-step Lovelace or Assist flow. Do
 not register it in the MVP Home Assistant integration.
 
 MVP behavior:
 
 ```text
-Bubble Card collects time, energy, goal, area, and mood locally
--> Bubble Card calls homekeep.generate_smart_chore_list with those fields
+Lovelace collects time, energy, goal, area, and mood locally
+-> Lovelace calls homekeep.generate_smart_chore_list with those fields
 -> Homekeep returns a RecommendationSnapshot and Smart Chore List
 ```
 

@@ -146,7 +146,7 @@ mood_context_ttl_minutes = 60
 
 ## UI Behavior
 
-Bubble Card should let the user override the inferred mood quickly.
+Lovelace should let the user override the inferred mood quickly.
 
 Recommended controls:
 

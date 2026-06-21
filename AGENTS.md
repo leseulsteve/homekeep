@@ -148,7 +148,7 @@ Recommended build order:
 5. Implement Recommendation Engine V1.
 6. Wire Home Assistant services, sensors, and To-do projections.
 7. Implement Calendar Context.
-8. Add the Bubble Card MVP dashboard example.
+8. Add the Lovelace MVP dashboard example.
 9. Harden tests, reload/unload behavior, migrations, and release checks.
 
 Ask Steve before proceeding when:
@@ -232,7 +232,7 @@ Git rules:
 - `docs/SERVICE_SCHEMAS.md`: draft Home Assistant service payloads.
 - `docs/TEST_PLAN.md`: unit and integration test plan.
 - `docs/SCAFFOLDING_TASKS.md`: file-by-file first implementation checklist.
-- `docs/BUBBLE_CARD_MVP.md`: dashboard flow and service wiring.
+- `docs/LOVELACE_MVP.md`: dashboard flow and service wiring.
 - `docs/CALENDAR_CONTEXT.md`: calendar freshness and invalidation rules.
 - `docs/ADAPTIVE_INTERVALS.md`: adaptive cadence bounds and update rules.
 - `docs/DERIVED_HEALTH.md`: health/staleness derivation and cache rules.

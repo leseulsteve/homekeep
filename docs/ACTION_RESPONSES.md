@@ -2,7 +2,7 @@
 
 ## Goal
 
-Homekeep services should be useful from Bubble Card, automations, scripts,
+Homekeep services should be useful from Lovelace, automations, scripts,
 Assist, and developer tools without requiring callers to scrape entity state.
 
 When a service naturally produces data, register it with Home Assistant action

@@ -170,9 +170,9 @@ Done when:
 - Expired Calendar Context is refreshed or ignored before scoring.
 - Raw event details are not stored in long-lived history unless necessary.
 
-## Phase 6: Bubble Card MVP
+## Phase 6: Lovelace MVP
 
-- Document Bubble Card YAML examples.
+- Document Lovelace YAML examples.
 - Build an "I'm ready" pop-up.
 - Wire time, energy, and goal controls to services.
 - Show Smart Chore List and active session.
