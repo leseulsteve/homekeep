@@ -1,7 +1,7 @@
 {
   "domain": "homekeep",
   "name": "Homekeep",
-  "codeowners": [],
+  "codeowners": ["@leseulsteve"],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/leseulsteve/homekeep",
