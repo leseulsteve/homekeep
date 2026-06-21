@@ -76,6 +76,7 @@ homekeep.skip_chore
 homekeep.snooze_chore
 homekeep.dismiss_chore
 homekeep.refresh_calendar_context
+homekeep.load_sample_chores
 homekeep.pause_session
 homekeep.accept_bonus_chore
 homekeep.end_session
@@ -97,6 +98,10 @@ and null before materialization.
 collect context locally and call `homekeep.generate_smart_chore_list` with the
 final answers.
 
+`homekeep.load_sample_chores` is a private live-test helper for seeding bundled
+synthetic Chores from the installed integration package. It is not a general
+import API and must not be used with real household data.
+
 ## Action Response Rules
 
 Homekeep must use Home Assistant action/service responses for services that
@@ -112,6 +117,8 @@ recommendations or created sessions.
 - Register `homekeep.accept_bonus_chore` and `homekeep.end_session` with
   `supports_response=SupportsResponse.ONLY`.
 - Register `homekeep.refresh_calendar_context` with
+  `supports_response=SupportsResponse.OPTIONAL`.
+- Register `homekeep.load_sample_chores` with
   `supports_response=SupportsResponse.OPTIONAL`.
 - Mutation services may use `SupportsResponse.OPTIONAL` for acknowledgement
   dictionaries.

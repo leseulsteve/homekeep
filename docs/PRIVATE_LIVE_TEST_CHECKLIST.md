@@ -60,20 +60,20 @@ Frontend: 20260527.6
   install private GitHub repositories
 - [x] Confirm HACS is installed and configured in the target Home Assistant
   instance
-- [ ] Add `https://github.com/leseulsteve/homekeep` as a HACS custom
+- [x] Add `https://github.com/leseulsteve/homekeep` as a HACS custom
   repository with type `Integration`
-- [ ] Download Homekeep from HACS
-- [ ] Restart Home Assistant after installing the integration
-- [ ] Verify Homekeep appears in integrations
-- [ ] Create one Homekeep config entry
-- [ ] Open Homekeep options and select test calendar entities if needed
+- [x] Download Homekeep from HACS
+- [x] Restart Home Assistant after installing the integration
+- [x] Verify Homekeep appears in integrations
+- [x] Create one Homekeep config entry
+- [x] Open Homekeep options and select test calendar entities if needed
 
 Install method selected by Steve: HACS custom repository.
 
 ## Gate 3: Synthetic Data Setup
 
-- [ ] Load or manually create synthetic chores based on
-  `examples/sample_chores.yaml`
+- [ ] Load bundled synthetic chores from Developer Tools > Actions:
+  `homekeep.load_sample_chores`
 - [ ] Do not use real private room routines or private schedule details
 - [ ] Confirm Homekeep storage contains Chore definitions and Chore state
 - [ ] Confirm sensors exist:

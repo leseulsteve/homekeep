@@ -466,3 +466,43 @@ Result should contain derived Calendar Context only.
 This service is a manual refresh hook. Homekeep must also refresh or invalidate
 Calendar Context automatically when selected calendar entities change or when a
 snapshot exceeds its max age.
+
+## `homekeep.load_sample_chores`
+
+Private live-test helper that loads bundled synthetic Chore definitions from
+the installed integration package.
+
+Response support:
+
+```text
+supports_response = SupportsResponse.OPTIONAL
+```
+
+```yaml
+replace_existing: bool
+```
+
+Validation:
+
+- If Homekeep already has stored Chores, reject unless
+  `replace_existing=true`.
+- The bundled sample file must pass normal Chore validation.
+- This service is not a general import API and must not accept arbitrary paths
+  or live household data.
+
+Behavior:
+
+- Load bundled synthetic Chores.
+- Create default ChoreState records for loaded Chores.
+- When `replace_existing=true`, clear existing Chores, Chore state,
+  completions, sessions, recommendations, Session-History Learning stats, and
+  idempotency records before loading the bundled fixtures.
+
+Result:
+
+```yaml
+status: loaded
+chore_count: int
+chore_ids: list[string]
+replace_existing: bool
+```

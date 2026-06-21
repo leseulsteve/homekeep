@@ -1,0 +1,532 @@
+# Synthetic Homekeep chore definitions for private live testing.
+#
+# These fixtures are intentionally generic. Do not replace them with real
+# household routines, private schedules, or personally identifying details.
+
+chores:
+  empty_compost:
+    name: Empty compost
+    area_id: kitchen
+    group_id: trash
+    base_interval_days: 2
+    min_interval_days: 1
+    max_interval_days: 4
+    estimated_minutes: 2
+    energy: low
+    visibility: medium
+    health_weight: 1.4
+    variants:
+      tiny:
+        label: Empty small bin
+        credit: 0.5
+      normal:
+        label: Empty compost
+        credit: 1.0
+    pairs_with:
+      - wipe_kitchen_counters
+      - take_out_kitchen_trash
+    enabled: true
+
+  wipe_kitchen_counters:
+    name: Wipe kitchen counters
+    area_id: kitchen
+    group_id: surfaces
+    base_interval_days: 2
+    min_interval_days: 1
+    max_interval_days: 5
+    estimated_minutes: 5
+    energy: normal
+    visibility: high
+    health_weight: 1.2
+    variants:
+      tiny:
+        label: Wipe visible counters
+        credit: 0.5
+      normal:
+        label: Wipe counters
+        credit: 1.0
+      deep:
+        label: Clear and wipe counters
+        credit: 1.3
+    pairs_with:
+      - empty_compost
+      - start_dishwasher
+      - sweep_kitchen_floor
+    enabled: true
+
+  start_dishwasher:
+    name: Start dishwasher
+    area_id: kitchen
+    group_id: dishes
+    base_interval_days: 1
+    min_interval_days: 0.5
+    max_interval_days: 2
+    estimated_minutes: 3
+    energy: low
+    visibility: high
+    health_weight: 1.0
+    variants:
+      normal:
+        label: Start dishwasher
+        credit: 1.0
+    pairs_with:
+      - wipe_kitchen_counters
+      - clear_table
+    enabled: true
+
+  clear_table:
+    name: Clear dining table
+    area_id: dining
+    group_id: surfaces
+    base_interval_days: 1
+    min_interval_days: 0.5
+    max_interval_days: 3
+    estimated_minutes: 4
+    energy: low
+    visibility: high
+    health_weight: 1.1
+    variants:
+      tiny:
+        label: Clear obvious items
+        credit: 0.4
+      normal:
+        label: Clear dining table
+        credit: 1.0
+      deep:
+        label: Clear and wipe table
+        credit: 1.3
+    pairs_with:
+      - start_dishwasher
+      - wipe_kitchen_counters
+    enabled: true
+
+  sweep_kitchen_floor:
+    name: Sweep kitchen floor
+    area_id: kitchen
+    group_id: floors
+    base_interval_days: 3
+    min_interval_days: 1
+    max_interval_days: 7
+    estimated_minutes: 6
+    energy: normal
+    visibility: medium
+    health_weight: 1.0
+    variants:
+      tiny:
+        label: Sweep high-traffic spots
+        credit: 0.5
+      normal:
+        label: Sweep kitchen floor
+        credit: 1.0
+      deep:
+        label: Sweep and spot mop kitchen
+        credit: 1.5
+    pairs_with:
+      - wipe_kitchen_counters
+      - take_out_kitchen_trash
+    enabled: true
+
+  take_out_kitchen_trash:
+    name: Take out kitchen trash
+    area_id: kitchen
+    group_id: trash
+    base_interval_days: 3
+    min_interval_days: 1
+    max_interval_days: 5
+    estimated_minutes: 4
+    energy: normal
+    visibility: high
+    health_weight: 1.3
+    variants:
+      normal:
+        label: Take out kitchen trash
+        credit: 1.0
+      deep:
+        label: Take trash and wipe bin rim
+        credit: 1.3
+    pairs_with:
+      - empty_compost
+      - sweep_kitchen_floor
+    enabled: true
+
+  clean_bathroom_sink:
+    name: Clean bathroom sink
+    area_id: bathroom
+    group_id: bathroom_refresh
+    base_interval_days: 5
+    min_interval_days: 2
+    max_interval_days: 10
+    estimated_minutes: 6
+    energy: normal
+    visibility: high
+    health_weight: 1.0
+    variants:
+      tiny:
+        label: Wipe sink
+        credit: 0.4
+      normal:
+        label: Clean sink and mirror
+        credit: 1.0
+      deep:
+        label: Sink, mirror, counter, and cabinet fronts
+        credit: 1.4
+    pairs_with:
+      - replace_bathroom_towels
+      - restock_toilet_paper
+    enabled: true
+
+  replace_bathroom_towels:
+    name: Replace bathroom towels
+    area_id: bathroom
+    group_id: linens
+    base_interval_days: 4
+    min_interval_days: 2
+    max_interval_days: 7
+    estimated_minutes: 3
+    energy: low
+    visibility: medium
+    health_weight: 0.8
+    variants:
+      normal:
+        label: Replace towels
+        credit: 1.0
+    pairs_with:
+      - clean_bathroom_sink
+    enabled: true
+
+  restock_toilet_paper:
+    name: Restock toilet paper
+    area_id: bathroom
+    group_id: supplies
+    base_interval_days: 7
+    min_interval_days: 3
+    max_interval_days: 14
+    estimated_minutes: 2
+    energy: low
+    visibility: medium
+    health_weight: 0.7
+    variants:
+      normal:
+        label: Restock toilet paper
+        credit: 1.0
+    pairs_with:
+      - clean_bathroom_sink
+      - replace_bathroom_towels
+    enabled: true
+
+  tidy_living_room_surfaces:
+    name: Tidy living room surfaces
+    area_id: living_room
+    group_id: surfaces
+    base_interval_days: 2
+    min_interval_days: 1
+    max_interval_days: 5
+    estimated_minutes: 6
+    energy: normal
+    visibility: high
+    health_weight: 1.2
+    variants:
+      tiny:
+        label: Clear visible clutter
+        credit: 0.5
+      normal:
+        label: Tidy living room surfaces
+        credit: 1.0
+      deep:
+        label: Tidy and dust surfaces
+        credit: 1.4
+    pairs_with:
+      - vacuum_living_room
+      - reset_entryway
+    enabled: true
+
+  vacuum_living_room:
+    name: Vacuum living room
+    area_id: living_room
+    group_id: floors
+    base_interval_days: 5
+    min_interval_days: 2
+    max_interval_days: 10
+    estimated_minutes: 12
+    energy: high
+    visibility: medium
+    health_weight: 1.1
+    variants:
+      tiny:
+        label: Vacuum visible area
+        credit: 0.5
+      normal:
+        label: Vacuum living room
+        credit: 1.0
+      deep:
+        label: Move small items and vacuum
+        credit: 1.5
+    pairs_with:
+      - tidy_living_room_surfaces
+    enabled: true
+
+  reset_entryway:
+    name: Reset entryway
+    area_id: entry
+    group_id: entry_reset
+    base_interval_days: 3
+    min_interval_days: 1
+    max_interval_days: 7
+    estimated_minutes: 5
+    energy: normal
+    visibility: high
+    health_weight: 1.0
+    variants:
+      tiny:
+        label: Straighten shoes
+        credit: 0.4
+      normal:
+        label: Reset entryway
+        credit: 1.0
+      deep:
+        label: Reset entry and sweep mat
+        credit: 1.3
+    pairs_with:
+      - tidy_living_room_surfaces
+      - sort_mail
+    enabled: true
+
+  sort_mail:
+    name: Sort mail and papers
+    area_id: entry
+    group_id: admin
+    base_interval_days: 4
+    min_interval_days: 2
+    max_interval_days: 10
+    estimated_minutes: 7
+    energy: quiet
+    visibility: medium
+    health_weight: 0.9
+    variants:
+      tiny:
+        label: Sort obvious papers
+        credit: 0.4
+      normal:
+        label: Sort mail and papers
+        credit: 1.0
+      deep:
+        label: Sort and file papers
+        credit: 1.5
+    pairs_with:
+      - reset_entryway
+    enabled: true
+
+  start_laundry:
+    name: Start a laundry load
+    area_id: laundry
+    group_id: laundry
+    base_interval_days: 3
+    min_interval_days: 1
+    max_interval_days: 6
+    estimated_minutes: 6
+    energy: normal
+    visibility: medium
+    health_weight: 1.1
+    variants:
+      normal:
+        label: Start a laundry load
+        credit: 1.0
+      deep:
+        label: Sort and start laundry
+        credit: 1.3
+    pairs_with:
+      - fold_clean_laundry
+    enabled: true
+
+  fold_clean_laundry:
+    name: Fold clean laundry
+    area_id: laundry
+    group_id: laundry
+    base_interval_days: 4
+    min_interval_days: 2
+    max_interval_days: 8
+    estimated_minutes: 15
+    energy: quiet
+    visibility: medium
+    health_weight: 1.0
+    variants:
+      tiny:
+        label: Fold one basket section
+        credit: 0.4
+      normal:
+        label: Fold clean laundry
+        credit: 1.0
+      deep:
+        label: Fold and put away laundry
+        credit: 1.5
+    pairs_with:
+      - start_laundry
+    enabled: true
+
+  make_bed:
+    name: Make bed
+    area_id: bedroom
+    group_id: reset
+    base_interval_days: 1
+    min_interval_days: 0.5
+    max_interval_days: 2
+    estimated_minutes: 3
+    energy: low
+    visibility: high
+    health_weight: 0.8
+    variants:
+      normal:
+        label: Make bed
+        credit: 1.0
+      deep:
+        label: Make bed and clear nightstand
+        credit: 1.4
+    pairs_with:
+      - clear_bedroom_floor
+    enabled: true
+
+  clear_bedroom_floor:
+    name: Clear bedroom floor
+    area_id: bedroom
+    group_id: floors
+    base_interval_days: 3
+    min_interval_days: 1
+    max_interval_days: 7
+    estimated_minutes: 8
+    energy: normal
+    visibility: medium
+    health_weight: 1.0
+    variants:
+      tiny:
+        label: Pick up visible items
+        credit: 0.5
+      normal:
+        label: Clear bedroom floor
+        credit: 1.0
+      deep:
+        label: Clear floor and reset surfaces
+        credit: 1.4
+    pairs_with:
+      - make_bed
+    enabled: true
+
+  water_plants:
+    name: Water plants
+    area_id: living_room
+    group_id: plants
+    base_interval_days: 7
+    min_interval_days: 3
+    max_interval_days: 14
+    estimated_minutes: 6
+    energy: quiet
+    visibility: low
+    health_weight: 0.7
+    variants:
+      normal:
+        label: Water plants
+        credit: 1.0
+      deep:
+        label: Water and trim plants
+        credit: 1.5
+    pairs_with:
+      - tidy_living_room_surfaces
+    enabled: true
+
+  desk_reset:
+    name: Reset desk
+    area_id: office
+    group_id: admin
+    base_interval_days: 3
+    min_interval_days: 1
+    max_interval_days: 7
+    estimated_minutes: 8
+    energy: quiet
+    visibility: high
+    health_weight: 0.9
+    variants:
+      tiny:
+        label: Clear desk surface
+        credit: 0.5
+      normal:
+        label: Reset desk
+        credit: 1.0
+      deep:
+        label: Reset desk and cables
+        credit: 1.4
+    pairs_with:
+      - sort_mail
+    enabled: true
+
+  vacuum_hallway:
+    name: Vacuum hallway
+    area_id: hallway
+    group_id: floors
+    base_interval_days: 6
+    min_interval_days: 3
+    max_interval_days: 12
+    estimated_minutes: 10
+    energy: high
+    visibility: medium
+    health_weight: 1.0
+    variants:
+      tiny:
+        label: Vacuum main path
+        credit: 0.5
+      normal:
+        label: Vacuum hallway
+        credit: 1.0
+      deep:
+        label: Vacuum hallway and edges
+        credit: 1.5
+    pairs_with:
+      - reset_entryway
+      - vacuum_living_room
+    enabled: true
+
+  wipe_appliance_fronts:
+    name: Wipe appliance fronts
+    area_id: kitchen
+    group_id: surfaces
+    base_interval_days: 7
+    min_interval_days: 3
+    max_interval_days: 14
+    estimated_minutes: 8
+    energy: normal
+    visibility: medium
+    health_weight: 0.8
+    variants:
+      normal:
+        label: Wipe appliance fronts
+        credit: 1.0
+      deep:
+        label: Wipe appliance fronts and handles
+        credit: 1.4
+    pairs_with:
+      - wipe_kitchen_counters
+    enabled: true
+
+  weekly_planning_reset:
+    name: Weekly planning reset
+    area_id: office
+    group_id: admin
+    base_interval_days: 7
+    min_interval_days: 4
+    max_interval_days: 14
+    estimated_minutes: 20
+    energy: quiet
+    visibility: low
+    health_weight: 0.6
+    variants:
+      tiny:
+        label: Review top tasks
+        credit: 0.4
+      normal:
+        label: Weekly planning reset
+        credit: 1.0
+      deep:
+        label: Full weekly planning reset
+        credit: 1.5
+    pairs_with:
+      - desk_reset
+      - sort_mail
+    enabled: true

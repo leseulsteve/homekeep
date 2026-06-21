@@ -94,6 +94,16 @@ refresh_calendar_context:
       selector:
         text:
 
+load_sample_chores:
+  name: Load sample chores
+  description: Load bundled synthetic Chore definitions for private live testing.
+  fields:
+    replace_existing:
+      required: false
+      default: false
+      selector:
+        boolean:
+
 pause_session:
   name: Pause session
   description: Scaffold service for future Chore Session pause handling.

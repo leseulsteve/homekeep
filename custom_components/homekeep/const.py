@@ -15,6 +15,7 @@ SERVICE_SKIP_CHORE = "skip_chore"
 SERVICE_SNOOZE_CHORE = "snooze_chore"
 SERVICE_DISMISS_CHORE = "dismiss_chore"
 SERVICE_REFRESH_CALENDAR_CONTEXT = "refresh_calendar_context"
+SERVICE_LOAD_SAMPLE_CHORES = "load_sample_chores"
 SERVICE_PAUSE_SESSION = "pause_session"
 SERVICE_ACCEPT_BONUS_CHORE = "accept_bonus_chore"
 SERVICE_END_SESSION = "end_session"
@@ -33,6 +34,7 @@ OPTIONAL_RESPONSE_SERVICES = {
     SERVICE_SNOOZE_CHORE,
     SERVICE_DISMISS_CHORE,
     SERVICE_REFRESH_CALENDAR_CONTEXT,
+    SERVICE_LOAD_SAMPLE_CHORES,
     SERVICE_PAUSE_SESSION,
 }
 
@@ -51,6 +53,7 @@ ATTR_REASON = "reason"
 ATTR_RECOMMENDATION_ID = "recommendation_id"
 ATTR_RECOMMENDATION_MODE = "recommendation_mode"
 ATTR_RECOMMENDATION_SNAPSHOT_ID = "recommendation_snapshot_id"
+ATTR_REPLACE_EXISTING = "replace_existing"
 ATTR_REQUEST_ID = "request_id"
 ATTR_SESSION_ID = "session_id"
 ATTR_SESSION_ITEM_ID = "session_item_id"

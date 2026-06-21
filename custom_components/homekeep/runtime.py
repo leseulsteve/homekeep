@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Optional, Protocol
 
 from .const import (
@@ -20,6 +21,7 @@ from .const import (
     ATTR_RECOMMENDATION_ID,
     ATTR_RECOMMENDATION_MODE,
     ATTR_RECOMMENDATION_SNAPSHOT_ID,
+    ATTR_REPLACE_EXISTING,
     ATTR_REQUEST_ID,
     ATTR_SESSION_ID,
     ATTR_SESSION_ITEM_ID,
@@ -35,6 +37,7 @@ from .const import (
     SERVICE_DISMISS_CHORE,
     SERVICE_END_SESSION,
     SERVICE_GENERATE_SMART_CHORE_LIST,
+    SERVICE_LOAD_SAMPLE_CHORES,
     SERVICE_PAUSE_SESSION,
     SERVICE_REFRESH_CALENDAR_CONTEXT,
     SERVICE_SKIP_CHORE,
@@ -48,10 +51,10 @@ from .calendar_context import (
     fetch_calendar_events_from_hass,
     selected_calendar_entity_ids,
 )
-from .models import HomekeepValidationError
+from .models import ChoreState, HomekeepValidationError
 from .recommendations import RecommendationEngine
 from .sessions import SessionEngine
-from .storage import HomekeepStore
+from .storage import HomekeepStore, load_sample_chores
 
 
 class SupportsSave(Protocol):
@@ -199,6 +202,11 @@ class HomekeepServiceRuntime:
             await self.storage.async_save()
             return result
 
+        if service_name == SERVICE_LOAD_SAMPLE_CHORES:
+            result = self._load_sample_chores(data)
+            await self.storage.async_save()
+            return result
+
         raise HomekeepValidationError(f"unknown Homekeep service: {service_name}")
 
     def _sessions(self) -> SessionEngine:
@@ -261,6 +269,34 @@ class HomekeepServiceRuntime:
                 self.hass, entity_ids
             ),
         )
+
+    def _load_sample_chores(self, data: dict[str, Any]) -> dict[str, Any]:
+        replace_existing = bool(data.get(ATTR_REPLACE_EXISTING, False))
+        if self.store.chores and not replace_existing:
+            raise HomekeepValidationError(
+                "sample chores already loaded; set replace_existing to true to reset"
+            )
+
+        chores = load_sample_chores(Path(__file__).with_name("sample_chores.yaml"))
+        if replace_existing:
+            self.store.chores.clear()
+            self.store.states.clear()
+            self.store.completions.clear()
+            self.store.sessions.clear()
+            self.store.recommendations.clear()
+            self.store.user_preference_stats.clear()
+            self.store.idempotency_records.clear()
+
+        self.store.chores.update(chores)
+        for chore_id, chore in chores.items():
+            self.store.states.setdefault(chore_id, ChoreState.new_for_chore(chore))
+
+        return {
+            "status": "loaded",
+            "chore_count": len(chores),
+            "chore_ids": sorted(chores),
+            "replace_existing": replace_existing,
+        }
 
 
 def _required(data: dict[str, Any], key: str) -> str:

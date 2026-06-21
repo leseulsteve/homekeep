@@ -20,6 +20,7 @@ from .const import (
     ATTR_RECOMMENDATION_ID,
     ATTR_RECOMMENDATION_MODE,
     ATTR_RECOMMENDATION_SNAPSHOT_ID,
+    ATTR_REPLACE_EXISTING,
     ATTR_REQUEST_ID,
     ATTR_SESSION_ID,
     ATTR_SESSION_ITEM_ID,
@@ -43,6 +44,7 @@ from .const import (
     SERVICE_DISMISS_CHORE,
     SERVICE_END_SESSION,
     SERVICE_GENERATE_SMART_CHORE_LIST,
+    SERVICE_LOAD_SAMPLE_CHORES,
     SERVICE_PAUSE_SESSION,
     SERVICE_REFRESH_CALENDAR_CONTEXT,
     SERVICE_SKIP_CHORE,
@@ -259,6 +261,11 @@ def _build_service_schemas() -> dict[str, Any]:
                 vol.Optional(ATTR_CALENDAR_ENTITY_IDS): vol.Any(
                     None, [optional_string]
                 ),
+            }
+        ),
+        SERVICE_LOAD_SAMPLE_CHORES: vol.Schema(
+            {
+                vol.Optional(ATTR_REPLACE_EXISTING, default=False): cv.boolean,
             }
         ),
         SERVICE_PAUSE_SESSION: vol.Schema(

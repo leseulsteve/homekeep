@@ -191,6 +191,10 @@ implementation pass.
 - Recommendation To-do items are launchable suggestions only in Phase 5; only
   active-session To-do items with valid Homekeep projection metadata can be
   completed directly from Home Assistant.
+- `homekeep.load_sample_chores` is a private live-test seed helper, not a
+  general Chore import surface. It loads bundled synthetic fixtures, refuses to
+  overwrite existing chores unless `replace_existing=true`, and may clear
+  durable Homekeep test state when replacement is requested.
 
 ## Bubble Card Dashboard
 

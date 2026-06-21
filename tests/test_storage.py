@@ -186,6 +186,17 @@ class StorageTest(unittest.TestCase):
         self.assertIn("wipe_kitchen_counters", chores)
         self.assertIn("normal", chores["empty_compost"].variants)
 
+    def test_bundled_sample_chores_load_for_hacs_private_testing(self) -> None:
+        chores = load_sample_chores(
+            ROOT / "custom_components" / "homekeep" / "sample_chores.yaml"
+        )
+
+        self.assertIn("empty_compost", chores)
+        self.assertIn("clean_bathroom_sink", chores)
+        self.assertIn("weekly_planning_reset", chores)
+        self.assertGreaterEqual(len(chores), 20)
+        self.assertIn("normal", chores["clean_bathroom_sink"].variants)
+
 
 if __name__ == "__main__":
     unittest.main()

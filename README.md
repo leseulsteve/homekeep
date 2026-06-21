@@ -3,22 +3,21 @@
 Homekeep is a planned Home Assistant integration for adaptive chores, light
 Chore Sessions, Smart Chore Lists, and Home Health.
 
-## Do Not Use Yet
+## Private Test Status
 
-Homekeep is experimental pre-release software for private testing only. Do not
-use it in a production Home Assistant instance, do not rely on it for household
-operations, and do not connect it to private calendar data or real routines
-until the live-test checklist and release-readiness work are complete.
+Homekeep is experimental pre-release software for Steve's private testing. It
+is not production-ready and should not be connected to private calendar data,
+real routines, or household-critical automations until the private live-test
+checklist and release-readiness work are complete.
 
 The integration is still missing Home Assistant package-backed integration
 tests, live validation, packaged helper/script examples for the dashboard, and
-a public release process. Expect breaking changes, incomplete behavior, and
-rough edges.
+a release process.
 
 ## Private HACS Test Install
 
-Homekeep can be tested as a HACS custom repository while it is still private
-MVP software.
+Homekeep can be installed through HACS as a custom repository for the private
+MVP test.
 
 Requirements:
 
@@ -27,7 +26,7 @@ Requirements:
 - HACS must be installed and configured in Home Assistant
 - Home Assistant Core `2026.6.0` or newer
 
-Install:
+Private test install:
 
 1. In Home Assistant, open HACS.
 2. Open the custom repositories menu.
