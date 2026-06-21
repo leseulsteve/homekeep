@@ -215,15 +215,29 @@ Gate 5 partial live result on 2026-06-21:
 
 ## Gate 6: Calendar Context Smoke Test
 
-- [ ] Select at least one safe test calendar entity in Homekeep options
-- [ ] Refresh Calendar Context manually
-- [ ] Generate recommendations with fresh Calendar Context
+- [x] Select at least one safe test calendar entity in Homekeep options
+- [x] Refresh Calendar Context manually
+- [x] Generate recommendations with fresh Calendar Context
 - [ ] Modify/add a synthetic event on a selected calendar entity
 - [ ] Confirm Calendar Context is invalidated or refreshed before reuse
 - [ ] Confirm dependent RecommendationSnapshots become invalidated when the
   Calendar Context source changes
-- [ ] Confirm `sensor.homekeep_next_calendar_context` reflects stale/clear/guest
+- [x] Confirm `sensor.homekeep_next_calendar_context` reflects stale/clear/guest
   or busy state as expected
+
+Gate 6 partial live result on 2026-06-21:
+
+- Selected safe test calendar entity `calendar.activites`.
+- `homekeep.refresh_calendar_context` returned derived Calendar Context
+  `calendar_a30c1f7449927faa`.
+- Response included derived signals only, with `event_count: 0`,
+  `source_calendar_versions`, and diagnostics
+  `raw_event_details_stored: false`.
+- `homekeep.generate_smart_chore_list` returned snapshot
+  `snapshot_1fe27eef0c27b260` after Calendar Context refresh.
+- `sensor.homekeep_next_calendar_context` reported `clear`.
+- After a synthetic calendar check, Steve reported the calendar context sensor
+  still `clear`; explicit stale invalidation is not yet confirmed.
 
 ## Gate 7: Reload And Unload
 
