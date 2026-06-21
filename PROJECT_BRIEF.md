@@ -272,13 +272,11 @@ Read:
 - docs/ADAPTIVE_INTERVALS.md
 - docs/DERIVED_HEALTH.md
 - docs/PARTICIPANT_ATTRIBUTION.md
-- examples/sample_chores.yaml
 
 Deliver:
 - typed models or dataclasses
 - validation helpers
 - storage migration hook
-- sample chore loading for tests
 - tests for invalid intervals, ChoreVariant validation, and storage round trip
 
 Update docs/IMPLEMENTATION_PROGRESS.md before finishing.

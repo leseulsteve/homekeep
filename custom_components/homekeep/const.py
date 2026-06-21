@@ -7,8 +7,6 @@ PLATFORMS: list[str] = ["sensor", "binary_sensor", "todo"]
 CURRENT_STORAGE_VERSION = 2
 STORAGE_KEY = f"{DOMAIN}.store"
 
-OPTION_DEV_MODE = "dev_mode"
-
 SERVICE_GENERATE_SMART_CHORE_LIST = "generate_smart_chore_list"
 SERVICE_START_RECOMMENDATION = "start_recommendation"
 SERVICE_START_CHORE_BUNDLE = "start_chore_bundle"
@@ -18,7 +16,6 @@ SERVICE_SKIP_CHORE = "skip_chore"
 SERVICE_SNOOZE_CHORE = "snooze_chore"
 SERVICE_DISMISS_CHORE = "dismiss_chore"
 SERVICE_REFRESH_CALENDAR_CONTEXT = "refresh_calendar_context"
-SERVICE_LOAD_SAMPLE_CHORES = "load_sample_chores"
 SERVICE_PAUSE_SESSION = "pause_session"
 SERVICE_ACCEPT_BONUS_CHORE = "accept_bonus_chore"
 SERVICE_END_SESSION = "end_session"
@@ -38,7 +35,6 @@ OPTIONAL_RESPONSE_SERVICES = {
     SERVICE_SNOOZE_CHORE,
     SERVICE_DISMISS_CHORE,
     SERVICE_REFRESH_CALENDAR_CONTEXT,
-    SERVICE_LOAD_SAMPLE_CHORES,
     SERVICE_PAUSE_SESSION,
 }
 
@@ -64,7 +60,6 @@ ATTR_REASON = "reason"
 ATTR_RECOMMENDATION_ID = "recommendation_id"
 ATTR_RECOMMENDATION_MODE = "recommendation_mode"
 ATTR_RECOMMENDATION_SNAPSHOT_ID = "recommendation_snapshot_id"
-ATTR_REPLACE_EXISTING = "replace_existing"
 ATTR_REQUEST_ID = "request_id"
 ATTR_SESSION_ID = "session_id"
 ATTR_SESSION_ITEM_ID = "session_item_id"

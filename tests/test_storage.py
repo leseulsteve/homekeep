@@ -4,21 +4,16 @@ from __future__ import annotations
 
 import unittest
 from datetime import datetime, timezone
-from pathlib import Path
 
 from custom_components.homekeep.const import CURRENT_STORAGE_VERSION
 from custom_components.homekeep.storage import (
     UnsupportedStorageVersionError,
     dump_store_dict,
     empty_store_dict,
-    load_sample_chores,
     load_store_dict,
     migrate_store_dict,
 )
 from custom_components.homekeep.models import HomekeepValidationError
-
-
-ROOT = Path(__file__).resolve().parents[1]
 
 
 def chore_data() -> dict:
@@ -199,24 +194,6 @@ class StorageTest(unittest.TestCase):
             ["2026-01-02T12:00:00+00:00"],
         )
         self.assertEqual(round_tripped["completions"], raw["completions"])
-
-    def test_sample_chores_load_for_tests(self) -> None:
-        chores = load_sample_chores(ROOT / "examples" / "sample_chores.yaml")
-
-        self.assertIn("empty_compost", chores)
-        self.assertIn("wipe_kitchen_counters", chores)
-        self.assertIn("normal", chores["empty_compost"].variants)
-
-    def test_bundled_sample_chores_load_for_hacs_private_testing(self) -> None:
-        chores = load_sample_chores(
-            ROOT / "custom_components" / "homekeep" / "sample_chores.yaml"
-        )
-
-        self.assertIn("empty_compost", chores)
-        self.assertIn("clean_bathroom_sink", chores)
-        self.assertIn("weekly_planning_reset", chores)
-        self.assertGreaterEqual(len(chores), 20)
-        self.assertIn("normal", chores["clean_bathroom_sink"].variants)
 
 
 if __name__ == "__main__":

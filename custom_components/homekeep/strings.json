@@ -5,9 +5,7 @@
       "user": {
         "title": "Homekeep",
         "description": "Set up Homekeep.",
-        "data": {
-          "dev_mode": "Developer mode: load bundled sample chores"
-        }
+        "data": {}
       }
     },
     "abort": {
@@ -18,9 +16,8 @@
     "step": {
       "init": {
         "title": "Homekeep options",
-        "description": "Private live-test settings.",
+        "description": "Homekeep settings.",
         "data": {
-          "dev_mode": "Developer mode: load bundled sample chores",
           "calendar_entity_ids": "Calendar entities"
         }
       }

@@ -209,17 +209,11 @@ implementation pass.
   present as a pending item in an active Chore Session, Homekeep may resolve the
   write-through to that active session item. Recommendation-only completion
   without a matching active session remains rejected.
-- `homekeep.load_sample_chores` is a private live-test seed helper, not a
-  general Chore import surface. It loads bundled synthetic fixtures, refuses to
-  overwrite existing chores unless `replace_existing=true`, and may clear
-  durable Homekeep test state when replacement is requested.
-- Private dev mode defaults to enabled during setup and options. When enabled,
-  `async_setup_entry` seeds bundled sample Chores only if Homekeep storage has
-  no existing Chores; it must not overwrite existing data during normal setup.
-- Bundled sample Chore seed/repair behavior may mark unstarted synthetic sample
-  Chores immediately due so private live testing has non-empty due sensors and
-  recommendations. This does not change normal `ChoreState.new_for_chore`
-  semantics.
+- Homekeep no longer exposes private dev mode, bundled sample Chore seeding,
+  or `homekeep.load_sample_chores`.
+- Config entry setup must load existing Homekeep storage only. It must not
+  create synthetic Chores, repair sample state, or clear durable data for
+  private testing.
 
 ## Lovelace Dashboard
 

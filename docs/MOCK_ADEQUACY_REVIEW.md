@@ -9,8 +9,9 @@ Homekeep is pre-`1.0`. A version bump is not ready to publish unless the
 changed behavior is covered by realistic local mocks or by an approved live
 candidate workflow.
 
-For the current MVP implementation pass, mock coverage is adequate for a
-developer readiness checkpoint but not yet adequate for a public release.
+For the `0.0.2` MVP implementation pass, mock coverage is adequate for a
+private HACS publish and developer readiness checkpoint, but not yet adequate
+for a public production release.
 
 ## Covered By Local Tests
 
@@ -38,6 +39,8 @@ Home Assistant lifecycle:
 - config entry unload calls platform unload
 - successful unload removes entry storage and calendar state listener
 - failed platform unload preserves storage and listener
+- source checks confirm config flow no longer exposes private dev mode
+- source checks confirm setup no longer seeds bundled sample Chores
 
 To-do projections:
 
@@ -98,8 +101,8 @@ Calendar:
 ## Release Readiness Decision
 
 Mock coverage is adequate for continuing MVP implementation and for a
-developer-only version bump check, provided the version bump does not claim
-live Home Assistant release readiness.
+private `0.0.2` HACS publish, provided the version bump does not claim live
+Home Assistant production readiness.
 
 Mock coverage is not yet adequate for a public pre-`1.0` release without one
 of these follow-up actions:

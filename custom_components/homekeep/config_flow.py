@@ -8,11 +8,8 @@ from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import selector
 
-from .const import DOMAIN, NAME, OPTION_DEV_MODE
+from .const import DOMAIN, NAME
 from .calendar_context import OPTION_CALENDAR_ENTITY_IDS
-
-
-DEFAULT_DEV_MODE = True
 
 
 class HomekeepConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -31,11 +28,7 @@ class HomekeepConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             return self.async_create_entry(
                 title=NAME,
-                data={
-                    OPTION_DEV_MODE: user_input.get(
-                        OPTION_DEV_MODE, DEFAULT_DEV_MODE
-                    ),
-                },
+                data={},
             )
 
         return self.async_show_form(
@@ -79,7 +72,6 @@ class HomekeepOptionsFlow(config_entries.OptionsFlowWithReload):
 
         return vol.Schema(
             {
-                vol.Optional(OPTION_DEV_MODE): selector.BooleanSelector(),
                 vol.Optional(
                     OPTION_CALENDAR_ENTITY_IDS,
                 ): selector.EntitySelector(
@@ -95,9 +87,6 @@ class HomekeepOptionsFlow(config_entries.OptionsFlowWithReload):
         """Return suggested option values from entry options and setup data."""
 
         return {
-            OPTION_DEV_MODE: _entry_option(
-                self.config_entry, OPTION_DEV_MODE, DEFAULT_DEV_MODE
-            ),
             OPTION_CALENDAR_ENTITY_IDS: _entry_option(
                 self.config_entry, OPTION_CALENDAR_ENTITY_IDS, []
             ),
@@ -109,14 +98,7 @@ def _config_schema() -> Any:
 
     import voluptuous as vol
 
-    return vol.Schema(
-        {
-            vol.Optional(
-                OPTION_DEV_MODE,
-                default=DEFAULT_DEV_MODE,
-            ): selector.BooleanSelector(),
-        }
-    )
+    return vol.Schema({})
 
 
 def _entry_option(entry: Any, key: str, default: Any) -> Any:

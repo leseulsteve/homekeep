@@ -77,7 +77,6 @@ homekeep.skip_chore
 homekeep.snooze_chore
 homekeep.dismiss_chore
 homekeep.refresh_calendar_context
-homekeep.load_sample_chores
 homekeep.pause_session
 homekeep.accept_bonus_chore
 homekeep.end_session
@@ -101,14 +100,9 @@ and null before materialization.
 collect context locally and call `homekeep.generate_smart_chore_list` with the
 final answers.
 
-`homekeep.load_sample_chores` is a private live-test helper for seeding bundled
-synthetic Chores from the installed integration package. It is not a general
-import API and must not be used with real household data.
-
-The config entry exposes a private `dev_mode` boolean that defaults to true.
-When `dev_mode` is enabled, setup seeds bundled synthetic Chores automatically
-only if Homekeep storage is empty. The options flow exposes the same toggle
-after install and reloads the integration when changed.
+Homekeep does not expose private dev mode or a sample-loading service. Config
+entry setup loads existing storage only and must not create synthetic Chores or
+clear durable data for test setup.
 
 ## Action Response Rules
 
@@ -127,8 +121,6 @@ recommendations or created sessions.
 - Register `homekeep.accept_bonus_chore` and `homekeep.end_session` with
   `supports_response=SupportsResponse.ONLY`.
 - Register `homekeep.refresh_calendar_context` with
-  `supports_response=SupportsResponse.OPTIONAL`.
-- Register `homekeep.load_sample_chores` with
   `supports_response=SupportsResponse.OPTIONAL`.
 - Mutation services may use `SupportsResponse.OPTIONAL` for acknowledgement
   dictionaries.

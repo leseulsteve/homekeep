@@ -14,7 +14,6 @@ from custom_components.homekeep.const import (
     ATTR_RECOMMENDATION_ID,
     ATTR_RECOMMENDATION_SNAPSHOT_ID,
     ATTR_REQUEST_ID,
-    ATTR_REPLACE_EXISTING,
     ATTR_SESSION_ID,
     ATTR_SESSION_ITEM_ID,
     ATTR_SNOOZE_MINUTES,
@@ -23,7 +22,6 @@ from custom_components.homekeep.const import (
     SERVICE_CREATE_CHORE,
     SERVICE_END_SESSION,
     SERVICE_GENERATE_SMART_CHORE_LIST,
-    SERVICE_LOAD_SAMPLE_CHORES,
     SERVICE_PAUSE_SESSION,
     SERVICE_SKIP_CHORE,
     SERVICE_SNOOZE_CHORE,
@@ -257,39 +255,6 @@ class HomekeepServiceRuntimeTest(unittest.IsolatedAsyncioTestCase):
                 "end_session",
                 {ATTR_SESSION_ID: "missing", ATTR_STATUS: "completed"},
             )
-
-    async def test_load_sample_chores_requires_replace_existing_when_store_has_chores(self) -> None:
-        with self.assertRaisesRegex(HomekeepValidationError, "replace_existing"):
-            await self.runtime.async_handle(SERVICE_LOAD_SAMPLE_CHORES, {})
-
-        self.assertEqual(self.storage.save_count, 0)
-
-    async def test_load_sample_chores_can_reset_to_bundled_synthetic_data(self) -> None:
-        result = await self.runtime.async_handle(
-            SERVICE_LOAD_SAMPLE_CHORES,
-            {ATTR_REPLACE_EXISTING: True},
-        )
-
-        assert result is not None
-        self.assertEqual(result["status"], "loaded")
-        self.assertIn("empty_compost", result["chore_ids"])
-        self.assertGreaterEqual(result["chore_count"], 20)
-        self.assertEqual(set(self.storage.store.chores), set(result["chore_ids"]))
-        self.assertEqual(set(self.storage.store.states), set(result["chore_ids"]))
-        self.assertEqual(self.storage.save_count, 1)
-
-    async def test_load_sample_chores_uses_executor_when_hass_is_available(self) -> None:
-        hass = FakeHass()
-        runtime = HomekeepServiceRuntime(self.storage, hass)
-
-        result = await runtime.async_handle(
-            SERVICE_LOAD_SAMPLE_CHORES,
-            {ATTR_REPLACE_EXISTING: True},
-        )
-
-        assert result is not None
-        self.assertIn("load_sample_chores", hass.executor_jobs)
-        self.assertGreaterEqual(result["chore_count"], 20)
 
     async def test_stale_session_response_after_cancel_does_not_mutate(self) -> None:
         session = SessionEngine(self.storage.store).start_session(["empty_compost"])

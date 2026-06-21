@@ -136,4 +136,4 @@ Use this as the first implementation checklist.
 
 - Verify `PROJECT_BRIEF.md` is human-readable.
 - Verify docs match actual service names.
-- Verify sample chores still load.
+- Verify config entry setup does not seed or mutate storage.

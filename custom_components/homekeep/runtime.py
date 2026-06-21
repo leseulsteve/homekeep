@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from math import isfinite
-from pathlib import Path
 from typing import Any, Optional, Protocol
 
 from .const import (
@@ -30,7 +28,6 @@ from .const import (
     ATTR_RECOMMENDATION_ID,
     ATTR_RECOMMENDATION_MODE,
     ATTR_RECOMMENDATION_SNAPSHOT_ID,
-    ATTR_REPLACE_EXISTING,
     ATTR_REQUEST_ID,
     ATTR_SESSION_ID,
     ATTR_SESSION_ITEM_ID,
@@ -48,7 +45,6 @@ from .const import (
     SERVICE_DISMISS_CHORE,
     SERVICE_END_SESSION,
     SERVICE_GENERATE_SMART_CHORE_LIST,
-    SERVICE_LOAD_SAMPLE_CHORES,
     SERVICE_PAUSE_SESSION,
     SERVICE_REFRESH_CALENDAR_CONTEXT,
     SERVICE_SKIP_CHORE,
@@ -65,7 +61,7 @@ from .calendar_context import (
 from .models import ChoreDefinition, ChoreState, HomekeepValidationError
 from .recommendations import RecommendationEngine
 from .sessions import SessionEngine
-from .storage import HomekeepStore, load_sample_chores
+from .storage import HomekeepStore
 
 
 class SupportsSave(Protocol):
@@ -222,64 +218,7 @@ class HomekeepServiceRuntime:
             await self.storage.async_save()
             return result
 
-        if service_name == SERVICE_LOAD_SAMPLE_CHORES:
-            result = await self._async_load_sample_chores(data)
-            await self.storage.async_save()
-            return result
-
         raise HomekeepValidationError(f"unknown Homekeep service: {service_name}")
-
-    async def async_seed_sample_chores_if_empty(self) -> dict[str, Any]:
-        """Load bundled sample chores for private dev mode when storage is empty."""
-
-        if self.store.chores:
-            return {
-                "status": "skipped",
-                "reason": "existing_chores",
-                "chore_count": len(self.store.chores),
-            }
-
-        result = await self._async_load_sample_chores({ATTR_REPLACE_EXISTING: False})
-        await self.storage.async_save()
-        return result
-
-    async def async_mark_sample_chores_due_if_unstarted(self) -> dict[str, Any]:
-        """Mark existing bundled sample chores due when they have no schedule yet."""
-
-        sample_chores = await self._async_bundled_sample_chores()
-        now = datetime.now(timezone.utc)
-        updated: list[str] = []
-        for chore_id in sample_chores:
-            state = self.store.states.get(chore_id)
-            if (
-                chore_id in self.store.chores
-                and state is not None
-                and state.last_completed_at is None
-                and state.next_due_at is None
-            ):
-                self.store.states[chore_id] = replace(
-                    state,
-                    next_due_at=now - timedelta(seconds=1),
-                )
-                updated.append(chore_id)
-
-        if updated:
-            await self.storage.async_save()
-        return {
-            "status": "updated" if updated else "skipped",
-            "chore_count": len(updated),
-            "chore_ids": sorted(updated),
-        }
-
-    async def _async_load_sample_chores(self, data: dict[str, Any]) -> dict[str, Any]:
-        chores = await self._async_bundled_sample_chores()
-        return self._load_sample_chores(data, chores)
-
-    async def _async_bundled_sample_chores(self) -> dict[str, Any]:
-        path = Path(__file__).with_name("sample_chores.yaml")
-        if self.hass is not None:
-            return await self.hass.async_add_executor_job(load_sample_chores, path)
-        return load_sample_chores(path)
 
     def _sessions(self) -> SessionEngine:
         return SessionEngine(self.store)
@@ -341,36 +280,6 @@ class HomekeepServiceRuntime:
                 self.hass, entity_ids
             ),
         )
-
-    def _load_sample_chores(
-        self, data: dict[str, Any], chores: dict[str, Any]
-    ) -> dict[str, Any]:
-        replace_existing = bool(data.get(ATTR_REPLACE_EXISTING, False))
-        if self.store.chores and not replace_existing:
-            raise HomekeepValidationError(
-                "sample chores already loaded; set replace_existing to true to reset"
-            )
-
-        if replace_existing:
-            self.store.chores.clear()
-            self.store.states.clear()
-            self.store.completions.clear()
-            self.store.sessions.clear()
-            self.store.recommendations.clear()
-            self.store.user_preference_stats.clear()
-            self.store.idempotency_records.clear()
-
-        self.store.chores.update(chores)
-        now = datetime.now(timezone.utc)
-        for chore_id, chore in chores.items():
-            self.store.states.setdefault(chore_id, _sample_chore_state(chore, now))
-
-        return {
-            "status": "loaded",
-            "chore_count": len(chores),
-            "chore_ids": sorted(chores),
-            "replace_existing": replace_existing,
-        }
 
     def _create_chore(self, data: dict[str, Any]) -> dict[str, Any]:
         name = _required(data, ATTR_NAME)
@@ -467,15 +376,6 @@ class HomekeepServiceRuntime:
         )
         for key, _record in ordered[: len(records) - 1000]:
             records.pop(key, None)
-
-
-def _sample_chore_state(chore: Any, now: datetime) -> ChoreState:
-    """Create live-test sample state that is immediately due."""
-
-    return replace(
-        ChoreState.new_for_chore(chore),
-        next_due_at=now - timedelta(seconds=1),
-    )
 
 
 def _required(data: dict[str, Any], key: str) -> str:

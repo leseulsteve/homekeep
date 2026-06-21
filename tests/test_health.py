@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import unittest
 from datetime import timedelta
-from pathlib import Path
 
 from custom_components.homekeep.health import (
     adaptive_interval_after_non_completion_action,
@@ -20,12 +19,8 @@ from custom_components.homekeep.health import (
 from custom_components.homekeep.models import ChoreDefinition, ChoreState
 from custom_components.homekeep.storage import (
     dump_store_dict,
-    load_sample_chores,
     load_store_dict,
 )
-
-
-ROOT = Path(__file__).resolve().parents[1]
 
 
 def chore_data(**overrides: object) -> dict:
@@ -54,7 +49,24 @@ def chore_data(**overrides: object) -> dict:
 
 class HealthTest(unittest.TestCase):
     def test_health_recomputes_from_durable_state_after_cache_loss(self) -> None:
-        chores = load_sample_chores(ROOT / "examples" / "sample_chores.yaml")
+        chores = {
+            "empty_compost": ChoreDefinition.from_dict(
+                "empty_compost",
+                chore_data(
+                    name="Empty compost",
+                    group_id="trash",
+                    base_interval_days=2,
+                    min_interval_days=1,
+                    max_interval_days=4,
+                    estimated_minutes=2,
+                    health_weight=1.4,
+                ),
+            ),
+            "wipe_kitchen_counters": ChoreDefinition.from_dict(
+                "wipe_kitchen_counters",
+                chore_data(name="Wipe kitchen counters", health_weight=1.1),
+            ),
+        }
         now = utc_datetime(2026, 6, 21)
         raw = {
             "version": 2,

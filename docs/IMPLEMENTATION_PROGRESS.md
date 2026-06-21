@@ -62,6 +62,78 @@ Known gaps / next prompt:
 - ...
 ```
 
+### 2026-06-21 - Remove mock/dev-mode setup paths
+
+Status: completed
+
+Implemented:
+- Removed the private `dev_mode` config/options toggle.
+- Stopped config entry setup from seeding or repairing bundled synthetic
+  Chores.
+- Removed the `homekeep.load_sample_chores` service, service schema, service
+  metadata, runtime handler, bundled integration sample YAML, and production
+  sample YAML parser.
+- Deleted the remaining example sample Chore YAML and converted tests that
+  depended on sample loading to explicit synthetic in-test Chore definitions.
+
+Tests/checks run:
+- `python3 -m unittest discover -s tests -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `git diff --check`
+
+Docs updated:
+- `AGENTS.md`
+- `PROJECT_BRIEF.md`
+- `ALL_DOCS.md`
+- `docs/DECISION_LOG.md`
+- `docs/HOME_ASSISTANT_CONTRACT.md`
+- `docs/SERVICE_SCHEMAS.md`
+- `docs/SCAFFOLDING_TASKS.md`
+- `docs/TEST_PLAN.md`
+- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Homekeep setup now loads existing Homekeep storage only. It must not seed
+  synthetic Chores, repair sample state, or clear durable test data.
+- Test fixtures may still use synthetic in-test data, but production code no
+  longer carries a sample Chore loader.
+
+Known gaps / next prompt:
+- Reinstall or reload the integration in the private Home Assistant instance
+  and confirm the options UI no longer exposes dev mode and setup no longer
+  auto-creates Chores.
+
+### 2026-06-21 - Version 0.0.2 private publish prep
+
+Status: completed
+
+Implemented:
+- Bumped Homekeep integration version to `0.0.2`.
+- Updated mock adequacy and private live-test release notes for the removal of
+  private dev mode, bundled sample Chore seeding, and `load_sample_chores`.
+
+Tests/checks run:
+- `python3 -m unittest discover -s tests -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `git diff --check`
+
+Docs updated:
+- `custom_components/homekeep/manifest.json`
+- `docs/MOCK_ADEQUACY_REVIEW.md`
+- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- No tag will be created because the repository has no established tag
+  convention.
+- No deploy script exists in the workspace; this publish is a commit and push
+  to `main` for private HACS consumption.
+
+Known gaps / next prompt:
+- Update Homekeep through HACS in the private Home Assistant instance and
+  confirm version `0.0.2` loads without dev mode or automatic sample Chores.
+
 ### 2026-06-21 - Bubble Card to Lovelace dashboard switch
 
 Status: completed

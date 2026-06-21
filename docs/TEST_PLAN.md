@@ -256,7 +256,7 @@
 
 ## Reproducible MVP Check
 
-1. Load sample chores.
+1. Create at least two non-private Chores through `homekeep.create_chore`.
 2. Start a 15-minute Ready-Now session.
 3. Generate Smart Chore List.
 4. Start best bundle.

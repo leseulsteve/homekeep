@@ -256,7 +256,6 @@ Git rules:
 - `docs/IMPLEMENTATION_PROGRESS.md`: phase status and resume ledger.
 - `docs/IMPLEMENTATION_PLAN.md`: build phases.
 - `docs/MVP_ACCEPTANCE_CRITERIA.md`: definition of done.
-- `examples/sample_chores.yaml`: sample chore definitions for tests and demos.
 
 ## Before Implementing
 
@@ -567,13 +566,11 @@ Read:
 - docs/ADAPTIVE_INTERVALS.md
 - docs/DERIVED_HEALTH.md
 - docs/PARTICIPANT_ATTRIBUTION.md
-- examples/sample_chores.yaml
 
 Deliver:
 - typed models or dataclasses
 - validation helpers
 - storage migration hook
-- sample chore loading for tests
 - tests for invalid intervals, ChoreVariant validation, and storage round trip
 
 Update docs/IMPLEMENTATION_PROGRESS.md before finishing.

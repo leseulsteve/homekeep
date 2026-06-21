@@ -27,7 +27,6 @@ from .const import (
     ATTR_RECOMMENDATION_ID,
     ATTR_RECOMMENDATION_MODE,
     ATTR_RECOMMENDATION_SNAPSHOT_ID,
-    ATTR_REPLACE_EXISTING,
     ATTR_REQUEST_ID,
     ATTR_SESSION_ID,
     ATTR_SESSION_ITEM_ID,
@@ -43,7 +42,6 @@ from .const import (
     ENERGY_LEVELS,
     GOALS,
     MOODS,
-    OPTION_DEV_MODE,
     OPTIONAL_RESPONSE_SERVICES,
     PLATFORMS,
     RECOMMENDATION_MODES,
@@ -53,7 +51,6 @@ from .const import (
     SERVICE_DISMISS_CHORE,
     SERVICE_END_SESSION,
     SERVICE_GENERATE_SMART_CHORE_LIST,
-    SERVICE_LOAD_SAMPLE_CHORES,
     SERVICE_PAUSE_SESSION,
     SERVICE_REFRESH_CALENDAR_CONTEXT,
     SERVICE_SKIP_CHORE,
@@ -107,7 +104,6 @@ async def async_setup_entry(hass: Any, entry: Any) -> bool:
 
     storage = HomekeepStorage(hass, entry)
     await storage.async_load()
-    await _async_seed_sample_chores_for_dev_mode(storage, entry)
     _entry_stores(hass)[entry.entry_id] = storage
     storage.calendar_unsub = _async_setup_calendar_listeners(hass, storage, entry)
 
@@ -135,37 +131,6 @@ async def async_unload_entry(hass: Any, entry: Any) -> bool:
             hass.data.pop(DOMAIN, None)
 
     return unload_ok
-
-
-async def _async_seed_sample_chores_for_dev_mode(
-    storage: HomekeepStorage, entry: Any
-) -> None:
-    """Seed bundled sample chores during setup when private dev mode is enabled."""
-
-    if not _dev_mode_enabled(entry):
-        return
-
-    from .runtime import HomekeepServiceRuntime
-
-    if storage.store.chores:
-        await HomekeepServiceRuntime(
-            storage, getattr(storage, "hass", None)
-        ).async_mark_sample_chores_due_if_unstarted()
-        return
-
-    await HomekeepServiceRuntime(
-        storage, getattr(storage, "hass", None)
-    ).async_seed_sample_chores_if_empty()
-
-
-def _dev_mode_enabled(entry: Any) -> bool:
-    """Return whether private dev mode is enabled for a config entry."""
-
-    options = getattr(entry, "options", {}) or {}
-    if OPTION_DEV_MODE in options:
-        return bool(options[OPTION_DEV_MODE])
-    data = getattr(entry, "data", {}) or {}
-    return bool(data.get(OPTION_DEV_MODE, True))
 
 
 def _service_handler(hass: Any, service_name: str) -> Callable[[Any], Any]:
@@ -321,11 +286,6 @@ def _build_service_schemas() -> dict[str, Any]:
                 vol.Optional(ATTR_CALENDAR_ENTITY_IDS): vol.Any(
                     None, [optional_string]
                 ),
-            }
-        ),
-        SERVICE_LOAD_SAMPLE_CHORES: vol.Schema(
-            {
-                vol.Optional(ATTR_REPLACE_EXISTING, default=False): cv.boolean,
             }
         ),
         SERVICE_PAUSE_SESSION: vol.Schema(

@@ -5,7 +5,6 @@ from __future__ import annotations
 import copy
 from dataclasses import dataclass, field
 from datetime import datetime
-from pathlib import Path
 from typing import Any, Dict, Mapping, Optional
 
 from .const import CURRENT_STORAGE_VERSION, STORAGE_KEY
@@ -212,79 +211,6 @@ def dump_store_dict(store: HomekeepStore) -> Dict[str, Any]:
     """Serialize a validated store."""
 
     return store.to_dict()
-
-
-def load_sample_chores(path: str | Path) -> Dict[str, ChoreDefinition]:
-    """Load sample Chore definitions from the repository YAML fixture.
-
-    The parser intentionally supports the small YAML subset used by
-    examples/sample_chores.yaml so tests do not need a runtime PyYAML install.
-    """
-
-    data = _parse_sample_yaml(Path(path).read_text(encoding="utf-8"))
-    chores_raw = data.get("chores", {})
-    if not isinstance(chores_raw, Mapping):
-        raise HomekeepValidationError("sample chores file must contain chores")
-    return {
-        chore_id: ChoreDefinition.from_dict(chore_id, chore_data)
-        for chore_id, chore_data in chores_raw.items()
-    }
-
-
-def _parse_sample_yaml(text: str) -> Dict[str, Any]:
-    """Parse the YAML subset used by examples/sample_chores.yaml."""
-
-    root: Dict[str, Any] = {}
-    stack: list[tuple[int, Any]] = [(-1, root)]
-
-    for raw_line in text.splitlines():
-        if not raw_line.strip() or raw_line.lstrip().startswith("#"):
-            continue
-        indent = len(raw_line) - len(raw_line.lstrip(" "))
-        stripped = raw_line.strip()
-
-        while stack and indent <= stack[-1][0]:
-            stack.pop()
-        parent = stack[-1][1]
-
-        if stripped.startswith("- "):
-            if not isinstance(parent, list):
-                raise HomekeepValidationError("invalid sample chores list item")
-            parent.append(_parse_scalar(stripped[2:]))
-            continue
-
-        key, separator, value = stripped.partition(":")
-        if not separator:
-            raise HomekeepValidationError("invalid sample chores mapping")
-
-        if value.strip() == "":
-            next_container: Any = [] if key == "pairs_with" else {}
-            if isinstance(parent, dict):
-                parent[key] = next_container
-            else:
-                raise HomekeepValidationError("invalid sample chores nesting")
-            stack.append((indent, next_container))
-        else:
-            if not isinstance(parent, dict):
-                raise HomekeepValidationError("invalid sample chores scalar")
-            parent[key] = _parse_scalar(value.strip())
-
-    return root
-
-
-def _parse_scalar(value: str) -> Any:
-    if value == "true":
-        return True
-    if value == "false":
-        return False
-    if value == "null":
-        return None
-    try:
-        if "." in value:
-            return float(value)
-        return int(value)
-    except ValueError:
-        return value
 
 
 class HomekeepStorage:

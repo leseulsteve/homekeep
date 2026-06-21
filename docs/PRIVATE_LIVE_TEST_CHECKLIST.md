@@ -72,10 +72,10 @@ Install method selected by Steve: HACS custom repository.
 
 ## Gate 3: Synthetic Data Setup
 
-- [x] Confirm Homekeep options show Developer mode enabled after install
-- [x] Confirm bundled synthetic Chores loaded automatically on setup
-- [ ] If a reset is needed, use Developer Tools > Actions:
-  `homekeep.load_sample_chores` with `replace_existing: true`
+- [x] Confirm private dev mode and bundled synthetic setup are removed
+- [x] Confirm Homekeep setup does not seed Chores automatically
+- [ ] If setup data is needed, create non-private Chores with
+  `homekeep.create_chore`
 - [x] Do not use real private room routines or private schedule details
 - [x] Confirm Homekeep storage contains Chore definitions and Chore state
 - [x] Confirm sensors exist:
@@ -86,7 +86,7 @@ Install method selected by Steve: HACS custom repository.
 - [x] Confirm To-do entities exist:
   - [x] `todo.homekeep_recommendations`
   - [x] `todo.homekeep_active_session`
-- [x] Confirm per-Chore due binary sensors are created for synthetic Chores
+- [x] Confirm per-Chore due binary sensors are created for configured Chores
 
 Gate 3 live result on 2026-06-21:
 
@@ -97,6 +97,9 @@ Gate 3 live result on 2026-06-21:
 - Commit `0ca0245` repaired the private dev-mode sample states so unstarted
   bundled sample Chores become immediately due.
 - Steve confirmed after update/restart that counts and binary sensors are good.
+- Later on 2026-06-21, private dev mode and bundled synthetic Chore loading were
+  removed. Future setup checks should use explicit non-private Chores created
+  through Homekeep services.
 
 ## Gate 4: Service Smoke Test
 
@@ -395,7 +398,10 @@ Result note:
 
 - [ ] Home Assistant package-backed tests or approved live synthetic candidate
   results
-- [ ] Version bump decision
-- [ ] Release notes
-- [ ] Mock adequacy review updated for the release diff
-- [ ] Explicit Steve approval for any deploy/release/publish action
+- [x] Version bump decision: `0.0.2`
+- [x] Release notes for private HACS publish:
+  - remove private dev mode and bundled synthetic Chore seeding
+  - remove `homekeep.load_sample_chores`
+  - keep setup storage-only; create setup Chores explicitly with services
+- [x] Mock adequacy review updated for the release diff
+- [x] Explicit Steve approval for this private publish action
