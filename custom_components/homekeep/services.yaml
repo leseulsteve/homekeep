@@ -1,0 +1,23 @@
+refresh_recommendations:
+  description: Refresh Homekeep recommendations. Phase 0 accepts the service contract without generating recommendations.
+  fields:
+    force:
+      selector:
+        boolean:
+    area_id:
+      selector:
+        text:
+    entity_id:
+      selector:
+        entity:
+
+dismiss_recommendation:
+  description: Dismiss a Homekeep recommendation. Phase 0 validates the request without mutating recommendation state.
+  fields:
+    recommendation_id:
+      required: true
+      selector:
+        text:
+    reason:
+      selector:
+        text:

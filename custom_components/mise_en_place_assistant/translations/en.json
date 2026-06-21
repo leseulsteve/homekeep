@@ -1,0 +1,95 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Mise en Place Assistant",
+        "description": "Track what is physically prepped, where it lives, whether storage is safe, and what kitchen action should happen next. Mealie owns recipes, Grocy owns stock, KitchenOwl owns shopping, and Home Assistant owns sensors and automations.",
+        "data": {
+          "dev_mode": "DEV mode",
+          "m5dial_device_id": "Enrolled M5Dial",
+          "m5dial_presence_entity_ids": "M5Dial idle presence sensors",
+          "prep_calendar_entity_id": "Prep session calendar",
+          "shopping_list_provider": "Shopping list provider",
+          "kitchenowl_url": "KitchenOwl URL",
+          "kitchenowl_token": "KitchenOwl long-lived access token",
+          "kitchenowl_shopping_list_id": "KitchenOwl shopping list ID"
+        }
+      },
+      "mealie_entry": {
+        "title": "Connect Mealie",
+        "description": "Choose the Mealie integration that owns recipes, foods, and meal-planning context.",
+        "data": {
+          "mealie_entry_id": "Mealie integration"
+        }
+      },
+      "mealie_manual": {
+        "title": "Connect Mealie",
+        "description": "No Home Assistant Mealie integration is configured. Enter connection details for the recipe and food provider.",
+        "data": {
+          "mealie_url": "Mealie URL",
+          "mealie_token": "Mealie API token"
+        }
+      },
+      "grocy_manual": {
+        "title": "Connect Grocy",
+        "description": "Enter Grocy connection details for durable stock, products, units, storage locations, expiry, and minimum-stock policy.",
+        "data": {
+          "grocy_url": "Grocy URL",
+          "grocy_token": "Grocy API key",
+          "shopping_list_provider": "Shopping list provider",
+          "kitchenowl_url": "KitchenOwl URL",
+          "kitchenowl_token": "KitchenOwl long-lived access token",
+          "kitchenowl_shopping_list_id": "KitchenOwl shopping list ID"
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Mise en Place Assistant is already configured."
+    },
+    "error": {
+      "invalid_mealie_connection": "Enter a valid Mealie URL and API token.",
+      "invalid_provider_connection": "Enter valid credentials for each selected live provider.",
+      "provider_required": "Choose a data provider or enable DEV mode for mock data."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Mise en Place Assistant options",
+        "description": "Adjust provider connections, DEV mode, and shopping targets.",
+        "data": {
+          "dev_mode": "DEV mode",
+          "m5dial_device_id": "Enrolled M5Dial",
+          "m5dial_presence_entity_ids": "M5Dial idle presence sensors",
+          "prep_calendar_entity_id": "Prep session calendar",
+          "mealie_url": "Mealie URL",
+          "mealie_token": "Mealie API token",
+          "grocy_url": "Grocy URL",
+          "grocy_token": "Grocy API key",
+          "shopping_list_provider": "Shopping list provider",
+          "kitchenowl_url": "KitchenOwl URL",
+          "kitchenowl_token": "KitchenOwl long-lived access token",
+          "kitchenowl_shopping_list_id": "KitchenOwl shopping list ID"
+        }
+      },
+      "error": {
+        "invalid_mealie_connection": "Enter a valid Mealie URL and API token.",
+        "invalid_provider_connection": "Enter valid credentials for each selected live provider.",
+        "provider_required": "Choose a data provider or enable DEV mode for mock data."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "container": {
+        "name": "Status"
+      },
+      "location": {
+        "name": "Containers"
+      },
+      "storage_attention": {
+        "name": "Storage attention"
+      }
+    }
+  }
+}

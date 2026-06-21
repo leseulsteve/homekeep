@@ -1,0 +1,21 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Homekeep",
+        "description": "Create the local Homekeep workspace."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Homekeep is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Homekeep options",
+        "description": "Homekeep has no configurable options yet."
+      }
+    }
+  }
+}

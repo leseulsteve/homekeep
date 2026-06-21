@@ -1,0 +1,1781 @@
+substitutions:
+  device_name: m5dial-mise-en-place-assistant
+  friendly_name: "M5 Dial Mise en Place Assistant"
+  # Change this to the room containing the Dial before enabling presence.
+  espresense_room: kitchen
+  espresense_device_name: "Android watch"
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+  platformio_options:
+    board_build.flash_mode: dio
+
+  on_boot:
+    priority: -100
+    then:
+      - pcf8563.read_time: dial_rtc
+      - light.turn_on:
+          id: backlight
+          brightness: 80%
+      - script.execute: show_page
+      - script.execute: screensaver_timeout
+      - script.execute: start_ble_scanning
+
+esp32:
+  variant: esp32s3
+  flash_size: 8MB
+  framework:
+    type: esp-idf
+
+logger:
+  level: INFO
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+  actions:
+    - action: show_create_container
+      variables:
+        tag_id: string
+        request_id: int
+        incoming_item_ids: string[]
+        incoming_item_labels: string[]
+        incoming_item_formats: string[]
+        incoming_item_units: string[]
+        incoming_item_providers: string[]
+        incoming_item_content_kinds: string[]
+        incoming_location_ids: string[]
+        incoming_location_labels: string[]
+      then:
+        - lambda: |-
+            id(ha_response_accepted) = id(current_view) == 1 && id(last_tag_id) == tag_id && id(active_request_id) == request_id;
+            if (!id(ha_response_accepted)) {
+              ESP_LOGW("mise_en_place_assistant", "Ignoring stale create response: tag=%s request=%d active=%d view=%d", tag_id.c_str(), request_id, id(active_request_id), id(current_view));
+            } else {
+              id(last_tag_id) = tag_id;
+              id(active_request_id) = request_id;
+              id(item_ids) = incoming_item_ids;
+              id(item_labels) = incoming_item_labels;
+              id(item_formats) = incoming_item_formats;
+              id(item_units) = incoming_item_units;
+              id(item_providers) = incoming_item_providers;
+              id(item_content_kinds) = incoming_item_content_kinds;
+              id(location_ids) = incoming_location_ids;
+              id(locations) = incoming_location_labels;
+              id(selected_item_index) = 0;
+              id(selected_location_index) = 0;
+              id(selected_item_id).clear();
+              id(selected_item_label).clear();
+              id(selected_item_format).clear();
+              id(selected_item_unit) = "items";
+              id(selected_item_provider).clear();
+              id(selected_content_kind) = "ingredient";
+              id(selected_location_id).clear();
+              id(selected_location_label).clear();
+              id(inventory_qty) = 0;
+              id(current_view) = 10;
+              ESP_LOGI("mise_en_place_assistant", "Create flow loaded: tag=%s request=%d items=%d locations=%d", tag_id.c_str(), request_id, (int) incoming_item_labels.size(), (int) incoming_location_labels.size());
+            }
+        - if:
+            condition:
+              lambda: 'return id(ha_response_accepted);'
+            then:
+              - script.stop: scan_timeout
+              - script.execute: sync_selection
+              - script.execute: show_page
+
+    - action: show_known_container
+      variables:
+        tag_id: string
+        request_id: int
+        item_label: string
+        item_format: string
+        item_provider: string
+        content_kind: string
+        quantity: float
+        unit: string
+        location_id: string
+        location_label: string
+        incoming_location_ids: string[]
+        incoming_location_labels: string[]
+      then:
+        - lambda: |-
+            id(ha_response_accepted) = id(current_view) == 1 && id(last_tag_id) == tag_id && id(active_request_id) == request_id;
+            if (!id(ha_response_accepted)) {
+              ESP_LOGW("mise_en_place_assistant", "Ignoring stale known-container response: tag=%s request=%d active=%d view=%d", tag_id.c_str(), request_id, id(active_request_id), id(current_view));
+            } else {
+              id(last_tag_id) = tag_id;
+              id(active_request_id) = request_id;
+              id(selected_item_label) = item_label;
+              id(selected_item_format) = item_format;
+              id(selected_item_provider) = item_provider;
+              id(selected_content_kind) = content_kind.empty() ? std::string("ingredient") : std::string(content_kind.c_str());
+              id(selected_item_unit) = unit;
+              id(selected_location_id) = location_id;
+              id(selected_location_label) = location_label;
+              id(location_ids) = incoming_location_ids;
+              id(locations) = incoming_location_labels;
+              id(selected_location_index) = 0;
+              int location_choice_count = id(locations).size();
+              if ((int) id(location_ids).size() < location_choice_count) {
+                location_choice_count = id(location_ids).size();
+                ESP_LOGW("mise_en_place_assistant", "Known flow location payload is mismatched: labels=%d ids=%d", (int) id(locations).size(), (int) id(location_ids).size());
+              }
+              for (int i = 0; i < location_choice_count; i++) {
+                if (id(location_ids)[i] == location_id) {
+                  id(selected_location_index) = i;
+                  break;
+                }
+              }
+              id(inventory_qty) = quantity;
+              id(current_view) = 20;
+              ESP_LOGI("mise_en_place_assistant", "Known flow loaded: tag=%s request=%d item=%s provider=%s kind=%s quantity=%g location=%s choices=%d", tag_id.c_str(), request_id, item_label.c_str(), id(selected_item_provider).c_str(), id(selected_content_kind).c_str(), quantity, location_label.c_str(), (int) incoming_location_labels.size());
+            }
+        - if:
+            condition:
+              lambda: 'return id(ha_response_accepted);'
+            then:
+              - script.stop: scan_timeout
+              - script.execute: show_page
+
+    - action: show_operation_result
+      variables:
+        tag_id: string
+        request_id: int
+        success: bool
+        title: string
+        message: string
+      then:
+        - lambda: |-
+            id(ha_response_accepted) = id(current_view) == 29 && id(last_tag_id) == tag_id && id(active_request_id) == request_id;
+            if (!id(ha_response_accepted)) {
+              ESP_LOGW("mise_en_place_assistant", "Ignoring stale operation result: tag=%s request=%d active=%d view=%d", tag_id.c_str(), request_id, id(active_request_id), id(current_view));
+            } else {
+              id(result_title) = title.empty() ? std::string(success ? "Saved" : "Could not save") : std::string(title.c_str());
+              id(error_message) = message;
+              id(current_view) = success ? 30 : 31;
+            }
+        - if:
+            condition:
+              lambda: 'return id(ha_response_accepted) && success;'
+            then:
+              - script.execute: sound_saved
+        - if:
+            condition:
+              lambda: 'return id(ha_response_accepted) && !success;'
+            then:
+              - script.execute: sound_attention
+        - if:
+            condition:
+              lambda: 'return id(ha_response_accepted);'
+            then:
+              - script.stop: operation_timeout
+              - script.execute: show_page
+
+    - action: show_mise_listening
+      then:
+        - script.stop: scan_timeout
+        - script.stop: operation_timeout
+        - lambda: |-
+            id(ha_response_accepted) = false;
+            id(active_request_id) = 0;
+            id(last_tag_id).clear();
+            id(current_view) = 40;
+            ESP_LOGI("mise_en_place_assistant", "Showing Mise listening view");
+        - script.execute: show_page
+
+    - action: set_theme
+      variables:
+        theme: string
+      then:
+        - lambda: |-
+            if (theme != "yoshoku_pantry") {
+              ESP_LOGW("mise_en_place_assistant", "Ignoring unsupported Dial theme: %s", theme.c_str());
+            } else {
+              id(selected_theme) = theme;
+            }
+
+    - action: set_idle_presence
+      variables:
+        nearby: bool
+      then:
+        - lambda: |-
+            id(idle_presence_known) = true;
+            id(idle_presence_nearby) = nearby;
+            ESP_LOGI("mise_en_place_assistant", "Home Assistant idle presence: nearby=%s", nearby ? "true" : "false");
+        - if:
+            condition:
+              lambda: 'return id(current_view) == 3 && !id(idle_presence_nearby);'
+            then:
+              - lambda: 'id(current_view) = 0;'
+              - script.execute: show_page
+        - if:
+            condition:
+              lambda: 'return id(current_view) == 0 && id(idle_presence_nearby);'
+            then:
+              - script.execute: screensaver_timeout
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  power_save_mode: LIGHT
+
+  ap:
+    # ESPHome limits fallback AP SSIDs to 32 characters.
+    ssid: "Mise en Place Dial"
+    password: !secret fallback_ap_password
+
+captive_portal:
+
+time:
+  - platform: pcf8563
+    id: dial_rtc
+    i2c_id: bus_internal
+    address: 0x51
+    update_interval: never
+
+  - platform: homeassistant
+    id: ha_time
+    on_time_sync:
+      then:
+        - pcf8563.write_time: dial_rtc
+    on_time:
+      - seconds: /1
+        then:
+          - script.execute: refresh_clock
+
+# ─────────────────────────────
+# BLUETOOTH / HOME ASSISTANT DEVICE MANAGEMENT
+# ─────────────────────────────
+#
+# Home Assistant owns discovery, pairing and the device registry.  The Dial is
+# only the radio proxy, so a supported BLE peripheral can remain its own Home
+# Assistant device instead of becoming an entity of the Dial.
+#
+# Keep the tracker defaults: ESPHome recommends them for Wi-Fi proxies. The
+# The Home Assistant BLE switch, iBeacon discovery, and ESPresense presence
+# share one radio policy: the radio is disabled only when all three are off.
+esp32_ble:
+  id: ble_radio
+  enable_on_boot: false
+
+esp32_ble_tracker:
+  scan_parameters:
+    # Scanning is started at boot and controlled by the Home Assistant switch.
+    continuous: false
+
+  # Discovery is opt-in and handles only fully parsed iBeacons. Once enrolled,
+  # the same callback publishes only the chosen beacon in ESPresense's room
+  # topic shape; other nearby Bluetooth devices are ignored.
+  on_ble_advertise:
+    - then:
+        - lambda: |-
+            id(espresense_report_ready) = false;
+            auto beacon = x.get_ibeacon();
+            if (!beacon.has_value()) {
+              return;
+            }
+            char uuid[37];
+            const auto beacon_id = std::string(beacon->get_uuid().to_str(uuid)) + "-" + std::to_string(beacon->get_major()) + "-" + std::to_string(beacon->get_minor());
+            if (id(espresense_discovery_enabled) && id(last_discovered_ibeacon) != beacon_id) {
+              id(last_discovered_ibeacon) = beacon_id;
+              ESP_LOGI("espresense", "Discovered iBeacon: %s", beacon_id.c_str());
+            }
+            if (!id(espresense_presence_enabled) || id(tracked_ibeacon_id) != beacon_id) {
+              return;
+            }
+            const uint32_t now = millis();
+            if (now - id(last_espresense_publish_ms) < 3000) {
+              return;
+            }
+            id(last_espresense_publish_ms) = now;
+            id(espresense_rssi) = x.get_rssi();
+            id(espresense_distance) = powf(10.0f, (beacon->get_signal_power() - id(espresense_rssi)) / 20.0f);
+            id(espresense_watch_rssi).publish_state(id(espresense_rssi));
+            id(espresense_watch_distance).publish_state(id(espresense_distance));
+            id(espresense_watch_present).publish_state(true);
+            id(espresense_report_ready) = true;
+        - if:
+            condition:
+              lambda: 'return id(espresense_report_ready);'
+            then:
+              - script.execute: publish_espresense_presence
+              - script.execute: publish_watch_tracker_home
+              - script.execute: espresense_presence_timeout
+
+bluetooth_proxy:
+  active: true
+  cache_services: true
+  connection_slots: 3
+
+mqtt:
+  id: mqtt_client
+  broker: !secret mqtt_broker
+  username: !secret mqtt_username
+  password: !secret mqtt_password
+  topic_prefix: null
+  on_connect:
+    - script.execute: publish_watch_tracker_discovery
+
+switch:
+  - platform: template
+    id: ble_connectivity
+    name: "BLE connectivity"
+    entity_category: config
+    lambda: 'return id(ble_connectivity_enabled);'
+    turn_on_action:
+      - lambda: 'id(ble_connectivity_enabled) = true;'
+      - script.execute: start_ble_scanning
+      - switch.template.publish:
+          id: ble_connectivity
+          state: ON
+    turn_off_action:
+      - lambda: 'id(ble_connectivity_enabled) = false;'
+      - script.execute: stop_ble_if_unused
+      - switch.template.publish:
+          id: ble_connectivity
+          state: OFF
+
+  - platform: template
+    id: espresense_presence
+    name: "ESPresense presence"
+    icon: mdi:bluetooth-connect
+    entity_category: config
+    lambda: 'return id(espresense_presence_enabled);'
+    turn_on_action:
+      - lambda: |-
+          id(espresense_presence_enabled) = true;
+          if (id(tracked_ibeacon_id).empty()) {
+            ESP_LOGW("espresense", "Presence is enabled, but no iBeacon has been enrolled yet");
+          }
+      - script.execute: start_ble_scanning
+      - switch.template.publish:
+          id: espresense_presence
+          state: ON
+    turn_off_action:
+      - lambda: |-
+          id(espresense_presence_enabled) = false;
+          id(espresense_watch_present).publish_state(false);
+      - script.stop: espresense_presence_timeout
+      - script.execute: publish_watch_tracker_not_home
+      - script.execute: stop_ble_if_unused
+      - switch.template.publish:
+          id: espresense_presence
+          state: OFF
+
+  - platform: template
+    id: espresense_discovery
+    name: "Discover BLE beacons"
+    icon: mdi:bluetooth-searching
+    entity_category: diagnostic
+    lambda: 'return id(espresense_discovery_enabled);'
+    turn_on_action:
+      - lambda: |-
+          id(espresense_discovery_enabled) = true;
+          id(last_discovered_ibeacon).clear();
+          ESP_LOGI("espresense", "iBeacon discovery enabled; bring the watch close to the Dial");
+      - script.execute: start_ble_scanning
+      - switch.template.publish:
+          id: espresense_discovery
+          state: ON
+    turn_off_action:
+      - lambda: |-
+          id(espresense_discovery_enabled) = false;
+          id(last_discovered_ibeacon).clear();
+          ESP_LOGI("espresense", "iBeacon discovery disabled");
+      - script.execute: stop_ble_if_unused
+      - switch.template.publish:
+          id: espresense_discovery
+          state: OFF
+
+button:
+  - platform: template
+    name: "Restart BLE connectivity"
+    entity_category: config
+    on_press:
+      - if:
+          condition:
+            lambda: 'return id(ble_connectivity_enabled) || id(espresense_discovery_enabled) || id(espresense_presence_enabled);'
+          then:
+            - esp32_ble_tracker.stop_scan:
+            - ble.disable:
+            - delay: 250ms
+            - script.execute: start_ble_scanning
+
+  - platform: template
+    name: "Use discovered BLE beacon"
+    icon: mdi:bluetooth-transfer
+    entity_category: config
+    on_press:
+      - lambda: |-
+          if (id(last_discovered_ibeacon).empty()) {
+            ESP_LOGW("espresense", "No iBeacon has been discovered; enable discovery and bring the watch close");
+            return;
+          }
+          id(tracked_ibeacon_id) = id(last_discovered_ibeacon);
+          id(tracked_ibeacon_text).publish_state(id(tracked_ibeacon_id));
+          ESP_LOGI("espresense", "Enrolled iBeacon for presence: %s", id(tracked_ibeacon_id).c_str());
+
+  - platform: template
+    name: "Forget tracked BLE beacon"
+    icon: mdi:bluetooth-off
+    entity_category: config
+    on_press:
+      - lambda: |-
+          id(tracked_ibeacon_id).clear();
+          id(tracked_ibeacon_text).publish_state("Not enrolled");
+          id(espresense_watch_present).publish_state(false);
+          ESP_LOGI("espresense", "Forgot enrolled iBeacon");
+      - script.stop: espresense_presence_timeout
+      - script.execute: publish_watch_tracker_not_home
+
+  - platform: template
+    name: "Return Dial to idle"
+    entity_category: config
+    on_press:
+      - script.execute: cancel_flow
+
+  - platform: restart
+    name: "Restart Dial"
+    entity_category: diagnostic
+
+# ─────────────────────────────
+# HARDWARE
+# ─────────────────────────────
+
+spi:
+  clk_pin: GPIO6
+  mosi_pin: GPIO5
+
+i2c:
+  - id: bus_internal
+    sda: GPIO11
+    scl: GPIO12
+    scan: true
+    frequency: 100kHz
+
+touchscreen:
+  - platform: ft5x06
+    id: dial_touch
+    i2c_id: bus_internal
+    address: 0x38
+    display: round_display
+
+display:
+  - platform: mipi_spi
+    model: GC9A01A
+    id: round_display
+    cs_pin: GPIO7
+    dc_pin: GPIO4
+    reset_pin: GPIO8
+    invert_colors: true
+    auto_clear_enabled: false
+    update_interval: never
+
+output:
+  - platform: ledc
+    id: buzzer_output
+    pin: GPIO3
+    frequency: 2000Hz
+
+  - platform: ledc
+    id: backlight_output
+    pin: GPIO9
+
+light:
+  - platform: monochromatic
+    id: backlight
+    name: "Screen backlight"
+    entity_category: config
+    output: backlight_output
+    restore_mode: ALWAYS_ON
+
+rtttl:
+  output: buzzer_output
+  id: buzzer
+
+# ─────────────────────────────
+# SENSORS
+# ─────────────────────────────
+
+binary_sensor:
+  - platform: template
+    name: "BLE radio"
+    device_class: connectivity
+    entity_category: diagnostic
+    lambda: 'return id(ble_radio).is_active();'
+
+  - platform: status
+    id: ha_connected
+    name: "Home Assistant connection"
+    device_class: connectivity
+    entity_category: diagnostic
+
+  - platform: template
+    id: espresense_watch_present
+    name: "Android watch nearby"
+    device_class: presence
+    entity_category: diagnostic
+
+  - platform: gpio
+    id: dial_button
+    pin:
+      number: GPIO42
+      mode: INPUT_PULLUP
+      inverted: true
+    filters:
+      - delayed_on_off: 10ms
+
+    # Physical UX contract:
+    # - Short press advances exactly one step on the current screen.
+    # - Long press opens the lightweight Mise listening view and clears any
+    #   active request so stale Home Assistant replies cannot save inventory.
+    # - The side Hold Button below is the always-available cancel/idle escape.
+    on_multi_click:
+      - timing:
+          - ON for at most 599ms
+          - OFF for at least 50ms
+        then:
+          - script.execute: on_short_press
+
+      - timing:
+          - ON for at least 600ms
+        then:
+          - script.execute: on_long_press
+
+  # GPIO46 is the Dial's physical Hold Button, not a power-hold output.
+  - platform: gpio
+    id: dial_hold_button
+    internal: true
+    pin:
+      number: GPIO46
+      mode: INPUT_PULLUP
+      inverted: true
+    filters:
+      - delayed_on_off: 10ms
+    on_press:
+      # Hardware escape hatch: cancel the transient Dial flow, return to idle,
+      # and leave durable inventory decisions in Home Assistant.
+      - script.execute: cancel_flow
+
+sensor:
+  - platform: wifi_signal
+    id: wifi_rssi
+    name: "Wi-Fi signal"
+    entity_category: diagnostic
+    update_interval: 60s
+
+  - platform: uptime
+    name: "Uptime"
+    entity_category: diagnostic
+    update_interval: 60s
+
+  - platform: template
+    id: espresense_watch_rssi
+    name: "Android watch RSSI"
+    device_class: signal_strength
+    state_class: measurement
+    unit_of_measurement: dBm
+    entity_category: diagnostic
+    accuracy_decimals: 0
+
+  - platform: template
+    id: espresense_watch_distance
+    name: "Android watch distance"
+    device_class: distance
+    state_class: measurement
+    unit_of_measurement: m
+    entity_category: diagnostic
+    accuracy_decimals: 1
+
+  - platform: rotary_encoder
+    id: dial_encoder
+    pin_a:
+      number: GPIO40
+      mode: INPUT_PULLUP
+    pin_b:
+      number: GPIO41
+      mode: INPUT_PULLUP
+    resolution: 2
+    filters:
+      - debounce: 2ms
+
+    on_clockwise:
+      then:
+        - script.execute: encoder_up
+
+    on_anticlockwise:
+      then:
+        - script.execute: encoder_down
+
+rc522_i2c:
+  id: nfc_reader
+  i2c_id: bus_internal
+  address: 0x28
+  update_interval: 1s
+
+  on_tag:
+    then:
+      - lambda: |-
+          id(last_tag_id) = x;
+      - script.execute: on_nfc
+
+text_sensor:
+  - platform: template
+    id: tracked_ibeacon_text
+    name: "Tracked ESPresense beacon"
+    entity_category: diagnostic
+    update_interval: 15s
+    lambda: |-
+      if (id(tracked_ibeacon_id).empty()) return {"Not enrolled"};
+      return {id(tracked_ibeacon_id)};
+
+  - platform: template
+    name: "Dial workflow"
+    entity_category: diagnostic
+    update_interval: 1s
+    lambda: |-
+      switch (id(current_view)) {
+        case 0: return {"Idle"};
+        case 1: return {"Waiting for Home Assistant"};
+        case 3: return {"Presence clock"};
+        case 10: return {"Choosing item"};
+        case 11: return {"Choosing quantity"};
+        case 13: return {"Choosing location"};
+        case 20: return {"Editing inventory"};
+        case 21: return {"Moving container"};
+        case 29: return {"Saving"};
+        case 30: return {"Saved"};
+        case 31: return {"Home Assistant timeout"};
+        case 40: return {"Mise listening"};
+        default: return {"Unknown"};
+      }
+
+# ─────────────────────────────
+# GLOBAL STATE
+# ─────────────────────────────
+
+globals:
+  - id: ble_connectivity_enabled
+    type: bool
+    restore_value: true
+    initial_value: "true"
+
+  - id: espresense_discovery_enabled
+    type: bool
+    restore_value: false
+    initial_value: "false"
+
+  - id: espresense_presence_enabled
+    type: bool
+    restore_value: true
+    initial_value: "false"
+
+  - id: last_discovered_ibeacon
+    type: std::string
+    restore_value: false
+    initial_value: '""'
+
+  - id: tracked_ibeacon_id
+    type: std::string
+    restore_value: true
+    max_restore_data_length: 64
+    initial_value: '""'
+
+  - id: espresense_rssi
+    type: int
+    initial_value: "-127"
+
+  - id: espresense_distance
+    type: float
+    initial_value: "0.0"
+
+  - id: last_espresense_publish_ms
+    type: uint32_t
+    initial_value: "0"
+
+  - id: espresense_report_ready
+    type: bool
+    initial_value: "false"
+
+  - id: current_view
+    type: int
+    initial_value: "0"
+
+  - id: idle_presence_known
+    type: bool
+    initial_value: "false"
+
+  - id: idle_presence_nearby
+    type: bool
+    initial_value: "false"
+
+  - id: press_view
+    type: int
+    initial_value: "0"
+
+  - id: inventory_qty
+    type: float
+    initial_value: "0.0"
+
+  - id: ha_response_accepted
+    type: bool
+    initial_value: "false"
+
+  - id: active_request_id
+    type: int
+    initial_value: "0"
+
+  - id: next_request_id
+    type: int
+    initial_value: "0"
+
+  - id: last_tag_id
+    type: std::string
+    initial_value: '""'
+
+  - id: item_ids
+    type: std::vector<std::string>
+    initial_value: "std::vector<std::string>()"
+
+  - id: item_labels
+    type: std::vector<std::string>
+    initial_value: "std::vector<std::string>()"
+
+  - id: item_formats
+    type: std::vector<std::string>
+    initial_value: "std::vector<std::string>()"
+
+  - id: item_units
+    type: std::vector<std::string>
+    initial_value: "std::vector<std::string>()"
+
+  - id: item_providers
+    type: std::vector<std::string>
+    initial_value: "std::vector<std::string>()"
+
+  - id: item_content_kinds
+    type: std::vector<std::string>
+    initial_value: "std::vector<std::string>()"
+
+  - id: locations
+    type: std::vector<std::string>
+    initial_value: "std::vector<std::string>()"
+
+  - id: location_ids
+    type: std::vector<std::string>
+    initial_value: "std::vector<std::string>()"
+
+  - id: selected_item_index
+    type: int
+    initial_value: "0"
+
+  - id: selected_location_index
+    type: int
+    initial_value: "0"
+
+  - id: selected_item_id
+    type: std::string
+    initial_value: '""'
+
+  - id: selected_item_label
+    type: std::string
+    initial_value: '""'
+
+  - id: selected_item_format
+    type: std::string
+    initial_value: '""'
+
+  - id: selected_item_unit
+    type: std::string
+    initial_value: '"items"'
+
+  - id: selected_item_provider
+    type: std::string
+    initial_value: '""'
+
+  - id: selected_content_kind
+    type: std::string
+    initial_value: '"ingredient"'
+
+  - id: selected_location_label
+    type: std::string
+    initial_value: '""'
+
+  - id: selected_location_id
+    type: std::string
+    initial_value: '""'
+
+  - id: selected_theme
+    type: std::string
+    restore_value: true
+    initial_value: '"yoshoku_pantry"'
+
+  - id: error_message
+    type: std::string
+    initial_value: '"Home Assistant did not reply"'
+
+  - id: result_title
+    type: std::string
+    initial_value: '"Saved"'
+
+# ─────────────────────────────
+# SCRIPTS (NO INVALID IF SHORTCUTS)
+# ─────────────────────────────
+
+script:
+
+  - id: start_ble_scanning
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: 'return id(ble_connectivity_enabled) || id(espresense_discovery_enabled) || id(espresense_presence_enabled);'
+          then:
+            - ble.enable:
+            - delay: 500ms
+            - esp32_ble_tracker.start_scan:
+                continuous: true
+
+  - id: stop_ble_if_unused
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: 'return !id(ble_connectivity_enabled) && !id(espresense_discovery_enabled) && !id(espresense_presence_enabled);'
+          then:
+            - esp32_ble_tracker.stop_scan:
+            - ble.disable:
+
+  - id: publish_espresense_presence
+    mode: single
+    then:
+      - if:
+          condition:
+            mqtt.connected:
+          then:
+            - mqtt.publish_json:
+                topic: !lambda 'return std::string("espresense/devices/iBeacon:") + id(tracked_ibeacon_id) + "/${espresense_room}";'
+                payload: |-
+                  root["id"] = std::string("iBeacon:") + id(tracked_ibeacon_id);
+                  root["name"] = "${espresense_device_name}";
+                  root["distance"] = id(espresense_distance);
+                  root["rssi"] = id(espresense_rssi);
+                qos: 0
+                retain: false
+
+  # This direct tracker is intentionally separate from the ESPresense room
+  # topic above: it gives Home Assistant useful watch presence immediately,
+  # even before mqtt_room or an ESPresense fleet has been configured.
+  - id: publish_watch_tracker_discovery
+    mode: single
+    then:
+      - if:
+          condition:
+            mqtt.connected:
+          then:
+            - mqtt.publish_json:
+                topic: "homeassistant/device_tracker/${device_name}_android_watch/config"
+                payload: |-
+                  root["name"] = "Android watch via M5 Dial";
+                  root["unique_id"] = "${device_name}_android_watch_presence";
+                  root["state_topic"] = "mise_en_place_assistant/${device_name}/android_watch/state";
+                  root["payload_home"] = "home";
+                  root["payload_not_home"] = "not_home";
+                  root["source_type"] = "bluetooth_le";
+                retain: true
+
+  - id: publish_watch_tracker_home
+    mode: restart
+    then:
+      - if:
+          condition:
+            mqtt.connected:
+          then:
+            - mqtt.publish:
+                topic: "mise_en_place_assistant/${device_name}/android_watch/state"
+                payload: "home"
+                retain: true
+
+  - id: publish_watch_tracker_not_home
+    mode: restart
+    then:
+      - if:
+          condition:
+            mqtt.connected:
+          then:
+            - mqtt.publish:
+                topic: "mise_en_place_assistant/${device_name}/android_watch/state"
+                payload: "not_home"
+                retain: true
+
+  - id: espresense_presence_timeout
+    mode: restart
+    then:
+      - delay: 30s
+      - binary_sensor.template.publish:
+          id: espresense_watch_present
+          state: OFF
+      - script.execute: publish_watch_tracker_not_home
+
+  # The Dial has a piezo buzzer rather than a full speaker. Keep its voice
+  # deliberately small: rising notes mean progress, low notes mean attention.
+  - id: sound_advance
+    then:
+      - rtttl.play: "advance:d=32,o=6,b=180:16e6,16g6"
+
+  - id: sound_saved
+    then:
+      - rtttl.play: "saved:d=32,o=6,b=180:16c6,16e6,16g6"
+
+  - id: sound_cancel
+    then:
+      - rtttl.play: "cancel:d=32,o=5,b=150:16g5,16e5"
+
+  - id: sound_attention
+    then:
+      - rtttl.play: "attention:d=16,o=5,b=120:8e5,8c5"
+
+  - id: cancel_flow
+    then:
+      - script.stop: scan_timeout
+      - script.stop: operation_timeout
+      - lambda: |-
+          ESP_LOGI("mise_en_place_assistant", "Cancelling Dial flow: view=%d tag=%s", id(current_view), id(last_tag_id).c_str());
+          id(ha_response_accepted) = false;
+          id(active_request_id) = 0;
+          id(last_tag_id).clear();
+          id(current_view) = 0;
+      - script.execute: show_page
+      - script.execute: screensaver_timeout
+
+  - id: wake_display
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 3;'
+          then:
+            - lambda: 'id(current_view) = 0;'
+            - script.execute: show_page
+      - script.execute: screensaver_timeout
+
+  - id: screensaver_timeout
+    mode: restart
+    then:
+      - delay: 45s
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 0 && (!id(idle_presence_known) || id(idle_presence_nearby));'
+          then:
+            - lambda: 'id(current_view) = 3;'
+            - script.execute: show_page
+
+  - id: refresh_clock
+    then:
+      - lvgl.label.update:
+          id: lbl_clock_time
+          text: !lambda |-
+            auto now = id(ha_time).now();
+            if (!now.is_valid()) return std::string("--:--");
+            char value[6];
+            now.strftime(value, sizeof(value), "%H:%M");
+            return std::string(value);
+      - lvgl.label.update:
+          id: lbl_clock_date
+          text: !lambda |-
+            auto now = id(ha_time).now();
+            if (!now.is_valid()) return std::string("Waiting for time");
+            char value[20];
+            now.strftime(value, sizeof(value), "%a  %d %b");
+            return std::string(value);
+
+  - id: show_page
+    then:
+      - lambda: |-
+          ESP_LOGD("mise_en_place_assistant", "Showing view %d", id(current_view));
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 0;'
+          then:
+            - lvgl.page.show: page_idle
+
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 1;'
+          then:
+            - lvgl.page.show: page_loading
+
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 3;'
+          then:
+            - lvgl.page.show: page_clock
+
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 10;'
+          then:
+            - lvgl.page.show: page_create_item
+
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 11;'
+          then:
+            - lvgl.page.show: page_create_qty
+
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 13;'
+          then:
+            - lvgl.page.show: page_create_location
+
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 20;'
+          then:
+            - lvgl.page.show: page_known
+
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 21;'
+          then:
+            - lvgl.page.show: page_known_location
+
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 29;'
+          then:
+            - lvgl.page.show: page_saving
+
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 30;'
+          then:
+            - lvgl.page.show: page_done
+
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 31;'
+          then:
+            - lvgl.page.show: page_error
+
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 40;'
+          then:
+            - lvgl.page.show: page_mise_listening
+      - script.execute: refresh_ui
+
+  - id: scan_timeout
+    mode: restart
+    then:
+      - delay: 12s
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 1;'
+          then:
+            - lambda: |-
+                ESP_LOGW("mise_en_place_assistant", "Scan timed out waiting for Home Assistant response: tag=%s", id(last_tag_id).c_str());
+                id(result_title) = "No reply";
+                id(error_message) = "Home Assistant did not reply";
+                id(current_view) = 31;
+            - script.execute: sound_attention
+            - script.execute: show_page
+
+  - id: operation_timeout
+    mode: restart
+    then:
+      - delay: 12s
+      - if:
+          condition:
+            lambda: 'return id(current_view) == 29;'
+          then:
+            - lambda: |-
+                ESP_LOGW("mise_en_place_assistant", "Save confirmation timed out: tag=%s", id(last_tag_id).c_str());
+                id(result_title) = "Not confirmed";
+                id(error_message) = "Save not confirmed";
+                id(current_view) = 31;
+            - script.execute: sound_attention
+            - script.execute: show_page
+
+  - id: encoder_up
+    then:
+      - script.execute: wake_display
+      - lambda: |-
+          if (id(current_view) == 10 && !id(item_labels).empty()) {
+            id(selected_item_index) = (id(selected_item_index) + 1) % id(item_labels).size();
+          } else if (id(current_view) == 11 || id(current_view) == 20) {
+            id(inventory_qty)++;
+          } else if ((id(current_view) == 13 || id(current_view) == 21) && !id(locations).empty()) {
+            id(selected_location_index) = (id(selected_location_index) + 1) % id(locations).size();
+          }
+          ESP_LOGD("mise_en_place_assistant", "Encoder up: view=%d item_index=%d location_index=%d qty=%g", id(current_view), id(selected_item_index), id(selected_location_index), id(inventory_qty));
+      - script.execute: sync_selection
+      - script.execute: refresh_ui
+
+  - id: encoder_down
+    then:
+      - script.execute: wake_display
+      - lambda: |-
+          if (id(current_view) == 10 && !id(item_labels).empty()) {
+            int size = id(item_labels).size();
+            id(selected_item_index) = (id(selected_item_index) + size - 1) % size;
+          } else if ((id(current_view) == 11 || id(current_view) == 20) && id(inventory_qty) > 0) {
+            id(inventory_qty)--;
+          } else if ((id(current_view) == 13 || id(current_view) == 21) && !id(locations).empty()) {
+            int size = id(locations).size();
+            id(selected_location_index) = (id(selected_location_index) + size - 1) % size;
+          }
+          ESP_LOGD("mise_en_place_assistant", "Encoder down: view=%d item_index=%d location_index=%d qty=%g", id(current_view), id(selected_item_index), id(selected_location_index), id(inventory_qty));
+      - script.execute: sync_selection
+      - script.execute: refresh_ui
+
+  - id: on_short_press
+    then:
+      - script.execute: wake_display
+      - lambda: 'id(press_view) = id(current_view);'
+      - lambda: |-
+          ESP_LOGD("mise_en_place_assistant", "Button short press: view=%d tag=%s", id(press_view), id(last_tag_id).c_str());
+      - if:
+          condition:
+            lambda: 'return id(press_view) == 10 && !id(selected_item_id).empty();'
+          then:
+            - lambda: |-
+                ESP_LOGI("mise_en_place_assistant", "Item selected: id=%s label=%s format=%s unit=%s", id(selected_item_id).c_str(), id(selected_item_label).c_str(), id(selected_item_format).c_str(), id(selected_item_unit).c_str());
+                id(current_view) = 11;
+            - script.execute: sound_advance
+            - script.execute: show_page
+
+      - if:
+          condition:
+            lambda: 'return id(press_view) == 10 && id(selected_item_id).empty();'
+          then:
+            - lambda: |-
+                ESP_LOGW("mise_en_place_assistant", "Cannot continue create flow without a selected item ID");
+                id(result_title) = "Catalog missing";
+                id(error_message) = "Catalog item unavailable";
+                id(current_view) = 31;
+            - script.execute: sound_attention
+            - script.execute: show_page
+
+      - if:
+          condition:
+            lambda: 'return id(press_view) == 11;'
+          then:
+            - lambda: |-
+                ESP_LOGI("mise_en_place_assistant", "Quantity selected: %g %s", id(inventory_qty), id(selected_item_unit).c_str());
+                id(current_view) = 13;
+            - script.execute: sound_advance
+            - script.execute: show_page
+
+      - if:
+          condition:
+            lambda: 'return id(press_view) == 13 && !id(last_tag_id).empty() && !id(selected_item_id).empty() && !id(selected_location_id).empty();'
+          then:
+            - lambda: |-
+                ESP_LOGI("mise_en_place_assistant", "Creating container: tag=%s item=%s qty=%g location=%s", id(last_tag_id).c_str(), id(selected_item_label).c_str(), id(inventory_qty), id(selected_location_label).c_str());
+            - lambda: 'id(current_view) = 29;'
+            - script.execute: show_page
+            - script.execute: operation_timeout
+            - homeassistant.event:
+                event: esphome.mise_en_place_assistant_create_container
+                data:
+                  tag_id: !lambda 'return id(last_tag_id);'
+                  item_id: !lambda 'return id(selected_item_id);'
+                  item_label: !lambda 'return id(selected_item_label);'
+                  item_format: !lambda 'return id(selected_item_format);'
+                  source_provider: !lambda 'return id(selected_item_provider);'
+                  content_kind: !lambda 'return id(selected_content_kind);'
+                  unit: !lambda 'return id(selected_item_unit);'
+                  quantity: !lambda 'return std::to_string(id(inventory_qty));'
+                  location_id: !lambda 'return id(selected_location_id);'
+                  location: !lambda 'return id(selected_location_label);'
+                  request_id: !lambda 'return std::to_string(id(active_request_id));'
+                  source: "${device_name}"
+
+      - if:
+          condition:
+            lambda: 'return id(press_view) == 13 && (id(last_tag_id).empty() || id(selected_item_id).empty() || id(selected_location_id).empty());'
+          then:
+            - lambda: |-
+                ESP_LOGW("mise_en_place_assistant", "Cannot create container with incomplete selection: tag=%s item_id=%s location_id=%s", id(last_tag_id).c_str(), id(selected_item_id).c_str(), id(selected_location_id).c_str());
+                id(result_title) = "Selection missing";
+                id(error_message) = "Selection unavailable";
+                id(current_view) = 31;
+            - script.execute: sound_attention
+            - script.execute: show_page
+
+      - if:
+          condition:
+            lambda: 'return id(press_view) == 20 && !id(last_tag_id).empty();'
+          then:
+            - lambda: |-
+                ESP_LOGI("mise_en_place_assistant", "Known quantity selected: tag=%s qty=%g", id(last_tag_id).c_str(), id(inventory_qty));
+                id(current_view) = 21;
+            - script.execute: sound_advance
+            - script.execute: show_page
+
+      - if:
+          condition:
+            lambda: 'return id(press_view) == 21 && !id(last_tag_id).empty() && !id(selected_location_id).empty();'
+          then:
+            - lambda: |-
+                ESP_LOGI("mise_en_place_assistant", "Updating container: tag=%s qty=%g location=%s", id(last_tag_id).c_str(), id(inventory_qty), id(selected_location_label).c_str());
+            - lambda: 'id(current_view) = 29;'
+            - script.execute: show_page
+            - script.execute: operation_timeout
+            - homeassistant.event:
+                event: esphome.mise_en_place_assistant_update_container
+                data:
+                  tag_id: !lambda 'return id(last_tag_id);'
+                  quantity: !lambda 'return std::to_string(id(inventory_qty));'
+                  location_id: !lambda 'return id(selected_location_id);'
+                  location: !lambda 'return id(selected_location_label);'
+                  request_id: !lambda 'return std::to_string(id(active_request_id));'
+                  source: "${device_name}"
+
+      - if:
+          condition:
+            lambda: 'return id(press_view) == 21 && (id(last_tag_id).empty() || id(selected_location_id).empty());'
+          then:
+            - lambda: |-
+                ESP_LOGW("mise_en_place_assistant", "Cannot update container with incomplete selection: tag=%s location_id=%s", id(last_tag_id).c_str(), id(selected_location_id).c_str());
+                id(result_title) = "Selection missing";
+                id(error_message) = "Location unavailable";
+                id(current_view) = 31;
+            - script.execute: sound_attention
+            - script.execute: show_page
+
+      - if:
+          condition:
+            lambda: 'return id(press_view) == 30 || id(press_view) == 31;'
+          then:
+            - lambda: 'id(current_view) = 0;'
+            - script.execute: sound_advance
+            - script.execute: show_page
+
+      - if:
+          condition:
+            lambda: 'return id(press_view) == 40;'
+          then:
+            - lambda: 'id(current_view) = 0;'
+            - script.execute: sound_advance
+            - script.execute: show_page
+
+  - id: on_long_press
+    then:
+      - script.execute: sound_advance
+      - script.stop: scan_timeout
+      - script.stop: operation_timeout
+      - lambda: |-
+          ESP_LOGI("mise_en_place_assistant", "Long press showing Mise listening view from view=%d", id(current_view));
+          id(ha_response_accepted) = false;
+          id(active_request_id) = 0;
+          id(last_tag_id).clear();
+          id(current_view) = 40;
+      - script.execute: show_page
+
+  - id: on_nfc
+    then:
+      - script.execute: wake_display
+      - rtttl.play: "tag:d=32,o=6,b=180:16g6"
+      - lambda: |-
+          id(next_request_id)++;
+          if (id(next_request_id) <= 0) id(next_request_id) = 1;
+          id(active_request_id) = id(next_request_id);
+          ESP_LOGI("mise_en_place_assistant", "NFC tag scanned: %s", id(last_tag_id).c_str());
+          id(ha_response_accepted) = false;
+          id(error_message) = "Home Assistant did not reply";
+          id(result_title) = "Waiting";
+          id(current_view) = 1;
+          id(inventory_qty) = 0;
+      - script.execute: show_page
+      - homeassistant.event:
+          event: esphome.mise_en_place_assistant_scan
+          data:
+            tag_id: !lambda 'return id(last_tag_id);'
+            request_id: !lambda 'return std::to_string(id(active_request_id));'
+            source: "${device_name}"
+      - script.execute: scan_timeout
+
+  - id: sync_selection
+    then:
+      - lambda: |-
+          const bool selecting_catalog_item = id(current_view) == 10 || id(current_view) == 11 || id(current_view) == 13;
+          if (selecting_catalog_item) {
+            id(selected_item_id).clear();
+            id(selected_item_label).clear();
+            id(selected_item_format).clear();
+            id(selected_item_unit) = "items";
+            id(selected_item_provider).clear();
+            id(selected_content_kind) = "ingredient";
+          }
+          if (!id(item_labels).empty()) {
+            if (id(selected_item_index) < 0) id(selected_item_index) = 0;
+            if (id(selected_item_index) >= (int) id(item_labels).size()) id(selected_item_index) = id(item_labels).size() - 1;
+            id(selected_item_label) = id(item_labels)[id(selected_item_index)];
+          }
+          if (!id(item_ids).empty() && id(selected_item_index) < (int) id(item_ids).size()) {
+            id(selected_item_id) = id(item_ids)[id(selected_item_index)];
+          }
+          if (!id(item_formats).empty() && id(selected_item_index) < (int) id(item_formats).size()) {
+            id(selected_item_format) = id(item_formats)[id(selected_item_index)];
+          }
+          if (!id(item_units).empty() && id(selected_item_index) < (int) id(item_units).size()) {
+            id(selected_item_unit) = id(item_units)[id(selected_item_index)];
+          }
+          if (!id(item_providers).empty() && id(selected_item_index) < (int) id(item_providers).size()) {
+            id(selected_item_provider) = id(item_providers)[id(selected_item_index)];
+          }
+          if (!id(item_content_kinds).empty() && id(selected_item_index) < (int) id(item_content_kinds).size()) {
+            id(selected_content_kind) = id(item_content_kinds)[id(selected_item_index)];
+          }
+          if (!id(locations).empty()) {
+            if (id(selected_location_index) < 0) id(selected_location_index) = 0;
+            if (id(selected_location_index) >= (int) id(locations).size()) id(selected_location_index) = id(locations).size() - 1;
+            id(selected_location_label) = id(locations)[id(selected_location_index)];
+            id(selected_location_id).clear();
+            if (id(selected_location_index) < (int) id(location_ids).size()) {
+              id(selected_location_id) = id(location_ids)[id(selected_location_index)];
+            }
+          }
+          ESP_LOGD("mise_en_place_assistant", "Selection synced: item=%s location=%s qty=%g", id(selected_item_label).c_str(), id(selected_location_label).c_str(), id(inventory_qty));
+
+  - id: refresh_ui
+    then:
+      - lvgl.label.update:
+          id: lbl_item_name
+          text: !lambda 'return id(selected_item_label);'
+      - lvgl.label.update:
+          id: lbl_item_format
+          text: !lambda |-
+            std::string meta = id(selected_content_kind);
+            if (!id(selected_item_provider).empty()) meta += " · " + id(selected_item_provider);
+            if (!id(selected_item_format).empty()) meta += " · " + id(selected_item_format);
+            return meta;
+      - lvgl.label.update:
+          id: lbl_item_count
+          text: !lambda 'char value[16]; snprintf(value, sizeof(value), "%g", id(inventory_qty)); return std::string(value) + " " + id(selected_item_unit);'
+      - lvgl.label.update:
+          id: lbl_qty_value
+          text: !lambda 'char value[16]; snprintf(value, sizeof(value), "%g", id(inventory_qty)); return std::string(value);'
+      - lvgl.label.update:
+          id: lbl_qty_unit
+          text: !lambda 'return id(selected_item_unit);'
+      - lvgl.label.update:
+          id: lbl_location_name
+          text: !lambda 'return id(selected_location_label);'
+      - lvgl.label.update:
+          id: lbl_known_name
+          text: !lambda 'return id(selected_item_label);'
+      - lvgl.label.update:
+          id: lbl_known_format
+          text: !lambda |-
+            std::string meta = id(selected_content_kind);
+            if (!id(selected_item_provider).empty()) meta += " · " + id(selected_item_provider);
+            if (!id(selected_item_format).empty()) meta += " · " + id(selected_item_format);
+            return meta;
+      - lvgl.label.update:
+          id: lbl_known_qty
+          text: !lambda 'char value[16]; snprintf(value, sizeof(value), "%g", id(inventory_qty)); return std::string(value) + " " + id(selected_item_unit);'
+      - lvgl.label.update:
+          id: lbl_known_location
+          text: !lambda 'return id(selected_location_label);'
+      - lvgl.label.update:
+          id: lbl_known_location_select
+          text: !lambda 'return id(selected_location_label);'
+      - lvgl.label.update:
+          id: lbl_error_message
+          text: !lambda 'return id(error_message);'
+      - lvgl.label.update:
+          id: lbl_error_title
+          text: !lambda 'return id(result_title);'
+      - lvgl.label.update:
+          id: lbl_result_title
+          text: !lambda 'return id(result_title);'
+      - lvgl.label.update:
+          id: lbl_result_message
+          text: !lambda 'return id(error_message);'
+      - script.execute: refresh_clock
+
+# ─────────────────────────────
+# LVGL — a simple black background keeps the display uncluttered.
+# ─────────────────────────────
+lvgl:
+  displays:
+    - round_display
+  touchscreens:
+    - touchscreen_id: dial_touch
+  bg_color: 0x000000
+
+  pages:
+
+    - id: page_idle
+      bg_color: 0x000000
+      widgets:
+        - label:
+            align: CENTER
+            y: -42
+            text: "Mise en Place Assistant"
+            text_color: 0xFFF8EA
+        - label:
+            align: CENTER
+            y: -12
+            text: "PANTRY PAL"
+            text_color: 0xC6B4E9
+        - label:
+            align: CENTER
+            y: 18
+            text: "Scan a tag"
+            text_color: 0xFFF8EA
+        - label:
+            align: CENTER
+            y: 48
+            text: "A little kitchen magic"
+            text_color: 0x655C66
+
+    - id: page_clock
+      bg_color: 0x000000
+      widgets:
+        - label:
+            align: CENTER
+            y: -22
+            text: "KITCHEN TIME"
+            text_color: 0xC6B4E9
+        - label:
+            id: lbl_clock_time
+            align: CENTER
+            y: 10
+            text: "--:--"
+            text_font: montserrat_48
+            text_color: 0xFFF8EA
+        - label:
+            id: lbl_clock_date
+            align: CENTER
+            y: 46
+            text: "Waiting for time"
+            text_color: 0x91C788
+        - label:
+            align: BOTTOM_MID
+            y: -18
+            text: "Turn, press, or scan to wake"
+            text_color: 0x655C66
+        - obj:
+            width: 100%
+            height: 100%
+            align: CENTER
+            bg_opa: TRANSP
+            border_width: 0
+            clickable: true
+            on_click:
+              - script.execute: wake_display
+            on_swipe_left:
+              - script.execute: wake_display
+            on_swipe_right:
+              - script.execute: wake_display
+    - id: page_loading
+      bg_color: 0x000000
+      widgets:
+        - label:
+            align: CENTER
+            y: -34
+            text: "ONE MOMENT"
+            text_color: 0xF1C27D
+        - label:
+            align: CENTER
+            y: -2
+            text: "Reading your tag"
+            text_color: 0xFFF8EA
+        - label:
+            align: CENTER
+            y: 34
+            text: "Thinking with Home Assistant"
+            text_color: 0xB8AEB8
+
+    - id: page_create_item
+      bg_color: 0x000000
+      widgets:
+        - label:
+            align: TOP_MID
+            y: 22
+            text: "New container"
+            text_color: 0xC6B4E9
+        - label:
+            id: lbl_item_name
+            align: CENTER
+            y: -28
+            text: ""
+            text_color: 0xFFF8EA
+        - label:
+            id: lbl_item_count
+            align: CENTER
+            y: 8
+            text: "0 items"
+            text_color: 0x91C788
+        - label:
+            id: lbl_item_format
+            align: CENTER
+            y: 40
+            text: ""
+            text_color: 0xB8AEB8
+        - label:
+            align: BOTTOM_MID
+            y: -24
+            text: "Turn to browse  Press to choose"
+            text_color: 0x655C66
+
+    - id: page_create_qty
+      bg_color: 0x000000
+      widgets:
+        - label:
+            align: TOP_MID
+            y: 22
+            text: "Inventory count"
+            text_color: 0xC6B4E9
+        - label:
+            id: lbl_qty_value
+            align: CENTER
+            y: -18
+            text: "0"
+            text_color: 0xFFF8EA
+        - label:
+            id: lbl_qty_unit
+            align: CENTER
+            y: 34
+            text: "items"
+            text_color: 0x91C788
+        - label:
+            align: BOTTOM_MID
+            y: -24
+            text: "Turn to count  Press to continue"
+            text_color: 0x655C66
+
+    - id: page_create_location
+      bg_color: 0x000000
+      widgets:
+        - label:
+            align: TOP_MID
+            y: 22
+            text: "Location"
+            text_color: 0xC6B4E9
+        - label:
+            id: lbl_location_name
+            align: CENTER
+            y: -12
+            text: ""
+            text_color: 0xFFF8EA
+        - label:
+            align: CENTER
+            y: 32
+            text: "Press to save"
+            text_color: 0x91C788
+        - label:
+            align: BOTTOM_MID
+            y: -24
+            text: "Turn to choose a home"
+            text_color: 0x655C66
+
+    - id: page_known
+      bg_color: 0x000000
+      widgets:
+        - label:
+            align: TOP_MID
+            y: 20
+            text: "Current inventory"
+            text_color: 0xC6B4E9
+        - label:
+            id: lbl_known_name
+            align: CENTER
+            y: -44
+            text: ""
+            text_color: 0xFFF8EA
+        - label:
+            id: lbl_known_format
+            align: CENTER
+            y: -12
+            text: ""
+            text_color: 0xB8AEB8
+        - label:
+            id: lbl_known_qty
+            align: CENTER
+            y: 26
+            text: "0 items"
+            text_color: 0x91C788
+        - label:
+            id: lbl_known_location
+            align: CENTER
+            y: 58
+            text: ""
+            text_color: 0xB8AEB8
+        - label:
+            align: BOTTOM_MID
+            y: -18
+            text: "Turn to count  Press to continue"
+            text_color: 0x655C66
+
+    - id: page_known_location
+      bg_color: 0x000000
+      widgets:
+        - label:
+            align: TOP_MID
+            y: 22
+            text: "Move container"
+            text_color: 0xC6B4E9
+        - label:
+            id: lbl_known_location_select
+            align: CENTER
+            y: -12
+            text: ""
+            text_color: 0xFFF8EA
+        - label:
+            align: CENTER
+            y: 32
+            text: "Press to save this move"
+            text_color: 0x91C788
+        - label:
+            align: BOTTOM_MID
+            y: -24
+            text: "Turn to choose a home"
+            text_color: 0x655C66
+
+    - id: page_mise_listening
+      bg_color: 0x000000
+      widgets:
+        - obj:
+            width: 148
+            height: 148
+            align: CENTER
+            y: -14
+            radius: 74
+            bg_opa: TRANSP
+            border_width: 3
+            border_color: 0x655C66
+        - obj:
+            width: 116
+            height: 116
+            align: CENTER
+            y: -14
+            radius: 58
+            bg_opa: TRANSP
+            border_width: 4
+            border_color: 0xC6B4E9
+        - obj:
+            width: 72
+            height: 72
+            align: CENTER
+            y: -14
+            radius: 36
+            bg_opa: TRANSP
+            border_width: 4
+            border_color: 0x91C788
+        - obj:
+            width: 30
+            height: 30
+            align: CENTER
+            y: -14
+            radius: 15
+            bg_color: 0xFFF8EA
+            border_width: 0
+        - obj:
+            width: 12
+            height: 12
+            align: CENTER
+            x: -58
+            y: -14
+            radius: 6
+            bg_color: 0xF1C27D
+            border_width: 0
+        - obj:
+            width: 12
+            height: 12
+            align: CENTER
+            x: 58
+            y: -14
+            radius: 6
+            bg_color: 0xF1C27D
+            border_width: 0
+        - obj:
+            width: 9
+            height: 9
+            align: CENTER
+            y: -88
+            radius: 5
+            bg_color: 0x91C788
+            border_width: 0
+        - label:
+            align: BOTTOM_MID
+            y: -42
+            text: "MISE"
+            text_color: 0xFFF8EA
+        - label:
+            align: BOTTOM_MID
+            y: -18
+            text: "Press to exit"
+            text_color: 0x655C66
+
+    - id: page_done
+      bg_color: 0x000000
+      widgets:
+        - label:
+            id: lbl_result_title
+            align: CENTER
+            y: -34
+            text: "ALL SET"
+            text_color: 0x91C788
+        - label:
+            id: lbl_result_message
+            align: CENTER
+            y: -2
+            text: "Your pantry is in order"
+            text_color: 0xFFF8EA
+        - label:
+            align: CENTER
+            y: 34
+            text: "Press to scan another tag"
+            text_color: 0xB8AEB8
+
+    - id: page_saving
+      bg_color: 0x000000
+      widgets:
+        - label:
+            align: CENTER
+            y: -26
+            text: "SAVING"
+            text_color: 0xF1C27D
+        - label:
+            align: CENTER
+            y: 8
+            text: "Checking with Home Assistant"
+            text_color: 0xFFF8EA
+        - label:
+            align: CENTER
+            y: 42
+            text: "One moment..."
+            text_color: 0xB8AEB8
+
+    - id: page_error
+      bg_color: 0x000000
+      widgets:
+        - label:
+            id: lbl_error_title
+            align: CENTER
+            y: -36
+            text: "NOT QUITE"
+            text_color: 0xF47B63
+        - label:
+            id: lbl_error_message
+            align: CENTER
+            y: -4
+            text: "Home Assistant did not reply"
+            text_color: 0xFFF8EA
+        - label:
+            align: CENTER
+            y: 42
+            text: "Press to try again"
+            text_color: 0xB8AEB8
