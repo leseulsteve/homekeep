@@ -105,6 +105,9 @@ defined Homekeep flow.
 active Chore Session, completion may write through to that active session item.
 Recommendation-only completion without a matching active session remains
 rejected.
+- When such an active-session match exists, the recommendation projection should
+  expose the resolved active-session metadata so the Home Assistant frontend can
+  send back `session_id` and `session_item_id`.
 - Creating, deleting, renaming, moving, or editing recommendations is rejected
 or reverted.
 - Regeneration replaces the projection from Homekeep recommendations.

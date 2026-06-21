@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import unittest
+import json
 from dataclasses import dataclass
 
 from custom_components.homekeep.models import ChoreDefinition, ChoreState
@@ -84,6 +85,12 @@ class HomekeepTodoProjectionTest(unittest.IsolatedAsyncioTestCase):
             ["empty_compost"]
         )
         self.entity = TestableActiveSessionTodo(self.storage)
+
+    async def test_todo_projection_names_include_homekeep_prefix(self) -> None:
+        recommendations = TestableRecommendationsTodo(self.storage)
+
+        self.assertEqual(self.entity._attr_name, "Homekeep Active Session")
+        self.assertEqual(recommendations._attr_name, "Homekeep Recommendations")
 
     async def test_active_session_projection_completes_valid_item(self) -> None:
         item = self.entity.todo_items[0]
@@ -170,6 +177,14 @@ class HomekeepTodoProjectionTest(unittest.IsolatedAsyncioTestCase):
         }
         entity = TestableRecommendationsTodo(self.storage)
         item = entity.todo_items[0]
+        description = json.loads(item.description or "{}")
+
+        self.assertEqual(description["projection_kind"], "active_session")
+        self.assertEqual(description["session_id"], self.session["session_id"])
+        self.assertEqual(
+            description["session_item_id"],
+            self.session["items"][0]["session_item_id"],
+        )
 
         await entity.async_update_todo_item(
             TodoItem(

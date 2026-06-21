@@ -176,7 +176,7 @@ class HomekeepActiveSessionTodoEntity(HomekeepTodoProjectionEntity):
     """Projection of active Chore Session items."""
 
     def __init__(self, storage: Any) -> None:
-        super().__init__(storage, "active_session_todo", "Active Session")
+        super().__init__(storage, "active_session_todo", "Homekeep Active Session")
 
     def _project_items(self) -> list[tuple[str, TodoItem, ProjectionMetadata]]:
         projected: list[tuple[str, TodoItem, ProjectionMetadata]] = []
@@ -205,7 +205,7 @@ class HomekeepRecommendationsTodoEntity(HomekeepTodoProjectionEntity):
     """Projection of the latest Smart Chore List recommendations."""
 
     def __init__(self, storage: Any) -> None:
-        super().__init__(storage, "recommendations_todo", "Recommendations")
+        super().__init__(storage, "recommendations_todo", "Homekeep Recommendations")
 
     def _project_items(self) -> list[tuple[str, TodoItem, ProjectionMetadata]]:
         snapshot = _latest_snapshot(self.storage.store.recommendations)
@@ -223,6 +223,7 @@ class HomekeepRecommendationsTodoEntity(HomekeepTodoProjectionEntity):
                     recommendation_snapshot_id=snapshot["snapshot_id"],
                     variant=item.get("variant", "normal"),
                 )
+                metadata = self._completion_metadata(metadata)
                 uid = _uid(metadata)
                 projected.append((uid, _todo_item(uid, chore.name, metadata), metadata))
         return projected

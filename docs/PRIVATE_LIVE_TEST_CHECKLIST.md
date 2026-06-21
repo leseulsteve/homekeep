@@ -187,6 +187,12 @@ Gate 5 partial live result on 2026-06-21:
 - Patched To-do completion to resolve a recommendation projection to a matching
   pending active-session item for the same Chore. Recommendation completion
   without a matching active session remains rejected.
+- Live retry still showed recommendation metadata with `session_id: null`.
+  Patched recommendation projection generation to expose resolved
+  active-session metadata when a matching active item exists.
+- `todo.homekeep_active_session` was missing in the live entity list. Patched
+  To-do projection names to include the Homekeep prefix so Home Assistant
+  generates the documented entity ids.
 
 ## Gate 6: Calendar Context Smoke Test
 
