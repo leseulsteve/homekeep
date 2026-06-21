@@ -110,6 +110,7 @@ class HomekeepTodoProjectionEntity(TodoListEntity):
         metadata = self._metadata_by_uid.get(uid)
         if metadata is None:
             raise HomekeepTodoMutationError("unknown Homekeep projection item")
+        metadata = self._completion_metadata(metadata)
         if not metadata.session_id or not metadata.session_item_id:
             raise HomekeepTodoMutationError(
                 "projected item is not attached to an active session"
@@ -127,6 +128,34 @@ class HomekeepTodoProjectionEntity(TodoListEntity):
         )
         self._write_ha_state()
         return result or {}
+
+    def _completion_metadata(self, metadata: ProjectionMetadata) -> ProjectionMetadata:
+        if metadata.session_id and metadata.session_item_id:
+            return metadata
+        active_metadata = self._active_session_metadata_for_chore(
+            metadata.chore_id, metadata.variant
+        )
+        return active_metadata or metadata
+
+    def _active_session_metadata_for_chore(
+        self, chore_id: str, variant: str
+    ) -> Optional[ProjectionMetadata]:
+        for session in self.storage.store.sessions.values():
+            if session.get("status") not in {"active", "paused", "bonus_active"}:
+                continue
+            for item in session.get("items", []):
+                if (
+                    item.get("chore_id") == chore_id
+                    and item.get("status") in {"pending", "active"}
+                ):
+                    return ProjectionMetadata(
+                        projection_kind="active_session",
+                        chore_id=chore_id,
+                        session_id=session["session_id"],
+                        session_item_id=item["session_item_id"],
+                        variant=item.get("variant", variant),
+                    )
+        return None
 
     async def _reject_unsupported_mutation(self, mutation: str) -> None:
         self._write_ha_state()

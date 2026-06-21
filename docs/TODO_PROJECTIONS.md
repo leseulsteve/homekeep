@@ -101,6 +101,10 @@ name.
 
 - Completing a projected recommendation may start or complete only through the
 defined Homekeep flow.
+- If the recommendation item maps to a Chore that is already pending in an
+active Chore Session, completion may write through to that active session item.
+Recommendation-only completion without a matching active session remains
+rejected.
 - Creating, deleting, renaming, moving, or editing recommendations is rejected
 or reverted.
 - Regeneration replaces the projection from Homekeep recommendations.

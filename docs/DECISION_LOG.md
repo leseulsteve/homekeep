@@ -191,6 +191,10 @@ implementation pass.
 - Recommendation To-do items are launchable suggestions only in Phase 5; only
   active-session To-do items with valid Homekeep projection metadata can be
   completed directly from Home Assistant.
+- If a recommendation To-do item is completed while a matching Chore is already
+  present as a pending item in an active Chore Session, Homekeep may resolve the
+  write-through to that active session item. Recommendation-only completion
+  without a matching active session remains rejected.
 - `homekeep.load_sample_chores` is a private live-test seed helper, not a
   general Chore import surface. It loads bundled synthetic fixtures, refuses to
   overwrite existing chores unless `replace_existing=true`, and may clear

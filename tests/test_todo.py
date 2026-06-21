@@ -139,7 +139,7 @@ class HomekeepTodoProjectionTest(unittest.IsolatedAsyncioTestCase):
                 {
                     "recommendation_id": "rec-1",
                     "chore_items": [
-                        {"chore_id": "empty_compost", "variant": "normal"}
+                        {"chore_id": "wipe_counters", "variant": "normal"}
                     ],
                 }
             ],
@@ -153,6 +153,37 @@ class HomekeepTodoProjectionTest(unittest.IsolatedAsyncioTestCase):
             )
 
         self.assertEqual(len(self.storage.store.completions), 0)
+
+    async def test_recommendation_projection_completion_uses_matching_active_session(self) -> None:
+        snapshot_id = "snapshot-1"
+        self.storage.store.recommendations[snapshot_id] = {
+            "snapshot_id": snapshot_id,
+            "created_at": "2026-06-21T09:00:00+00:00",
+            "selected_recommendations": [
+                {
+                    "recommendation_id": "rec-1",
+                    "chore_items": [
+                        {"chore_id": "empty_compost", "variant": "normal"}
+                    ],
+                }
+            ],
+        }
+        entity = TestableRecommendationsTodo(self.storage)
+        item = entity.todo_items[0]
+
+        await entity.async_update_todo_item(
+            TodoItem(
+                uid=item.uid,
+                summary=item.summary,
+                status=TodoItemStatus.COMPLETED,
+            )
+        )
+
+        session_item = self.storage.store.sessions[self.session["session_id"]]["items"][0]
+        self.assertEqual(session_item["status"], "done")
+        self.assertEqual(len(self.storage.store.completions), 1)
+        self.assertEqual(self.storage.store.completions[0].source, "todo")
+        self.assertEqual(self.storage.save_count, 1)
 
 
 if __name__ == "__main__":

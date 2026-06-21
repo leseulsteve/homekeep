@@ -166,13 +166,27 @@ Gate 4 partial live result on 2026-06-21:
 
 - [ ] `todo.homekeep_recommendations` mirrors the latest Smart Chore List
 - [ ] `todo.homekeep_active_session` mirrors active session items
-- [ ] Completing a valid active-session To-do item writes through to Homekeep
+- [ ] Completing a valid To-do item attached to an active session writes
+  through to Homekeep
 - [ ] Completing an item without valid Homekeep metadata is rejected
 - [ ] Creating a To-do item is rejected or snaps back
 - [ ] Deleting a To-do item is rejected or snaps back
 - [ ] Renaming/editing a To-do item is rejected or snaps back
 - [ ] Reordering a To-do item is rejected or snaps back
 - [ ] Unsupported To-do mutations do not alter Homekeep storage
+
+Gate 5 partial live result on 2026-06-21:
+
+- Generated snapshot `snapshot_0f4c81eac60502aa` and started
+  `rec_c8eadc98e094087a` as
+  `session_0e0986ae0e8e4d52ab9e0ff4a4fbfaf6`.
+- To-do completion failed with `projected item is not attached to an active
+  session`, indicating the frontend action reached a recommendation-style
+  projection or stale projection metadata rather than the active-session
+  metadata.
+- Patched To-do completion to resolve a recommendation projection to a matching
+  pending active-session item for the same Chore. Recommendation completion
+  without a matching active session remains rejected.
 
 ## Gate 6: Calendar Context Smoke Test
 
