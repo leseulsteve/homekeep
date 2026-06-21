@@ -7,15 +7,15 @@ Use it as the resume point for future sessions. Do not rely on chat memory.
 ## Current Status
 
 ```yaml
-current_phase: 3
-current_phase_name: Chore Session lifecycle
+current_phase: 4
+current_phase_name: Recommendation Engine V1
 last_updated: 2026-06-21
 last_codex_summary: >
-  Phase 2 derived health and adaptive interval helpers are complete. Homekeep
-  now derives Staleness, Home Health, Area Health, Projected Impact, completion
-  scheduling relief, area-health event thresholds, and adaptive interval
-  training from durable ChoreDefinition and ChoreState facts without storing
-  authoritative health or staleness values.
+  Phase 3 Chore Session lifecycle is complete as a pure core mutation engine.
+  Homekeep now supports session start, pause, end, item completion, skip,
+  snooze, dismiss, participant attribution, bounded Bonus Chore states,
+  accept_bonus_chore, duplicate session-item completion protection, and
+  request_id idempotency under a mutation lock.
 ```
 
 ## Phase Checklist
@@ -23,7 +23,7 @@ last_codex_summary: >
 - [x] Phase 0: Scaffold
 - [x] Phase 1: Models and storage
 - [x] Phase 2: Health and adaptive intervals
-- [ ] Phase 3: Chore Session lifecycle
+- [x] Phase 3: Chore Session lifecycle
 - [ ] Phase 4: Recommendation Engine V1
 - [ ] Phase 5: Home Assistant services and entities
 - [ ] Phase 6: Calendar Context
@@ -194,6 +194,65 @@ Known gaps / next prompt:
 - Next recommended prompt: Implement Phase 3 Chore Session lifecycle with
   materialized Session Items, completion/skip/snooze/dismiss state changes,
   participant attribution, Bonus Chore lifecycle, and focused tests.
+
+### 2026-06-21 - Phase 3: Chore Session lifecycle
+
+Status: completed
+
+Implemented:
+- Added `custom_components/homekeep/sessions.py` with a pure core
+  `SessionEngine` that serializes durable mutations through an `RLock`.
+- Implemented Chore Session start, pause, completion, skip, snooze, dismiss,
+  end, Bonus Chore acceptance, lazy Bonus Chore expiry, and terminal-state
+  transition guards.
+- Materialized Session Items at session start with stable `session_item_id`
+  values and caller-facing session response dictionaries.
+- Wired completions through the Phase 2 completion helpers so completions update
+  durable `ChoreCompletion`, `ChoreState.last_completed_at`,
+  `adaptive_interval_days`, and `next_due_at`.
+- Added participant attribution validation: out-of-session participants are
+  rejected; omitted `completed_by` defaults to `started_by` when available.
+- Implemented skip/snooze/dismiss item handling without creating completions or
+  training adaptive intervals; snooze and dismissal update bounded ChoreState
+  event timestamps.
+- Implemented bounded `bonus_pending` and `bonus_active` lifecycle with a
+  15-minute pending offer TTL, one Bonus Chore per session, original
+  `session_id` reuse, and completion of the accepted Bonus Chore ending the
+  session.
+- Added request-id idempotency records with 24-hour TTL and 1000-record cap;
+  duplicate valid retries return the stored result.
+- Added `tests/test_sessions.py` for allowed/disallowed transitions, duplicate
+  completion calls, request-id idempotency, participant attribution, skip vs
+  complete conflicts, snooze/dismiss side effects, Bonus Chore acceptance,
+  expiry, paused-session Bonus Chore eligibility, and incomplete-session
+  rejection.
+
+Tests/checks run:
+- `python3 -m unittest tests.test_sessions -v`
+- `python3 -m unittest discover -s tests -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `git diff --check`
+
+Docs updated:
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Kept Phase 3 pure Python and storage-backed rather than wiring Home Assistant
+  services yet; Phase 0 service handlers still return scaffold responses.
+- Stored sessions as JSON-safe dictionaries inside the existing versioned store
+  so later service/entity layers can persist them without a migration.
+- Implemented a small explicit `start_session` helper for tests and future
+  service wiring; RecommendationSnapshot materialization remains for the
+  Recommendation Engine pass.
+
+Known gaps / next prompt:
+- Home Assistant service handlers still need to call `SessionEngine`; they
+  remain no-op scaffold handlers until the service/entity wiring phase.
+- RecommendationSnapshot freshness/materialization is not implemented yet and
+  should be handled with the Recommendation Engine V1 work.
+- Next recommended prompt: Implement Phase 4 Recommendation Engine V1 with
+  deterministic scoring, Smart Chore List payloads, RecommendationSnapshots,
+  context fingerprints, dismissal/snooze effects, and focused tests.
 
 ## Resume Instructions
 
