@@ -67,6 +67,17 @@ enabled/high-priority chores.
 - Whether area-focused To-do projections are enabled by default or opt-in.
 - Exact Bubble Card YAML after the first entities/services exist.
 
+## Phase 8 Hardening Notes
+
+- Home Assistant package-backed integration tests are still deferred because
+  Home Assistant is not installed in the local environment.
+- Local fakes now cover config entry unload behavior, storage preservation on
+  failed unload, and calendar listener cleanup.
+- Pre-`1.0` mock adequacy is tracked in `docs/MOCK_ADEQUACY_REVIEW.md`.
+- The current local mocks are adequate for developer readiness, but public
+  release readiness still requires Home Assistant package-backed tests or an
+  approved live synthetic candidate workflow.
+
 ## Scaffold Readiness
 
 The project is ready to scaffold when Codex can implement from:

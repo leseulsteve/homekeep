@@ -11,10 +11,10 @@ current_phase: 8
 current_phase_name: Hardening and release readiness
 last_updated: 2026-06-21
 last_codex_summary: >
-  Phase 7 Bubble Card MVP is complete as an example dashboard. The dashboard
-  uses Bubble Card pop-ups, select cards, buttons, and sub-buttons where they
-  fit, native Home Assistant To-do/entities cards for projections, and helper
-  scripts for service response ids that Lovelace cards cannot hold cleanly.
+  Phase 8 hardening is complete for local developer readiness. Homekeep now has
+  stronger storage migration coverage, malformed service payload guards, stale
+  session response tests, config entry unload/reload mock coverage, and a
+  pre-1.0 mock adequacy review. No deploy or release was performed.
 ```
 
 ## Phase Checklist
@@ -27,7 +27,7 @@ last_codex_summary: >
 - [x] Phase 5: Home Assistant services and entities
 - [x] Phase 6: Calendar Context
 - [x] Phase 7: Bubble Card MVP
-- [ ] Phase 8: Hardening and release readiness
+- [x] Phase 8: Hardening and release readiness
 
 ## Phase Log
 
@@ -566,6 +566,64 @@ Known gaps / next prompt:
   reload/unload behavior, migration edge cases, entity refresh behavior,
   service response polish, packaged helper/script examples, and focused Home
   Assistant integration tests where dependencies are available.
+
+### 2026-06-21 - Phase 8: Hardening and release readiness
+
+Status: completed
+
+Implemented:
+- Hardened `HomekeepServiceRuntime` so missing required service fields raise
+  `HomekeepValidationError` instead of raw `KeyError`.
+- Added malformed service payload tests for missing `chore_id`,
+  `snooze_minutes`, `recommendation_snapshot_id`, `session_id`, and `status`.
+- Added stale session response coverage: a stale completion attempt after
+  session cancellation is rejected and does not create a completion or mutate
+  terminal session state.
+- Expanded storage migration tests for version `2` loading, missing optional
+  sections, stale unknown-Chore state cleanup, and invalid stored values.
+- Added config entry unload/reload mock coverage for platform unload success,
+  failed platform unload preservation, and calendar listener cleanup.
+- Added `docs/MOCK_ADEQUACY_REVIEW.md` for pre-`1.0` version-bump readiness.
+- Updated `docs/IMPLEMENTATION_READINESS_REVIEW.md` with Phase 8 hardening
+  notes and remaining public-release test gaps.
+
+Deploy workflow status:
+- Reviewed the working tree before changes.
+- No version bump was requested or performed.
+- No deploy, publish, tag, or release command was run.
+- Pre-`1.0` mock adequacy was reviewed. Current mocks are adequate for local
+  developer readiness, but not enough to claim public release readiness without
+  Home Assistant package-backed tests or an approved live synthetic candidate.
+
+Tests/checks run:
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_services tests.test_storage tests.test_reload_unload -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest discover -s tests -v`
+- `git diff --check`
+
+Docs updated:
+- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/IMPLEMENTATION_READINESS_REVIEW.md`
+- `docs/MOCK_ADEQUACY_REVIEW.md`
+
+Important decisions:
+- Kept Phase 8 scoped to local hardening and release readiness review. No
+  deploy or version bump was performed because Steve explicitly said not to
+  deploy unless asked.
+- Used local fakes for Home Assistant lifecycle behavior because Home Assistant
+  is not installed in the local environment.
+- Treated Home Assistant package-backed integration tests as a remaining
+  release-readiness gap rather than pretending source checks are equivalent.
+
+Known gaps / next prompt:
+- Add Home Assistant package-backed tests for config flow, service
+  registration/action responses, sensors, binary sensors, To-do projections,
+  calendar services, reload/unload, and entity refresh behavior.
+- Add packaged helper/script examples for `examples/bubble_card_dashboard.yaml`
+  if the dashboard should be one-copy deployable.
+- Next recommended prompt: Add Home Assistant package-backed integration tests
+  and release checklist automation, or ask explicitly for a version bump/release
+  pass when ready.
 
 ## Resume Instructions
 

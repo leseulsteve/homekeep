@@ -111,7 +111,7 @@ class HomekeepServiceRuntime:
             if not recommendation_id:
                 raise HomekeepValidationError("recommendation_id is required")
             result = self._recommendations().start_recommendation(
-                data[ATTR_RECOMMENDATION_SNAPSHOT_ID],
+                _required(data, ATTR_RECOMMENDATION_SNAPSHOT_ID),
                 recommendation_id,
                 user_id=data.get(ATTR_USER_ID),
                 request_id=data.get(ATTR_REQUEST_ID),
@@ -121,7 +121,7 @@ class HomekeepServiceRuntime:
 
         if service_name == SERVICE_COMPLETE_CHORE:
             result = self._sessions().complete_chore(
-                data[ATTR_CHORE_ID],
+                _required(data, ATTR_CHORE_ID),
                 session_id=data.get(ATTR_SESSION_ID),
                 session_item_id=data.get(ATTR_SESSION_ITEM_ID),
                 variant=data.get(ATTR_VARIANT, "normal"),
@@ -136,7 +136,7 @@ class HomekeepServiceRuntime:
             session_id = _required(data, ATTR_SESSION_ID)
             session_item_id = _required(data, ATTR_SESSION_ITEM_ID)
             result = self._sessions().skip_chore(
-                data[ATTR_CHORE_ID],
+                _required(data, ATTR_CHORE_ID),
                 session_id=session_id,
                 session_item_id=session_item_id,
                 request_id=data.get(ATTR_REQUEST_ID),
@@ -146,8 +146,8 @@ class HomekeepServiceRuntime:
 
         if service_name == SERVICE_SNOOZE_CHORE:
             result = self._sessions().snooze_chore(
-                data[ATTR_CHORE_ID],
-                snooze_minutes=data[ATTR_SNOOZE_MINUTES],
+                _required(data, ATTR_CHORE_ID),
+                snooze_minutes=_required_int(data, ATTR_SNOOZE_MINUTES),
                 session_id=data.get(ATTR_SESSION_ID),
                 session_item_id=data.get(ATTR_SESSION_ITEM_ID),
                 request_id=data.get(ATTR_REQUEST_ID),
@@ -157,7 +157,7 @@ class HomekeepServiceRuntime:
 
         if service_name == SERVICE_DISMISS_CHORE:
             result = self._sessions().dismiss_chore(
-                data[ATTR_CHORE_ID],
+                _required(data, ATTR_CHORE_ID),
                 session_id=data.get(ATTR_SESSION_ID),
                 session_item_id=data.get(ATTR_SESSION_ITEM_ID),
                 request_id=data.get(ATTR_REQUEST_ID),
@@ -167,7 +167,7 @@ class HomekeepServiceRuntime:
 
         if service_name == SERVICE_PAUSE_SESSION:
             result = self._sessions().pause_session(
-                data[ATTR_SESSION_ID],
+                _required(data, ATTR_SESSION_ID),
                 request_id=data.get(ATTR_REQUEST_ID),
             )
             await self.storage.async_save()
@@ -175,19 +175,20 @@ class HomekeepServiceRuntime:
 
         if service_name == SERVICE_ACCEPT_BONUS_CHORE:
             result = self._sessions().accept_bonus_chore(
-                data[ATTR_SESSION_ID],
-                data[ATTR_CHORE_ID],
+                _required(data, ATTR_SESSION_ID),
+                _required(data, ATTR_CHORE_ID),
                 request_id=data.get(ATTR_REQUEST_ID),
             )
             await self.storage.async_save()
             return result
 
         if service_name == SERVICE_END_SESSION:
+            session_id = _required(data, ATTR_SESSION_ID)
             result = self._sessions().end_session(
-                data[ATTR_SESSION_ID],
-                status=data[ATTR_STATUS],
+                session_id,
+                status=_required(data, ATTR_STATUS),
                 offer_bonus_chore=data.get(ATTR_OFFER_BONUS_CHORE, False),
-                bonus_chore_id=self._bonus_chore_for_session(data[ATTR_SESSION_ID]),
+                bonus_chore_id=self._bonus_chore_for_session(session_id),
                 request_id=data.get(ATTR_REQUEST_ID),
             )
             await self.storage.async_save()
@@ -265,5 +266,12 @@ class HomekeepServiceRuntime:
 def _required(data: dict[str, Any], key: str) -> str:
     value = data.get(key)
     if not isinstance(value, str) or not value:
+        raise HomekeepValidationError(f"{key} is required")
+    return value
+
+
+def _required_int(data: dict[str, Any], key: str) -> int:
+    value = data.get(key)
+    if isinstance(value, bool) or not isinstance(value, int):
         raise HomekeepValidationError(f"{key} is required")
     return value

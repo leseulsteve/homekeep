@@ -15,6 +15,7 @@ from custom_components.homekeep.storage import (
     load_store_dict,
     migrate_store_dict,
 )
+from custom_components.homekeep.models import HomekeepValidationError
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -80,6 +81,51 @@ class StorageTest(unittest.TestCase):
 
         store = load_store_dict(raw)
         self.assertEqual(store.states["empty_compost"].adaptive_interval_days, 4)
+
+    def test_version_2_store_loads_and_missing_optional_sections_are_filled(self) -> None:
+        raw = {
+            "version": CURRENT_STORAGE_VERSION,
+            "chores": {"empty_compost": chore_data()},
+            "states": {},
+            "completions": [],
+        }
+
+        migrated = migrate_store_dict(raw)
+        store = load_store_dict(raw)
+
+        self.assertEqual(migrated["version"], CURRENT_STORAGE_VERSION)
+        self.assertIn("sessions", migrated)
+        self.assertIn("recommendations", migrated)
+        self.assertIn("calendar_context", migrated)
+        self.assertIn("user_preference_stats", migrated)
+        self.assertIn("idempotency_records", migrated)
+        self.assertIn("empty_compost", store.states)
+
+    def test_unknown_stale_state_is_ignored_during_load(self) -> None:
+        raw = empty_store_dict()
+        raw["chores"] = {"empty_compost": chore_data()}
+        raw["states"] = {
+            "missing_chore": {
+                "chore_id": "missing_chore",
+                "last_completed_at": None,
+                "adaptive_interval_days": 2,
+                "next_due_at": None,
+            }
+        }
+
+        store = load_store_dict(raw)
+
+        self.assertNotIn("missing_chore", store.states)
+        self.assertIn("empty_compost", store.states)
+
+    def test_invalid_stored_values_are_rejected(self) -> None:
+        raw = empty_store_dict()
+        broken = chore_data()
+        broken["base_interval_days"] = "not-a-number"
+        raw["chores"] = {"empty_compost": broken}
+
+        with self.assertRaisesRegex(HomekeepValidationError, "finite number"):
+            load_store_dict(raw)
 
     def test_future_storage_version_is_rejected(self) -> None:
         raw = empty_store_dict()

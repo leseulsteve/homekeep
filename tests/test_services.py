@@ -16,7 +16,9 @@ from custom_components.homekeep.const import (
     ATTR_SNOOZE_MINUTES,
     ATTR_STATUS,
     SERVICE_COMPLETE_CHORE,
+    SERVICE_END_SESSION,
     SERVICE_GENERATE_SMART_CHORE_LIST,
+    SERVICE_PAUSE_SESSION,
     SERVICE_SKIP_CHORE,
     SERVICE_SNOOZE_CHORE,
     SERVICE_START_RECOMMENDATION,
@@ -119,6 +121,30 @@ class HomekeepServiceRuntimeTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.storage.save_count, 0)
         self.assertEqual(len(self.storage.store.completions), 0)
 
+    async def test_missing_required_service_fields_raise_validation_errors(self) -> None:
+        cases = [
+            (SERVICE_COMPLETE_CHORE, {}, "chore_id"),
+            (
+                SERVICE_SNOOZE_CHORE,
+                {ATTR_CHORE_ID: "empty_compost"},
+                "snooze_minutes",
+            ),
+            (
+                SERVICE_START_RECOMMENDATION,
+                {ATTR_RECOMMENDATION_ID: "rec"},
+                "recommendation_snapshot_id",
+            ),
+            (SERVICE_PAUSE_SESSION, {}, "session_id"),
+            (SERVICE_END_SESSION, {ATTR_SESSION_ID: "session-1"}, "status"),
+        ]
+
+        for service_name, payload, message in cases:
+            with self.subTest(service_name=service_name):
+                with self.assertRaisesRegex(HomekeepValidationError, message):
+                    await self.runtime.async_handle(service_name, payload)
+
+        self.assertEqual(self.storage.save_count, 0)
+
     async def test_unknown_chore_id_is_rejected_without_crashing(self) -> None:
         with self.assertRaisesRegex(HomekeepValidationError, "unknown chore_id"):
             await self.runtime.async_handle(
@@ -168,6 +194,33 @@ class HomekeepServiceRuntimeTest(unittest.IsolatedAsyncioTestCase):
                 "end_session",
                 {ATTR_SESSION_ID: "missing", ATTR_STATUS: "completed"},
             )
+
+    async def test_stale_session_response_after_cancel_does_not_mutate(self) -> None:
+        session = SessionEngine(self.storage.store).start_session(["empty_compost"])
+        item = session["items"][0]
+        await self.runtime.async_handle(
+            SERVICE_END_SESSION,
+            {
+                ATTR_SESSION_ID: session["session_id"],
+                ATTR_STATUS: "cancelled",
+            },
+        )
+
+        with self.assertRaisesRegex(HomekeepValidationError, "cannot accept completions"):
+            await self.runtime.async_handle(
+                SERVICE_COMPLETE_CHORE,
+                {
+                    ATTR_CHORE_ID: item["chore_id"],
+                    ATTR_SESSION_ID: session["session_id"],
+                    ATTR_SESSION_ITEM_ID: item["session_item_id"],
+                },
+            )
+
+        self.assertEqual(len(self.storage.store.completions), 0)
+        self.assertEqual(
+            self.storage.store.sessions[session["session_id"]]["status"],
+            "cancelled",
+        )
 
 
 if __name__ == "__main__":
