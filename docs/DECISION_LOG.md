@@ -113,6 +113,8 @@ implementation pass.
   calendar entity state remains unchanged. The hash may include event
   start/end times and derived category flags, but not raw event summary,
   description, or location text.
+- Calendar Context keyword matching supports English and basic French terms
+  for guest/visit, travel/departure, and trash/recycling/compost signals.
 - Calendar entity state changes invalidate the current Calendar Context and
   dependent RecommendationSnapshots; recommendation refresh remains lazy.
 - Session-History Learning time buckets use Home Assistant local time.

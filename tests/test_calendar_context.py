@@ -311,6 +311,33 @@ class CalendarContextTest(unittest.IsolatedAsyncioTestCase):
             calendar_event_fingerprint(modified, now=NOW),
         )
 
+    def test_french_calendar_keywords_set_derived_signals(self) -> None:
+        events_by_entity = {
+            "calendar.family": [
+                {
+                    "start": (NOW + timedelta(hours=2)).isoformat(),
+                    "end": (NOW + timedelta(hours=3)).isoformat(),
+                    "summary": "Visite d'invités pour souper",
+                },
+                {
+                    "start": (NOW + timedelta(hours=4)).isoformat(),
+                    "end": (NOW + timedelta(hours=5)).isoformat(),
+                    "summary": "Départ vers l'aéroport",
+                },
+                {
+                    "start": (NOW + timedelta(days=1)).isoformat(),
+                    "end": (NOW + timedelta(days=1, hours=1)).isoformat(),
+                    "summary": "Sortir les poubelles et le recyclage",
+                },
+            ]
+        }
+
+        derived = derive_calendar_signals(events_by_entity, now=NOW)
+
+        self.assertTrue(derived["has_guests_soon"])
+        self.assertTrue(derived["leaving_home_soon"])
+        self.assertTrue(derived["trash_day_tomorrow"])
+
     async def test_runtime_refresh_and_recommendation_uses_selected_calendar_context(self) -> None:
         storage = FakeStorage(
             make_store(),

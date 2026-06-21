@@ -14,7 +14,8 @@ last_codex_summary: >
   Private live-test readiness is continuing after Phase 8. Calendar Context now
   stores a minimized event fingerprint and recommendation generation refreshes
   context when selected calendar events change even if the Home Assistant
-  calendar entity state stays unchanged. No deploy or release was performed.
+  calendar entity state stays unchanged. Calendar signal matching now includes
+  English and basic French terms. No deploy or release was performed.
 ```
 
 ## Phase Checklist
@@ -745,6 +746,35 @@ Known gaps / next prompt:
 - Bubble Card dashboard Gate 8 still needs private live testing.
 - Home Assistant package-backed automated tests remain a public-release
   blocker.
+
+### 2026-06-21 - Calendar Context French keyword support
+
+Status: completed locally, pending private HACS live retest
+
+Implemented:
+- Added basic French Calendar Context keywords alongside the existing English
+  terms for guest/visit, travel/departure, and trash/recycling/compost signals.
+- Centralized keyword checks so derived Calendar Context signals and minimized
+  event fingerprints classify events consistently.
+- Added regression coverage using synthetic French calendar event titles.
+
+Tests/checks run:
+- `python3 -m unittest tests.test_calendar_context -v`
+
+Docs updated:
+- `docs/CALENDAR_CONTEXT.md`
+- `docs/DECISION_LOG.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Kept this as simple local keyword matching for private live testing, not a
+  language model or broad localization system.
+- Included accented and unaccented French forms for common live-test calendar
+  phrases.
+
+Known gaps / next prompt:
+- Commit and push, update through HACS, then retest with a synthetic French
+  event title such as `Visite d'invités pour souper`.
 
 ## Resume Instructions
 

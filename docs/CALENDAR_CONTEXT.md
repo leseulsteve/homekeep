@@ -88,6 +88,10 @@ such as start/end times and derived category flags for guest, travel, trash,
 and evening signals. It must not include raw event summary, description, or
 location text.
 
+Calendar signal keyword matching supports English and basic French phrases for
+private live testing, including guest/visit/supper, departure/airport/travel,
+and trash/recycling/compost terms.
+
 Recommendation generation checks this fingerprint before reusing Calendar
 Context. This covers Home Assistant calendars where editing or adding events
 does not change the calendar entity state while it remains `off`.
