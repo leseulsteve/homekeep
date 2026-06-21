@@ -16,8 +16,9 @@ last_codex_summary: >
   context when selected calendar events change even if the Home Assistant
   calendar entity state stays unchanged. Calendar signal matching now includes
   English and basic French terms, Gate 6 is live-confirmed in the private HACS
-  test instance, and Gate 8 now has a pasteable helper/script example. No
-  deploy or release was performed.
+  test instance, and Gate 8 main Bubble Card helper flow is live-confirmed
+  except for separate Skip/Snooze button checks. No deploy or release was
+  performed.
 ```
 
 ## Phase Checklist
@@ -940,6 +941,42 @@ Important decisions:
 Known gaps / next prompt:
 - Commit and push this helper fix, reload scripts in Home Assistant, then
   retest Done for now and continue One more / Accept one more.
+
+### 2026-06-21 - Gate 8 Bubble Card main flow confirmation
+
+Status: completed with remaining Skip/Snooze live checks
+
+Implemented:
+- No code change in this pass; recorded private HACS live-test evidence for
+  the Bubble Card companion helper/scripts.
+
+Tests/checks run:
+- Private HACS live test on Home Assistant Core `2026.6.3`.
+- `script.homekeep_generate_ready_now`
+- `script.homekeep_start_selected_recommendation`
+- `script.homekeep_complete_selected_session_item`
+- `script.homekeep_end_session_completed`
+- `script.homekeep_offer_bonus_chore`
+- `script.homekeep_accept_bonus_chore`
+- Bonus Chore completion and active-session To-do check.
+
+Docs updated:
+- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/PRIVATE_LIVE_TEST_RESULTS.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Treated a second completion failure with `session cannot accept completions`
+  as expected after `todo.homekeep_active_session` reached `0`, because the
+  session was already terminal.
+
+Known gaps / next prompt:
+- Bubble Card Skip and Snooze helper buttons still need separate live
+  confirmation if full dashboard readiness is required.
+- Calendar listener behavior after reload remains not separately
+  live-confirmed.
+- Home Assistant package-backed automated tests remain a public-release
+  blocker.
 
 ## Resume Instructions
 

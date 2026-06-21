@@ -37,6 +37,8 @@ not a public release note.
 - Calendar Context refresh after a synthetic French event, including
   `has_guests_soon: true`, minimized event fingerprint storage, and
   `sensor.homekeep_next_calendar_context` reporting `guests`.
+- Bubble Card companion helper/script main flow: Generate, Start, complete
+  active item, Done for now, One more, Accept one more, and bonus completion.
 - Reload and restart recovery.
 - Privacy/diagnostics scan for Homekeep logs after fixes.
 
@@ -65,7 +67,8 @@ not a public release note.
 - Calendar listener behavior after reload is not live-confirmed.
 - Manual unload was not available in the Home Assistant UI; local automated
   unload tests cover this path.
-- Bubble Card dashboard MVP was not live-tested in this pass.
+- Bubble Card Skip and Snooze helper buttons were not separately live-tested in
+  this pass.
 - Home Assistant package-backed automated integration tests are still missing.
 
 ## Release Blockers
@@ -74,7 +77,7 @@ not a public release note.
 - Before any version bump or public release, add or run Home Assistant
   package-backed tests for config flow, services, entities, To-do projections,
   calendar invalidation, reload/unload, and service responses.
-- Complete Bubble Card helper/script live testing if dashboard readiness is
-  part of the release target.
+- Complete Bubble Card Skip and Snooze helper live testing if full dashboard
+  readiness is part of the release target.
 - Update mock adequacy review for the release diff.
 - Get explicit Steve approval before any release, deploy, publish, or tag.

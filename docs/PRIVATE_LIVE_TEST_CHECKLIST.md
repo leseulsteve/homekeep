@@ -291,19 +291,19 @@ Companion helper/script example:
 
 - `examples/bubble_card_helpers.yaml`
 
-- [ ] Create required `input_select` helpers:
-  - [ ] `input_select.homekeep_time_budget`
-  - [ ] `input_select.homekeep_energy_level`
-  - [ ] `input_select.homekeep_goal`
-  - [ ] `input_select.homekeep_mood`
-- [ ] Create required `input_text` helpers:
-  - [ ] `input_text.homekeep_recommendation_snapshot_id`
-  - [ ] `input_text.homekeep_recommendation_id`
-  - [ ] `input_text.homekeep_session_id`
-  - [ ] `input_text.homekeep_session_item_id`
-  - [ ] `input_text.homekeep_chore_id`
-  - [ ] `input_text.homekeep_bonus_chore_id`
-- [ ] Create bridge scripts documented in the dashboard example
+- [x] Create required `input_select` helpers:
+  - [x] `input_select.homekeep_time_budget`
+  - [x] `input_select.homekeep_energy_level`
+  - [x] `input_select.homekeep_goal`
+  - [x] `input_select.homekeep_mood`
+- [x] Create required `input_text` helpers:
+  - [x] `input_text.homekeep_recommendation_snapshot_id`
+  - [x] `input_text.homekeep_recommendation_id`
+  - [x] `input_text.homekeep_session_id`
+  - [x] `input_text.homekeep_session_item_id`
+  - [x] `input_text.homekeep_chore_id`
+  - [x] `input_text.homekeep_bonus_chore_id`
+- [x] Create bridge scripts documented in the dashboard example
 - [ ] Paste/import `examples/bubble_card_dashboard.yaml`
 - [ ] Ready-Now launcher opens
 - [ ] Time, energy, goal, and mood controls work
@@ -333,6 +333,14 @@ Gate 8 partial live result on 2026-06-21:
 - `script.homekeep_end_session_completed` initially failed because
   `homekeep.end_session` requires a `response_variable`. The helper example now
   captures `homekeep_end` before clearing helper state.
+- After the helper fixes were applied in Home Assistant, Start populated helper
+  state, active item completion worked, and Done for now completed the session.
+- One more offered bonus Chore `clean_bathroom_sink`; Accept one more worked and
+  populated the bonus Chore helper state.
+- Completing the bonus Chore left `todo.homekeep_active_session` at `0`.
+  A follow-up complete attempt failed with `session cannot accept completions`,
+  which is expected after the session is already terminal.
+- Skip and Snooze helper buttons are still not separately live-confirmed.
 
 ## Gate 9: Privacy And Diagnostics
 
