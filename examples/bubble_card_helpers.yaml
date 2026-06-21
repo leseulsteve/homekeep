@@ -203,6 +203,7 @@ script:
           session_id: "{{ states('input_text.homekeep_session_id') }}"
           status: completed
           offer_bonus_chore: false
+        response_variable: homekeep_end
       - action: input_text.set_value
         target:
           entity_id: input_text.homekeep_session_id

@@ -328,6 +328,11 @@ Gate 8 partial live result on 2026-06-21:
   Home Assistant Jinja treated `homekeep_start.items` as the dictionary
   `items()` method. The helper example now uses bracket notation
   `homekeep_start['items']`.
+- `script.homekeep_complete_selected_session_item` completed the active item
+  after Steve manually restored the missing helper ids from the Start trace.
+- `script.homekeep_end_session_completed` initially failed because
+  `homekeep.end_session` requires a `response_variable`. The helper example now
+  captures `homekeep_end` before clearing helper state.
 
 ## Gate 9: Privacy And Diagnostics
 

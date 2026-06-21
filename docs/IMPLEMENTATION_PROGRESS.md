@@ -914,6 +914,33 @@ Known gaps / next prompt:
 - Commit and push the helper fix, update/reload scripts in Home Assistant, then
   continue Gate 8 with Done, Skip/Snooze, Done for now, and One more actions.
 
+### 2026-06-21 - Bubble Card end-session helper response fix
+
+Status: completed locally, pending private HACS live retest
+
+Implemented:
+- Added `response_variable: homekeep_end` to
+  `script.homekeep_end_session_completed` in
+  `examples/bubble_card_helpers.yaml`, because `homekeep.end_session` is a
+  response-only Home Assistant action.
+- Recorded that the Bubble Card complete helper successfully completed the
+  active item after helper ids were restored from the Start trace.
+
+Tests/checks run:
+- Pending in this pass.
+
+Docs updated:
+- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Kept `homekeep.end_session` response-only and fixed the dashboard bridge
+  script to follow the Home Assistant service contract.
+
+Known gaps / next prompt:
+- Commit and push this helper fix, reload scripts in Home Assistant, then
+  retest Done for now and continue One more / Accept one more.
+
 ## Resume Instructions
 
 When resuming implementation:
