@@ -289,12 +289,26 @@ exist.
 
 ## Gate 9: Privacy And Diagnostics
 
-- [ ] No raw calendar descriptions are stored in durable Homekeep storage
-- [ ] No private entity ids or personal schedules are copied into tracked files
-- [ ] No credentials, tokens, cookies, or webhook URLs are present in logs or
+- [x] No raw calendar descriptions are stored in durable Homekeep storage
+- [x] No private entity ids or personal schedules are copied into tracked files
+- [x] No credentials, tokens, cookies, or webhook URLs are present in logs or
   repo changes
-- [ ] Errors are clear enough to act on from Developer Tools
-- [ ] Logs do not expose raw calendar event details
+- [x] Errors are clear enough to act on from Developer Tools
+- [x] Logs do not expose raw calendar event details
+
+Gate 9 live result on 2026-06-21:
+
+- Reviewed Home Assistant log
+  `home-assistant_2026-06-21T19-56-28.699Z.log`.
+- Homekeep did not log raw calendar event summaries, descriptions, or
+  locations.
+- Homekeep did not log credentials, tokens, cookies, webhook URLs, or raw
+  private calendar details.
+- The log did show Homekeep blocking event-loop file I/O while reading bundled
+  sample Chores during dev-mode setup repair. Patched sample Chore loading to
+  use Home Assistant's executor when `hass` is available.
+- Other log warnings/errors were from unrelated integrations or Home Assistant
+  custom integration notices.
 
 ## Gate 10: Result Notes
 

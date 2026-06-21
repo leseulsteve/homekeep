@@ -139,10 +139,14 @@ async def _async_seed_sample_chores_for_dev_mode(
     from .runtime import HomekeepServiceRuntime
 
     if storage.store.chores:
-        await HomekeepServiceRuntime(storage).async_mark_sample_chores_due_if_unstarted()
+        await HomekeepServiceRuntime(
+            storage, getattr(storage, "hass", None)
+        ).async_mark_sample_chores_due_if_unstarted()
         return
 
-    await HomekeepServiceRuntime(storage).async_seed_sample_chores_if_empty()
+    await HomekeepServiceRuntime(
+        storage, getattr(storage, "hass", None)
+    ).async_seed_sample_chores_if_empty()
 
 
 def _dev_mode_enabled(entry: Any) -> bool:

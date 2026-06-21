@@ -84,6 +84,15 @@ class FakeStorage:
         self.save_count += 1
 
 
+class FakeHass:
+    def __init__(self) -> None:
+        self.executor_jobs: list[str] = []
+
+    async def async_add_executor_job(self, func, *args):
+        self.executor_jobs.append(func.__name__)
+        return func(*args)
+
+
 class HomekeepServiceRuntimeTest(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.storage = FakeStorage(make_store())
@@ -216,6 +225,19 @@ class HomekeepServiceRuntimeTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(set(self.storage.store.chores), set(result["chore_ids"]))
         self.assertEqual(set(self.storage.store.states), set(result["chore_ids"]))
         self.assertEqual(self.storage.save_count, 1)
+
+    async def test_load_sample_chores_uses_executor_when_hass_is_available(self) -> None:
+        hass = FakeHass()
+        runtime = HomekeepServiceRuntime(self.storage, hass)
+
+        result = await runtime.async_handle(
+            SERVICE_LOAD_SAMPLE_CHORES,
+            {ATTR_REPLACE_EXISTING: True},
+        )
+
+        assert result is not None
+        self.assertIn("load_sample_chores", hass.executor_jobs)
+        self.assertGreaterEqual(result["chore_count"], 20)
 
     async def test_stale_session_response_after_cancel_does_not_mutate(self) -> None:
         session = SessionEngine(self.storage.store).start_session(["empty_compost"])

@@ -204,7 +204,7 @@ class HomekeepServiceRuntime:
             return result
 
         if service_name == SERVICE_LOAD_SAMPLE_CHORES:
-            result = self._load_sample_chores(data)
+            result = await self._async_load_sample_chores(data)
             await self.storage.async_save()
             return result
 
@@ -220,14 +220,14 @@ class HomekeepServiceRuntime:
                 "chore_count": len(self.store.chores),
             }
 
-        result = self._load_sample_chores({ATTR_REPLACE_EXISTING: False})
+        result = await self._async_load_sample_chores({ATTR_REPLACE_EXISTING: False})
         await self.storage.async_save()
         return result
 
     async def async_mark_sample_chores_due_if_unstarted(self) -> dict[str, Any]:
         """Mark existing bundled sample chores due when they have no schedule yet."""
 
-        sample_chores = load_sample_chores(Path(__file__).with_name("sample_chores.yaml"))
+        sample_chores = await self._async_bundled_sample_chores()
         now = datetime.now(timezone.utc)
         updated: list[str] = []
         for chore_id in sample_chores:
@@ -251,6 +251,16 @@ class HomekeepServiceRuntime:
             "chore_count": len(updated),
             "chore_ids": sorted(updated),
         }
+
+    async def _async_load_sample_chores(self, data: dict[str, Any]) -> dict[str, Any]:
+        chores = await self._async_bundled_sample_chores()
+        return self._load_sample_chores(data, chores)
+
+    async def _async_bundled_sample_chores(self) -> dict[str, Any]:
+        path = Path(__file__).with_name("sample_chores.yaml")
+        if self.hass is not None:
+            return await self.hass.async_add_executor_job(load_sample_chores, path)
+        return load_sample_chores(path)
 
     def _sessions(self) -> SessionEngine:
         return SessionEngine(self.store)
@@ -313,14 +323,15 @@ class HomekeepServiceRuntime:
             ),
         )
 
-    def _load_sample_chores(self, data: dict[str, Any]) -> dict[str, Any]:
+    def _load_sample_chores(
+        self, data: dict[str, Any], chores: dict[str, Any]
+    ) -> dict[str, Any]:
         replace_existing = bool(data.get(ATTR_REPLACE_EXISTING, False))
         if self.store.chores and not replace_existing:
             raise HomekeepValidationError(
                 "sample chores already loaded; set replace_existing to true to reset"
             )
 
-        chores = load_sample_chores(Path(__file__).with_name("sample_chores.yaml"))
         if replace_existing:
             self.store.chores.clear()
             self.store.states.clear()
