@@ -10,6 +10,13 @@ from typing import Any, Optional
 
 from .models import HomekeepValidationError, parse_datetime
 from .storage import HomekeepStore
+from .text_signals import (
+    CALENDAR_GUEST_KEYWORDS,
+    CALENDAR_TRAVEL_KEYWORDS,
+    TRASH_KEYWORDS,
+    has_any_keyword,
+    normalize_guess_text,
+)
 
 
 OPTION_CALENDAR_ENTITY_IDS = "calendar_entity_ids"
@@ -17,51 +24,6 @@ READY_NOW_MAX_AGE = timedelta(minutes=15)
 SCHEDULED_MAX_AGE = timedelta(minutes=60)
 READY_NOW_LOOKAHEAD = timedelta(hours=24)
 SCHEDULED_LOOKAHEAD = timedelta(days=7)
-GUEST_KEYWORDS = (
-    "guest",
-    "visitor",
-    "visit",
-    "dinner",
-    "party",
-    "invite",
-    "invité",
-    "invites",
-    "invités",
-    "visite",
-    "souper",
-    "dîner",
-    "diner",
-    "recevoir",
-)
-TRAVEL_KEYWORDS = (
-    "travel",
-    "airport",
-    "leave home",
-    "drive",
-    "voyage",
-    "aéroport",
-    "aeroport",
-    "partir",
-    "départ",
-    "depart",
-    "conduire",
-)
-TRASH_KEYWORDS = (
-    "trash",
-    "garbage",
-    "recycling",
-    "compost",
-    "poubelle",
-    "poubelles",
-    "vidange",
-    "vidanges",
-    "déchet",
-    "déchets",
-    "dechet",
-    "dechets",
-    "recyclage",
-)
-
 CalendarEventProvider = Callable[
     [list[str], datetime, datetime], Awaitable[Mapping[str, list[Any]]]
 ]
@@ -407,9 +369,9 @@ def derive_calendar_signals(
             if start and end:
                 event_ranges.append((start, end))
             text = _event_text(event)
-            is_guest = _has_keyword(text, GUEST_KEYWORDS)
-            is_travel = _has_keyword(text, TRAVEL_KEYWORDS)
-            is_trash = _has_keyword(text, TRASH_KEYWORDS)
+            is_guest = has_any_keyword(text, CALENDAR_GUEST_KEYWORDS)
+            is_travel = has_any_keyword(text, CALENDAR_TRAVEL_KEYWORDS)
+            is_trash = has_any_keyword(text, TRASH_KEYWORDS)
             if is_guest:
                 has_guests = True
             if is_travel:
@@ -465,9 +427,9 @@ def calendar_event_fingerprint(
                 {
                     "start": start.isoformat() if start else None,
                     "end": end.isoformat() if end else None,
-                    "guest": _has_keyword(text, GUEST_KEYWORDS),
-                    "travel": _has_keyword(text, TRAVEL_KEYWORDS),
-                    "trash": _has_keyword(text, TRASH_KEYWORDS),
+                    "guest": has_any_keyword(text, CALENDAR_GUEST_KEYWORDS),
+                    "travel": has_any_keyword(text, CALENDAR_TRAVEL_KEYWORDS),
+                    "trash": has_any_keyword(text, TRASH_KEYWORDS),
                     "evening": bool(start and _is_evening(start)),
                 }
             )
@@ -552,11 +514,7 @@ def _event_text(event: Any) -> str:
         value = _event_value(event, field)
         if value:
             parts.append(str(value))
-    return " ".join(parts).lower()
-
-
-def _has_keyword(text: str, keywords: tuple[str, ...]) -> bool:
-    return any(keyword in text for keyword in keywords)
+    return normalize_guess_text(" ".join(parts))
 
 
 def _event_datetime(event: Any, field: str) -> Optional[datetime]:

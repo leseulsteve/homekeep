@@ -13,6 +13,9 @@
 # buttons. Use small Home Assistant scripts/automations to bridge helper state
 # and Homekeep service responses.
 #
+# Companion helpers and scripts are provided in:
+# - examples/bubble_card_helpers.yaml
+#
 # Companion helpers expected by this dashboard:
 # - input_select.homekeep_time_budget: 2, 5, 15, 30
 # - input_select.homekeep_energy_level: low, normal, high, quiet

@@ -287,6 +287,10 @@ Gate 7 partial live result on 2026-06-21:
 Use `examples/bubble_card_dashboard.yaml` only after companion helpers/scripts
 exist.
 
+Companion helper/script example:
+
+- `examples/bubble_card_helpers.yaml`
+
 - [ ] Create required `input_select` helpers:
   - [ ] `input_select.homekeep_time_budget`
   - [ ] `input_select.homekeep_energy_level`

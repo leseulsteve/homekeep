@@ -249,6 +249,8 @@ class SessionLifecycleTest(unittest.TestCase):
             now=self.now + timedelta(minutes=1),
         )
         self.assertEqual(accepted["status"], "bonus_active")
+        self.assertEqual(accepted["chore_id"], "bonus_sink")
+        self.assertEqual(accepted["session_item_id"], "item_3")
 
         with self.assertRaisesRegex(SessionLifecycleError, "only accepts"):
             self.engine.complete_chore(

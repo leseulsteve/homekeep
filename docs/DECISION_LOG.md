@@ -133,6 +133,10 @@ implementation pass.
   during scaffolding.
 - Store and fingerprint the normalized local ISO target window, not raw input
   text.
+- String-based local signal guessing uses shared English/basic-French keyword
+  matching with case/accent normalization. This applies to Calendar Context
+  event classification and Recommendation Engine calendar-fit guesses from
+  Chore names, groups, and Home Assistant Area ids.
 
 ## Mood Context
 

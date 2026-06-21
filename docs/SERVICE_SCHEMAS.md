@@ -405,6 +405,8 @@ Result:
 ```yaml
 session_id: string
 status: bonus_active
+chore_id: string
+session_item_id: string
 ```
 
 ## `homekeep.end_session`

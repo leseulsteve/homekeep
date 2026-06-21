@@ -11,6 +11,7 @@ from custom_components.homekeep.models import ChoreDefinition, ChoreState
 from custom_components.homekeep.recommendations import (
     RecommendationEngine,
     RecommendationError,
+    _calendar_context_score,
     context_fingerprint,
 )
 from custom_components.homekeep.storage import HomekeepStore
@@ -216,6 +217,23 @@ class RecommendationEngineTest(unittest.TestCase):
             snapshot["context_fingerprint"],
         )
         self.assertIsNotNone(session["items"][0]["session_item_id"])
+
+    def test_calendar_context_string_guesses_include_french_chore_terms(self) -> None:
+        calendar_context = {
+            "has_guests_soon": True,
+            "trash_day_tomorrow": True,
+        }
+        guest_prep = ChoreDefinition.from_dict(
+            "salle_de_bain",
+            chore_data("Nettoyer la salle de bain", area_id="salle_de_bain"),
+        )
+        trash = ChoreDefinition.from_dict(
+            "poubelles",
+            chore_data("Sortir les poubelles et le recyclage", area_id="garage"),
+        )
+
+        self.assertEqual(_calendar_context_score(guest_prep, calendar_context), 80.0)
+        self.assertEqual(_calendar_context_score(trash, calendar_context), 85.0)
 
 
 if __name__ == "__main__":

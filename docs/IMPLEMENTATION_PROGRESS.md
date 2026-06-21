@@ -15,8 +15,9 @@ last_codex_summary: >
   stores a minimized event fingerprint and recommendation generation refreshes
   context when selected calendar events change even if the Home Assistant
   calendar entity state stays unchanged. Calendar signal matching now includes
-  English and basic French terms, and Gate 6 is live-confirmed in the private
-  HACS test instance. No deploy or release was performed.
+  English and basic French terms, Gate 6 is live-confirmed in the private HACS
+  test instance, and Gate 8 now has a pasteable helper/script example. No
+  deploy or release was performed.
 ```
 
 ## Phase Checklist
@@ -809,6 +810,81 @@ Known gaps / next prompt:
 - Bubble Card dashboard Gate 8 remains the next private live-test gate.
 - Home Assistant package-backed automated tests remain a public-release
   blocker.
+
+### 2026-06-21 - Bilingual string-signal guessing
+
+Status: completed locally
+
+Implemented:
+- Added a shared `text_signals` helper for local English/basic-French keyword
+  matching with case and accent normalization.
+- Moved Calendar Context keyword classification onto the shared helper so
+  derived signals and event fingerprints continue to treat French calendar text
+  consistently.
+- Updated Recommendation Engine calendar-fit guesses from Chore names, Chore
+  groups, and Home Assistant Area ids so French terms such as `salle de bain`,
+  `poubelles`, and `recyclage` can influence guest-prep and trash-day scoring.
+- Added focused recommendation coverage for French Chore string guesses.
+
+Tests/checks run:
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_recommendations tests.test_calendar_context -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest discover -s tests -v`
+- `git diff --check`
+
+Docs updated:
+- `docs/CALENDAR_CONTEXT.md`
+- `docs/DECISION_LOG.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/RECOMMENDATION_ENGINE.md`
+
+Important decisions:
+- Kept this as bounded local keyword matching, not a broad localization system
+  or language model.
+- Treated French support as a shared rule for all current string-based signal
+  guesses rather than only Calendar Context event text.
+
+Known gaps / next prompt:
+- Full Home Assistant package-backed automated tests remain a public-release
+  blocker.
+- Bubble Card dashboard Gate 8 remains the next private live-test gate.
+
+### 2026-06-21 - Bubble Card companion helper example
+
+Status: completed locally, pending private HACS live retest
+
+Implemented:
+- Added `examples/bubble_card_helpers.yaml` with the input helpers and bridge
+  scripts expected by `examples/bubble_card_dashboard.yaml`.
+- Updated `accept_bonus_chore` responses to include the materialized bonus
+  `session_item_id`, so the Bubble Card bridge can continue after accepting
+  One more without scraping To-do internals.
+- Updated Bubble Card and service docs to point at the companion helper file
+  and document the bonus accept response.
+
+Tests/checks run:
+- `python3 -m unittest tests.test_sessions -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `python3 -m unittest discover -s tests -v`
+- `git diff --check`
+
+Docs updated:
+- `docs/BUBBLE_CARD_MVP.md`
+- `docs/SERVICE_SCHEMAS.md`
+- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Kept helper state in Home Assistant helper entities only as dashboard bridge
+  state. Homekeep storage remains authoritative for Chores, sessions, and
+  projections.
+- The dashboard bridge stores the best single recommendation by default, with
+  bundle/easiest fallback, because Lovelace cards cannot comfortably capture
+  arbitrary service response choices without scripts.
+
+Known gaps / next prompt:
+- Run focused tests, commit, push, update through HACS, then paste/create the
+  helpers/scripts and dashboard YAML in Home Assistant for Gate 8 live testing.
 
 ## Resume Instructions
 

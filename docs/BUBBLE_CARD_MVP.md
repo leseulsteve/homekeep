@@ -147,6 +147,9 @@ as a bridge because dashboard cards do not cleanly persist service response
 payloads such as `snapshot_id`, `recommendation_id`, `session_id`, and
 `session_item_id` for later button calls.
 
+The pasteable companion helper/script example lives at
+`examples/bubble_card_helpers.yaml`.
+
 The scripts should:
 
 - read local setup helpers for time, energy, goal, and mood

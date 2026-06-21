@@ -12,6 +12,12 @@ from .history import context_bucket, history_fit_score
 from .models import ChoreDefinition, ChoreState, prune_event_timestamps
 from .sessions import SessionEngine
 from .storage import HomekeepStore
+from .text_signals import (
+    GUEST_PREP_CHORE_KEYWORDS,
+    TRASH_KEYWORDS,
+    has_any_keyword,
+    normalize_guess_text,
+)
 
 
 SNAPSHOT_TTL_MINUTES = 30
@@ -474,20 +480,14 @@ def _calendar_context_score(
     if calendar_context is None:
         return 50.0
     score = 50.0
-    name = chore.name.lower()
-    group = (chore.group_id or "").lower()
-    area = (chore.area_id or "").lower()
+    guess_text = normalize_guess_text(
+        " ".join(part for part in (chore.name, chore.group_id, chore.area_id) if part)
+    )
     if calendar_context.get("has_guests_soon"):
-        if any(
-            word in name or word in group or word in area
-            for word in ("bathroom", "guest", "entry", "surface", "kitchen")
-        ):
+        if has_any_keyword(guess_text, GUEST_PREP_CHORE_KEYWORDS):
             score += 30.0
     if calendar_context.get("trash_day_tomorrow"):
-        if any(
-            word in name or word in group
-            for word in ("trash", "compost", "garbage", "recycling")
-        ):
+        if has_any_keyword(guess_text, TRASH_KEYWORDS):
             score += 35.0
     if calendar_context.get("leaving_home_soon") and chore.estimated_minutes <= 5:
         score += 15.0

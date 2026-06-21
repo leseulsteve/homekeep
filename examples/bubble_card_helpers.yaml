@@ -1,0 +1,261 @@
+# Homekeep Bubble Card MVP companion helpers and scripts.
+#
+# Paste into a Home Assistant package or split into matching helper/script
+# sections. These helpers are dashboard bridge state only; Homekeep storage
+# remains authoritative.
+
+input_select:
+  homekeep_time_budget:
+    name: Homekeep Time Budget
+    options:
+      - "2"
+      - "5"
+      - "15"
+      - "30"
+    initial: "15"
+
+  homekeep_energy_level:
+    name: Homekeep Energy Level
+    options:
+      - low
+      - normal
+      - high
+      - quiet
+    initial: normal
+
+  homekeep_goal:
+    name: Homekeep Goal
+    options:
+      - quick_wins
+      - overdue
+      - visible_impact
+      - prevent_future_mess
+      - full_reset
+    initial: visible_impact
+
+  homekeep_mood:
+    name: Homekeep Mood
+    options:
+      - auto
+      - calm
+      - focused
+      - tired
+      - overwhelmed
+      - energized
+    initial: auto
+
+input_text:
+  homekeep_recommendation_snapshot_id:
+    name: Homekeep Recommendation Snapshot ID
+    max: 80
+
+  homekeep_recommendation_id:
+    name: Homekeep Recommendation ID
+    max: 80
+
+  homekeep_session_id:
+    name: Homekeep Session ID
+    max: 100
+
+  homekeep_session_item_id:
+    name: Homekeep Session Item ID
+    max: 100
+
+  homekeep_chore_id:
+    name: Homekeep Chore ID
+    max: 100
+
+  homekeep_bonus_chore_id:
+    name: Homekeep Bonus Chore ID
+    max: 100
+
+script:
+  homekeep_generate_ready_now:
+    alias: Homekeep Generate Ready Now
+    mode: single
+    sequence:
+      - action: homekeep.generate_smart_chore_list
+        data:
+          recommendation_mode: ready_now
+          time_budget_minutes: "{{ states('input_select.homekeep_time_budget') | int(15) }}"
+          energy_level: "{{ states('input_select.homekeep_energy_level') }}"
+          goal: "{{ states('input_select.homekeep_goal') }}"
+          mood: >-
+            {% set value = states('input_select.homekeep_mood') %}
+            {{ none if value == 'auto' else value }}
+          infer_mood: "{{ is_state('input_select.homekeep_mood', 'auto') }}"
+          include_alternates: true
+        response_variable: homekeep_result
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_recommendation_snapshot_id
+        data:
+          value: "{{ homekeep_result.snapshot_id }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_recommendation_id
+        data:
+          value: >-
+            {% set rec = homekeep_result.best_single_chore
+              or homekeep_result.best_bundle
+              or homekeep_result.easiest_chore %}
+            {{ rec.recommendation_id if rec else '' }}
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_id
+        data:
+          value: ""
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_item_id
+        data:
+          value: ""
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_chore_id
+        data:
+          value: ""
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_bonus_chore_id
+        data:
+          value: ""
+
+  homekeep_start_selected_recommendation:
+    alias: Homekeep Start Selected Recommendation
+    mode: single
+    sequence:
+      - action: homekeep.start_recommendation
+        data:
+          recommendation_snapshot_id: "{{ states('input_text.homekeep_recommendation_snapshot_id') }}"
+          recommendation_id: "{{ states('input_text.homekeep_recommendation_id') }}"
+        response_variable: homekeep_start
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_id
+        data:
+          value: "{{ homekeep_start.session_id }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_item_id
+        data:
+          value: "{{ homekeep_start.items[0].session_item_id if homekeep_start.items else '' }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_chore_id
+        data:
+          value: "{{ homekeep_start.items[0].chore_id if homekeep_start.items else '' }}"
+
+  homekeep_complete_selected_session_item:
+    alias: Homekeep Complete Selected Session Item
+    mode: queued
+    sequence:
+      - action: homekeep.complete_chore
+        data:
+          chore_id: "{{ states('input_text.homekeep_chore_id') }}"
+          session_id: "{{ states('input_text.homekeep_session_id') }}"
+          session_item_id: "{{ states('input_text.homekeep_session_item_id') }}"
+          variant: normal
+          source: bubble_card
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_item_id
+        data:
+          value: ""
+
+  homekeep_skip_selected_session_item:
+    alias: Homekeep Skip Selected Session Item
+    mode: queued
+    sequence:
+      - action: homekeep.skip_chore
+        data:
+          chore_id: "{{ states('input_text.homekeep_chore_id') }}"
+          session_id: "{{ states('input_text.homekeep_session_id') }}"
+          session_item_id: "{{ states('input_text.homekeep_session_item_id') }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_item_id
+        data:
+          value: ""
+
+  homekeep_snooze_selected_session_item:
+    alias: Homekeep Snooze Selected Session Item
+    mode: queued
+    sequence:
+      - action: homekeep.snooze_chore
+        data:
+          chore_id: "{{ states('input_text.homekeep_chore_id') }}"
+          session_id: "{{ states('input_text.homekeep_session_id') }}"
+          session_item_id: "{{ states('input_text.homekeep_session_item_id') }}"
+          snooze_minutes: 15
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_item_id
+        data:
+          value: ""
+
+  homekeep_end_session_completed:
+    alias: Homekeep End Session Completed
+    mode: single
+    sequence:
+      - action: homekeep.end_session
+        data:
+          session_id: "{{ states('input_text.homekeep_session_id') }}"
+          status: completed
+          offer_bonus_chore: false
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_id
+        data:
+          value: ""
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_item_id
+        data:
+          value: ""
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_chore_id
+        data:
+          value: ""
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_bonus_chore_id
+        data:
+          value: ""
+
+  homekeep_offer_bonus_chore:
+    alias: Homekeep Offer Bonus Chore
+    mode: single
+    sequence:
+      - action: homekeep.end_session
+        data:
+          session_id: "{{ states('input_text.homekeep_session_id') }}"
+          status: completed
+          offer_bonus_chore: true
+        response_variable: homekeep_end
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_bonus_chore_id
+        data:
+          value: "{{ homekeep_end.bonus_chore.chore_id if homekeep_end.bonus_chore else '' }}"
+
+  homekeep_accept_bonus_chore:
+    alias: Homekeep Accept Bonus Chore
+    mode: single
+    sequence:
+      - action: homekeep.accept_bonus_chore
+        data:
+          session_id: "{{ states('input_text.homekeep_session_id') }}"
+          chore_id: "{{ states('input_text.homekeep_bonus_chore_id') }}"
+        response_variable: homekeep_bonus
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_chore_id
+        data:
+          value: "{{ homekeep_bonus.chore_id }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.homekeep_session_item_id
+        data:
+          value: "{{ homekeep_bonus.session_item_id }}"

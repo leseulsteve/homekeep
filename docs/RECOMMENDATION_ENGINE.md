@@ -54,6 +54,9 @@ explicit user choices always win.
 : Whether the chore helps prepare for or recover from Calendar Context.
 Calendar Context must be fresh. If the snapshot is expired or a source calendar
 entity changed, refresh before scoring or score without Calendar Context.
+  When this component guesses from Chore names, groups, or Home Assistant Area
+  ids, it uses the shared English/basic-French text-signal matcher rather than
+  English-only keywords.
 
 `history_fit_score`
 : Whether similar users or sessions historically accept or complete this chore.

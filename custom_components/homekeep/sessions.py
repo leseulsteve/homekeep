@@ -547,19 +547,23 @@ class SessionEngine:
 
         session["status"] = "bonus_active"
         session["bonus_chore_accepted"] = True
-        session["items"].append(
-            {
-                "session_item_id": self._id_factory("item"),
-                "chore_id": chore_id,
-                "variant": "normal",
-                "status": "active",
-                "started_at": _iso(now),
-                "completed_at": None,
-                "completed_by": None,
-                "bonus": True,
-            }
-        )
-        return {"session_id": session_id, "status": "bonus_active", "chore_id": chore_id}
+        item = {
+            "session_item_id": self._id_factory("item"),
+            "chore_id": chore_id,
+            "variant": "normal",
+            "status": "active",
+            "started_at": _iso(now),
+            "completed_at": None,
+            "completed_by": None,
+            "bonus": True,
+        }
+        session["items"].append(item)
+        return {
+            "session_id": session_id,
+            "status": "bonus_active",
+            "chore_id": chore_id,
+            "session_item_id": item["session_item_id"],
+        }
 
     def _idempotent(
         self,
