@@ -42,6 +42,12 @@ from .const import (
     SERVICE_START_CHORE_BUNDLE,
     SERVICE_START_RECOMMENDATION,
 )
+from .calendar_context import (
+    CalendarContextEngine,
+    calendar_entity_versions_from_hass,
+    fetch_calendar_events_from_hass,
+    selected_calendar_entity_ids,
+)
 from .models import HomekeepValidationError
 from .recommendations import RecommendationEngine
 from .sessions import SessionEngine
@@ -60,8 +66,9 @@ class SupportsSave(Protocol):
 class HomekeepServiceRuntime:
     """Thin async service facade over the synchronous Homekeep engines."""
 
-    def __init__(self, storage: SupportsSave) -> None:
+    def __init__(self, storage: SupportsSave, hass: Any | None = None) -> None:
         self.storage = storage
+        self.hass = hass
 
     @property
     def store(self) -> HomekeepStore:
@@ -75,6 +82,7 @@ class HomekeepServiceRuntime:
         """Handle one validated Home Assistant service call."""
 
         if service_name == SERVICE_GENERATE_SMART_CHORE_LIST:
+            await self._ensure_calendar_context(data)
             result = self._recommendations().generate_smart_chore_list(
                 recommendation_mode=data.get(ATTR_RECOMMENDATION_MODE, "ready_now"),
                 target_time_window=data.get(ATTR_TARGET_TIME_WINDOW),
@@ -186,7 +194,7 @@ class HomekeepServiceRuntime:
             return result
 
         if service_name == SERVICE_REFRESH_CALENDAR_CONTEXT:
-            result = self._refresh_calendar_context(data)
+            result = await self._refresh_calendar_context(data)
             await self.storage.async_save()
             return result
 
@@ -208,19 +216,50 @@ class HomekeepServiceRuntime:
                 return chore_id
         return None
 
-    def _refresh_calendar_context(self, data: dict[str, Any]) -> dict[str, Any]:
-        now = datetime.now(timezone.utc)
-        entity_ids = data.get(ATTR_CALENDAR_ENTITY_IDS) or []
-        context = {
-            "calendar_context_id": f"calendar_{int(now.timestamp())}",
-            "refreshed_at": now.isoformat(),
-            "target_time_window": data.get(ATTR_TARGET_TIME_WINDOW),
-            "calendar_entity_count": len(entity_ids),
-            "has_guests_soon": False,
-            "has_busy_block_soon": False,
-        }
-        self.store.calendar_context = context
+    async def _ensure_calendar_context(self, data: dict[str, Any]) -> None:
+        entity_ids = self._calendar_entity_ids(data)
+        if not entity_ids:
+            return
+        engine = self._calendar_context_engine()
+        if engine.is_fresh(
+            entity_ids=entity_ids,
+            target_time_window=data.get(ATTR_TARGET_TIME_WINDOW),
+            recommendation_mode=data.get(ATTR_RECOMMENDATION_MODE, "ready_now"),
+        ):
+            return
+        await engine.async_refresh(
+            entity_ids=entity_ids,
+            target_time_window=data.get(ATTR_TARGET_TIME_WINDOW),
+            recommendation_mode=data.get(ATTR_RECOMMENDATION_MODE, "ready_now"),
+        )
+
+    async def _refresh_calendar_context(self, data: dict[str, Any]) -> dict[str, Any]:
+        entity_ids = self._calendar_entity_ids(data)
+        context = await self._calendar_context_engine().async_refresh(
+            entity_ids=entity_ids,
+            target_time_window=data.get(ATTR_TARGET_TIME_WINDOW),
+            recommendation_mode=data.get(ATTR_RECOMMENDATION_MODE, "ready_now"),
+        )
         return {"status": "refreshed", "calendar_context": context}
+
+    def _calendar_entity_ids(self, data: dict[str, Any]) -> list[str]:
+        if ATTR_CALENDAR_ENTITY_IDS in data and data.get(ATTR_CALENDAR_ENTITY_IDS) is not None:
+            return list(data.get(ATTR_CALENDAR_ENTITY_IDS) or [])
+        entry = getattr(self.storage, "entry", None)
+        return selected_calendar_entity_ids(entry)
+
+    def _calendar_context_engine(self) -> CalendarContextEngine:
+        if self.hass is None:
+            return CalendarContextEngine(self.store)
+        return CalendarContextEngine(
+            self.store,
+            event_provider=lambda entity_ids, start, end: fetch_calendar_events_from_hass(
+                self.hass, entity_ids, start, end
+            ),
+            state_provider=lambda entity_ids: calendar_entity_versions_from_hass(
+                self.hass, entity_ids
+            ),
+        )
 
 
 def _required(data: dict[str, Any], key: str) -> str:

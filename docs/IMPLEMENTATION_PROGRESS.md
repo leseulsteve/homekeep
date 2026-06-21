@@ -7,16 +7,15 @@ Use it as the resume point for future sessions. Do not rely on chat memory.
 ## Current Status
 
 ```yaml
-current_phase: 5
-current_phase_name: Home Assistant services and entities
+current_phase: 7
+current_phase_name: Bubble Card MVP
 last_updated: 2026-06-21
 last_codex_summary: >
-  Phase 4 Recommendation Engine V1 is complete as deterministic pure core
-  logic. Homekeep now generates bounded Smart Chore List payloads, normalized
-  0-100 score breakdowns, stable recommendation IDs, RecommendationSnapshots,
-  context fingerprints, context buckets, sparse Session-History fallback
-  scoring, expired/invalidated snapshot rejection, and fresh snapshot
-  materialization into Chore Sessions.
+  Phase 6 Calendar Context is complete. Homekeep can select calendar entities
+  via options, derive minimized Calendar Context snapshots, track source
+  calendar versions, invalidate context and dependent recommendations on
+  selected calendar state changes, and refresh stale context lazily before
+  recommendation generation.
 ```
 
 ## Phase Checklist
@@ -26,8 +25,8 @@ last_codex_summary: >
 - [x] Phase 2: Health and adaptive intervals
 - [x] Phase 3: Chore Session lifecycle
 - [x] Phase 4: Recommendation Engine V1
-- [ ] Phase 5: Home Assistant services and entities
-- [ ] Phase 6: Calendar Context
+- [x] Phase 5: Home Assistant services and entities
+- [x] Phase 6: Calendar Context
 - [ ] Phase 7: Bubble Card MVP
 - [ ] Phase 8: Hardening and release readiness
 
@@ -406,6 +405,78 @@ Important decisions:
 Known gaps / next prompt:
 - Next implementation work remains Phase 5 Home Assistant service wiring unless
   Steve asks to revise Mood/Readiness Context docs further.
+
+### 2026-06-21 - Phase 6: Calendar Context
+
+Status: completed
+
+Implemented:
+- Added `custom_components/homekeep/calendar_context.py` with selected calendar
+  entity normalization, source version tracking, freshness checks, derived
+  signal extraction, max-age expiry, context version hashes, and invalidation
+  helpers.
+- Added Home Assistant options for selecting calendar entities with a calendar
+  entity selector.
+- Wired `homekeep.refresh_calendar_context` to build minimized snapshots from
+  selected or caller-provided calendar entities.
+- Added lazy Calendar Context freshness refresh before Smart Chore List
+  generation when selected calendars are configured.
+- Added automatic invalidation listeners for selected calendar entity state
+  changes during config entry setup, including dependent RecommendationSnapshot
+  invalidation.
+- Updated the Recommendation Engine to include fresh Calendar Context id/version
+  in context fingerprints and RecommendationSnapshots, and to use a bounded
+  derived calendar context score instead of a permanently neutral score.
+- Updated the next-calendar-context sensor to report stale derived context when
+  a snapshot has been invalidated.
+- Added tests for derived snapshots, raw-detail minimization, max-age
+  freshness, source version changes, target-window changes, calendar state
+  invalidation, dependent recommendation invalidation, and runtime service
+  wiring.
+
+Home Assistant API verification:
+- Home Assistant is not installed locally, so Phase 6 calendar assumptions were
+  verified against official Home Assistant developer docs and current Home
+  Assistant core source.
+- Verified Calendar entities expose timezone-aware `async_get_events(hass,
+  start_date, end_date)` patterns and `CalendarEvent` fields.
+- Verified the built-in `calendar.get_events` service supports response data
+  for event fetching.
+- Verified `homeassistant.helpers.event.async_track_state_change_event` is the
+  current state-change helper and that older `async_track_state_change` is
+  deprecated.
+
+Tests/checks run:
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_calendar_context -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest discover -s tests -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `git diff --check`
+
+Docs updated:
+- `docs/DECISION_LOG.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Calendar Context stores only minimized derived signals and source version
+  metadata; raw summary, description, and location text are used transiently
+  during refresh and are not stored in durable snapshots.
+- Recommendation generation refreshes stale selected Calendar Context lazily
+  rather than doing unbounded background recommendation work on every calendar
+  state change.
+- The Phase 6 event fetch path uses Home Assistant's `calendar.get_events`
+  service response instead of trying to reach into calendar entity internals.
+- Calendar scoring remains bounded and explainable, with neutral behavior when
+  there is no fresh context.
+
+Known gaps / next prompt:
+- Full in-process Home Assistant tests are still deferred because Home
+  Assistant is not installed locally.
+- Calendar signal extraction is MVP keyword-based and intentionally minimal;
+  richer source-specific semantics can be hardened later.
+- Existing uncommitted Mood/Readiness planning docs remain separate from Phase
+  6 implementation work.
+- Next recommended prompt: Implement Phase 7 Bubble Card MVP dashboard example
+  and service wiring around the completed Homekeep services.
 
 ## Resume Instructions
 

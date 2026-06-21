@@ -96,9 +96,11 @@ class HomekeepNextCalendarContextSensor(HomekeepSensorBase):
         context = self.storage.store.calendar_context
         if not context:
             return "unknown"
+        if context.get("invalidated_at"):
+            return "stale"
         if context.get("has_guests_soon"):
             return "guests"
-        if context.get("has_busy_block_soon"):
+        if context.get("busy_evening"):
             return "busy"
         return "clear"
 

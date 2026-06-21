@@ -103,8 +103,13 @@ implementation pass.
 
 - Calendar Context snapshots must have max-age checks and selected calendar
   entity invalidation.
-- Calendar-derived durable data should avoid raw event descriptions whenever
-  possible.
+- Calendar-derived durable data stores minimized derived signals, source entity
+  versions, and freshness metadata, not raw event descriptions.
+- Selected calendar entities are Home Assistant config entry options.
+- Calendar Context source versions are based on selected calendar entity state,
+  `last_changed`, and `last_updated`.
+- Calendar entity state changes invalidate the current Calendar Context and
+  dependent RecommendationSnapshots; recommendation refresh remains lazy.
 - Session-History Learning time buckets use Home Assistant local time.
 - Convert datetimes with `homeassistant.util.dt.as_local()` before deriving
   day type or time block.

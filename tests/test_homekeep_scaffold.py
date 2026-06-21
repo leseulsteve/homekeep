@@ -38,6 +38,8 @@ class HomekeepScaffoldTest(unittest.TestCase):
         self.assertIn("VERSION = 1", source)
         self.assertIn("single_instance_allowed", source)
         self.assertIn("async_create_entry(title=NAME, data={})", source)
+        self.assertIn("OPTION_CALENDAR_ENTITY_IDS", source)
+        self.assertIn('domain="calendar"', source)
 
     def test_services_are_registered_with_response_support(self) -> None:
         source = (HOMEKEEP / "__init__.py").read_text()

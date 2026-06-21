@@ -87,7 +87,7 @@ dismiss_chore:
 
 refresh_calendar_context:
   name: Refresh calendar context
-  description: Scaffold service for future Calendar Context refresh handling.
+  description: Refresh minimized Calendar Context from selected calendar entities.
   fields:
     target_time_window:
       required: false

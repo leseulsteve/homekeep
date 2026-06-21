@@ -281,6 +281,9 @@ class HomekeepStorage:
     def __init__(self, hass: Any, entry: Any) -> None:
         from homeassistant.helpers.storage import Store
 
+        self.hass = hass
+        self.entry = entry
+        self.calendar_unsub = None
         self._store = Store(
             hass,
             CURRENT_STORAGE_VERSION,

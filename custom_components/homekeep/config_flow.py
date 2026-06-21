@@ -6,8 +6,10 @@ from typing import Any
 
 from homeassistant import config_entries
 from homeassistant.core import callback
+from homeassistant.helpers import selector
 
 from .const import DOMAIN, NAME
+from .calendar_context import OPTION_CALENDAR_ENTITY_IDS
 
 
 class HomekeepConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -47,6 +49,28 @@ class HomekeepOptionsFlow(config_entries.OptionsFlow):
         """Manage Homekeep options."""
 
         if user_input is not None:
-            return self.async_create_entry(title="", data={})
+            return self.async_create_entry(title="", data=user_input)
 
-        return self.async_show_form(step_id="init")
+        return self.async_show_form(
+            step_id="init",
+            data_schema=self._options_schema(),
+        )
+
+    def _options_schema(self) -> Any:
+        """Return the Homekeep options schema."""
+
+        import voluptuous as vol
+
+        return vol.Schema(
+            {
+                vol.Optional(
+                    OPTION_CALENDAR_ENTITY_IDS,
+                    default=[],
+                ): selector.EntitySelector(
+                    selector.EntitySelectorConfig(
+                        domain="calendar",
+                        multiple=True,
+                    )
+                ),
+            }
+        )

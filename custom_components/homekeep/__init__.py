@@ -96,6 +96,7 @@ async def async_setup_entry(hass: Any, entry: Any) -> bool:
     storage = HomekeepStorage(hass, entry)
     await storage.async_load()
     _entry_stores(hass)[entry.entry_id] = storage
+    storage.calendar_unsub = _async_setup_calendar_listeners(hass, storage, entry)
 
     if PLATFORMS:
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -111,6 +112,11 @@ async def async_unload_entry(hass: Any, entry: Any) -> bool:
 
     if unload_ok:
         stores = hass.data.get(DOMAIN, {})
+        storage = stores.get(entry.entry_id)
+        if storage is not None:
+            unsub = getattr(storage, "calendar_unsub", None)
+            if unsub:
+                unsub()
         stores.pop(entry.entry_id, None)
         if not stores:
             hass.data.pop(DOMAIN, None)
@@ -125,7 +131,7 @@ def _service_handler(hass: Any, service_name: str) -> Callable[[Any], Any]:
         from .runtime import HomekeepServiceRuntime
 
         try:
-            runtime = HomekeepServiceRuntime(_first_storage(hass))
+            runtime = HomekeepServiceRuntime(_first_storage(hass), hass)
             response = await runtime.async_handle(service_name, dict(call.data))
         except HomekeepValidationError as err:
             raise _service_validation_error(str(err)) from err
@@ -152,6 +158,30 @@ def _service_validation_error(message: str) -> Exception:
     except ModuleNotFoundError:
         return HomekeepValidationError(message)
     return ServiceValidationError(message)
+
+
+def _async_setup_calendar_listeners(hass: Any, storage: HomekeepStorage, entry: Any) -> Any:
+    """Listen for selected calendar entity state changes."""
+
+    from homeassistant.helpers.event import async_track_state_change_event
+
+    from .calendar_context import (
+        invalidate_calendar_context_for_entity,
+        selected_calendar_entity_ids,
+    )
+
+    entity_ids = selected_calendar_entity_ids(entry)
+    if not entity_ids:
+        return None
+
+    async def calendar_changed(event: Any) -> None:
+        entity_id = event.data.get("entity_id")
+        if not entity_id:
+            return
+        if invalidate_calendar_context_for_entity(storage.store, entity_id):
+            await storage.async_save()
+
+    return async_track_state_change_event(hass, entity_ids, calendar_changed)
 
 
 def _build_service_schemas() -> dict[str, Any]:

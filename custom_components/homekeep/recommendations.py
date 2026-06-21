@@ -61,6 +61,7 @@ class RecommendationEngine:
             if chore.enabled
             and not _is_snoozed(self.store.states.get(chore_id), created_at)
         }
+        calendar_context = _fresh_calendar_context(self.store.calendar_context, created_at)
         fingerprint_payload = {
             "schema_version": 1,
             "recommendation_mode": recommendation_mode,
@@ -70,8 +71,16 @@ class RecommendationEngine:
             "goal": goal,
             "area_id": area_id,
             "mood": mood,
-            "calendar_context_id": None,
-            "calendar_context_version": None,
+            "calendar_context_id": (
+                calendar_context.get("calendar_context_id")
+                if calendar_context
+                else None
+            ),
+            "calendar_context_version": (
+                calendar_context.get("calendar_context_version")
+                if calendar_context
+                else None
+            ),
             "chore_definition_version": "v1",
             "enabled_chore_ids": sorted(enabled_chores),
             "home_assistant_area_ids": sorted(
@@ -100,6 +109,7 @@ class RecommendationEngine:
                 time_budget_minutes=time_budget_minutes,
                 energy_level=energy_level,
                 area_id=area_id,
+                calendar_context=calendar_context,
                 bucket=bucket,
                 user_id=user_id,
             )
@@ -181,6 +191,16 @@ class RecommendationEngine:
             "invalidated_at": None,
             "invalidation_reason": None,
             "materialized_session_id": None,
+            "calendar_context_id": (
+                calendar_context.get("calendar_context_id")
+                if calendar_context
+                else None
+            ),
+            "calendar_context_version": (
+                calendar_context.get("calendar_context_version")
+                if calendar_context
+                else None
+            ),
             "result": result,
         }
         self.store.recommendations[snapshot_id] = snapshot
@@ -255,6 +275,7 @@ class RecommendationEngine:
         time_budget_minutes: Optional[int],
         energy_level: Optional[str],
         area_id: Optional[str],
+        calendar_context: Optional[dict[str, Any]],
         bucket: str,
         user_id: Optional[str],
     ) -> dict[str, Any]:
@@ -277,6 +298,7 @@ class RecommendationEngine:
             area_id=chore.area_id,
             user_id=user_id,
         )
+        calendar_score = _calendar_context_score(chore, calendar_context)
         penalty = _dismissal_penalty(state, now, priority_staleness(chore, state, now))
         total = clamp_score(
             stale * 0.30
@@ -284,7 +306,7 @@ class RecommendationEngine:
             + time_fit * 0.15
             + energy_fit * 0.10
             + area_fit * 0.10
-            + 50.0 * 0.05
+            + calendar_score * 0.05
             + history * 0.05
             - penalty
         )
@@ -315,7 +337,7 @@ class RecommendationEngine:
                     "time_fit_score": round(time_fit, 3),
                     "energy_fit_score": round(energy_fit, 3),
                     "area_fit_score": round(area_fit, 3),
-                    "calendar_context_score": 50.0,
+                    "calendar_context_score": round(calendar_score, 3),
                     "history_fit_score": round(history, 3),
                     "dismissal_penalty": round(penalty, 3),
                 },
@@ -431,6 +453,47 @@ def _normalize_fingerprint_payload(payload: dict[str, Any]) -> dict[str, Any]:
 
 def _is_snoozed(state: Optional[ChoreState], now: datetime) -> bool:
     return bool(state and state.snoozed_until and state.snoozed_until > now)
+
+
+def _fresh_calendar_context(
+    calendar_context: dict[str, Any], now: datetime
+) -> Optional[dict[str, Any]]:
+    if not calendar_context or calendar_context.get("invalidated_at"):
+        return None
+    expires_at = calendar_context.get("expires_at")
+    if not expires_at:
+        return None
+    if now >= _parse(expires_at):
+        return None
+    return calendar_context
+
+
+def _calendar_context_score(
+    chore: ChoreDefinition, calendar_context: Optional[dict[str, Any]]
+) -> float:
+    if calendar_context is None:
+        return 50.0
+    score = 50.0
+    name = chore.name.lower()
+    group = (chore.group_id or "").lower()
+    area = (chore.area_id or "").lower()
+    if calendar_context.get("has_guests_soon"):
+        if any(
+            word in name or word in group or word in area
+            for word in ("bathroom", "guest", "entry", "surface", "kitchen")
+        ):
+            score += 30.0
+    if calendar_context.get("trash_day_tomorrow"):
+        if any(
+            word in name or word in group
+            for word in ("trash", "compost", "garbage", "recycling")
+        ):
+            score += 35.0
+    if calendar_context.get("leaving_home_soon") and chore.estimated_minutes <= 5:
+        score += 15.0
+    if calendar_context.get("busy_evening") and chore.estimated_minutes <= 10:
+        score += 10.0
+    return clamp_score(score)
 
 
 def _time_fit(estimated_minutes: int, budget: Optional[int]) -> float:
