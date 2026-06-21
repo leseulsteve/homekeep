@@ -7,15 +7,16 @@ Use it as the resume point for future sessions. Do not rely on chat memory.
 ## Current Status
 
 ```yaml
-current_phase: 4
-current_phase_name: Recommendation Engine V1
+current_phase: 5
+current_phase_name: Home Assistant services and entities
 last_updated: 2026-06-21
 last_codex_summary: >
-  Phase 3 Chore Session lifecycle is complete as a pure core mutation engine.
-  Homekeep now supports session start, pause, end, item completion, skip,
-  snooze, dismiss, participant attribution, bounded Bonus Chore states,
-  accept_bonus_chore, duplicate session-item completion protection, and
-  request_id idempotency under a mutation lock.
+  Phase 4 Recommendation Engine V1 is complete as deterministic pure core
+  logic. Homekeep now generates bounded Smart Chore List payloads, normalized
+  0-100 score breakdowns, stable recommendation IDs, RecommendationSnapshots,
+  context fingerprints, context buckets, sparse Session-History fallback
+  scoring, expired/invalidated snapshot rejection, and fresh snapshot
+  materialization into Chore Sessions.
 ```
 
 ## Phase Checklist
@@ -24,7 +25,7 @@ last_codex_summary: >
 - [x] Phase 1: Models and storage
 - [x] Phase 2: Health and adaptive intervals
 - [x] Phase 3: Chore Session lifecycle
-- [ ] Phase 4: Recommendation Engine V1
+- [x] Phase 4: Recommendation Engine V1
 - [ ] Phase 5: Home Assistant services and entities
 - [ ] Phase 6: Calendar Context
 - [ ] Phase 7: Bubble Card MVP
@@ -253,6 +254,59 @@ Known gaps / next prompt:
 - Next recommended prompt: Implement Phase 4 Recommendation Engine V1 with
   deterministic scoring, Smart Chore List payloads, RecommendationSnapshots,
   context fingerprints, dismissal/snooze effects, and focused tests.
+
+### 2026-06-21 - Phase 4: Recommendation Engine V1
+
+Status: completed
+
+Implemented:
+- Added `custom_components/homekeep/recommendations.py` with deterministic,
+  local Recommendation Engine V1 scoring. No LLM or network behavior is used.
+- Added normalized component scoring for Staleness, Projected Impact, time fit,
+  energy fit, area fit, neutral Calendar Context, Session-History fit, and
+  bounded dismissal penalty.
+- Added bounded Smart Chore List generation with best Chore Bundle, best single
+  chore, easiest useful chore, up to 3 alternates, empty state handling, short
+  explanations, projected impact payloads, and stable `recommendation_id`
+  values within a RecommendationSnapshot.
+- Added RecommendationSnapshot storage with `context_fingerprint`,
+  `context_bucket`, candidate score breakdowns, selected recommendations,
+  explanations, expiry, invalidation fields, and materialization tracking.
+- Added fresh snapshot materialization through the existing `SessionEngine`;
+  expired or invalidated snapshots are rejected and fresh sessions copy the
+  snapshot `context_fingerprint`.
+- Added `custom_components/homekeep/history.py` with deterministic v1
+  `context_bucket` generation and sparse Session-History fallback scoring to
+  neutral `50.0` when observations are insufficient.
+- Added `tests/test_recommendations.py` covering payload shape, stable IDs,
+  context fingerprint normalization, sparse history fallback, expired snapshot
+  rejection, and fresh snapshot materialization.
+
+Tests/checks run:
+- `python3 -m unittest tests.test_recommendations -v`
+- `python3 -m unittest discover -s tests -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `git diff --check`
+
+Docs updated:
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Kept the Recommendation Engine pure Python and deterministic; Home Assistant
+  service handlers are still scaffold no-ops until Phase 5 wiring.
+- Used a neutral `50.0` Calendar Context score until Calendar Context snapshots
+  are implemented.
+- Used a deterministic `ctx:v1:<sha256>` context fingerprint from normalized
+  non-secret context fields, ignoring volatile timestamps like `created_at`.
+
+Known gaps / next prompt:
+- Home Assistant services still need to call `RecommendationEngine` and
+  `SessionEngine`, persist changed stores, and return action-response payloads.
+- Calendar Context, Mood Context inference, and richer dismissal cooldown logic
+  remain future phases or hardening work.
+- Next recommended prompt: Implement Phase 5 Home Assistant service wiring and
+  initial entities/to-do projections around the existing core engine.
+
 
 ## Resume Instructions
 
