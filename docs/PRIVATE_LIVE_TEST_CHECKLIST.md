@@ -307,6 +307,8 @@ Gate 9 live result on 2026-06-21:
 - The log did show Homekeep blocking event-loop file I/O while reading bundled
   sample Chores during dev-mode setup repair. Patched sample Chore loading to
   use Home Assistant's executor when `hass` is available.
+- Follow-up log `home-assistant_2026-06-21T20-01-17.982Z.log` no longer
+  showed Homekeep blocking file I/O warnings after the executor fix.
 - Other log warnings/errors were from unrelated integrations or Home Assistant
   custom integration notices.
 
