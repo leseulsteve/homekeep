@@ -317,18 +317,22 @@ Gate 9 live result on 2026-06-21:
 Codex should record results in a local note or a new docs file before any
 release decision.
 
-- [ ] Home Assistant version:
-- [ ] Homekeep commit:
-- [ ] Install method:
-- [ ] Synthetic Chore set used:
-- [ ] Calendar entities used:
-- [ ] Service smoke test result:
-- [ ] To-do projection result:
-- [ ] Calendar invalidation result:
-- [ ] Reload/unload result:
-- [ ] Bubble Card result:
-- [ ] Bugs found:
-- [ ] Release blockers:
+- [x] Home Assistant version:
+- [x] Homekeep commit:
+- [x] Install method:
+- [x] Synthetic Chore set used:
+- [x] Calendar entities used:
+- [x] Service smoke test result:
+- [x] To-do projection result:
+- [x] Calendar invalidation result:
+- [x] Reload/unload result:
+- [x] Bubble Card result:
+- [x] Bugs found:
+- [x] Release blockers:
+
+Result note:
+
+- See `docs/PRIVATE_LIVE_TEST_RESULTS.md`.
 
 ## Public Release Still Requires
 
