@@ -307,6 +307,34 @@ Known gaps / next prompt:
 - Next recommended prompt: Implement Phase 5 Home Assistant service wiring and
   initial entities/to-do projections around the existing core engine.
 
+### 2026-06-21 - Mood Context Post-Prototype Planning
+
+Status: completed
+
+Implemented:
+- Added a post-prototype improvement note to `docs/MOOD_CONTEXT.md` for
+  evolving Mood Context into broader Readiness Context after the MVP prototype.
+- Captured the future direction in `docs/DECISION_LOG.md` so future
+  implementation keeps mood optional, explainable, and subordinate to practical
+  planning signals.
+
+Tests/checks run:
+- Not run; documentation-only update.
+
+Docs updated:
+- `docs/MOOD_CONTEXT.md`
+- `docs/DECISION_LOG.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- The MVP Mood Context rules remain unchanged.
+- Post-prototype improvements should focus on chore friction, safer
+  explanations, explicit session modes, and user correction rather than deeper
+  emotional inference.
+
+Known gaps / next prompt:
+- Next implementation work remains Phase 5 Home Assistant service wiring unless
+  Steve asks to revise Mood/Readiness Context docs further.
 
 ## Resume Instructions
 

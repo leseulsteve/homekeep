@@ -163,6 +163,43 @@ Mood: Auto - looks like a quick-win session fits
 Avoid making mood the main visible feature. It should make Homekeep feel
 thoughtful, not invasive.
 
+## Post-Prototype Improvement: Readiness Context
+
+After the MVP prototype, consider evolving Mood Context into a broader
+Readiness Context. In this model, mood remains an optional user-facing input,
+but the Recommendation Engine primarily acts on practical planning signals such
+as energy, capacity, time, recent chore friction, and explicit user correction.
+
+The goal is to make Homekeep better at choosing a useful chore posture without
+sounding like it is diagnosing the user.
+
+Recommended additions:
+
+- Track chore friction rather than trying to infer deeper emotional state.
+  Useful signals include whether the user started the suggestion, completed it,
+  skipped it, snoozed it, dismissed it, accepted a Bonus Chore, repeatedly chose
+  quick wins in similar contexts, or abandoned longer sessions.
+- Improve explanations so they describe the planning fit, not the user as a
+  person. Prefer wording such as "A short quick-win session fits your recent
+  pattern" or "You picked low energy, so I prioritized lighter chores." Avoid
+  wording such as "You seem stressed" or "Your behavior suggests you are
+  overwhelmed."
+- Add explicit modes instead of relying on hidden inference. Possible modes:
+  `Auto`, `Quick win`, `Light session`, `Focus session`, `Reset mode`, and
+  `Quiet chores`.
+
+Strong recommendation:
+
+```text
+Evolve Mood Context into Readiness Context after the prototype. Mood should be
+one optional input, while recommendation behavior should mostly use capacity,
+energy, time, recent chore friction, and user correction.
+```
+
+This keeps the feature helpful, explainable, user-correctable, and less
+invasive. It also gives Homekeep a cleaner path to learning what chore sessions
+work in a given context without storing sensitive emotional history.
+
 ## Tests Required
 
 Implementation must test:

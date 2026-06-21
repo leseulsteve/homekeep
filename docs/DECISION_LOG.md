@@ -133,6 +133,10 @@ implementation pass.
   user-correctable.
 - Mood Context must not make medical or mental health claims and must not hide
   urgent stale chores by itself.
+- Post-prototype direction: consider evolving Mood Context into broader
+  Readiness Context where recommendation behavior primarily uses capacity,
+  energy, time, chore friction, explicit modes, and user correction. Mood should
+  remain optional and should not become a hidden diagnosis layer.
 
 ## Bonus Chores
 
