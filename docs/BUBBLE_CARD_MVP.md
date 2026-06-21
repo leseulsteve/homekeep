@@ -135,3 +135,25 @@ homekeep.end_session
   item IDs.
 - Session dismiss actions must pass `session_id` and materialized
   `session_item_id` so history learning uses the correct session context.
+
+## Phase 7 Dashboard Gap
+
+Bubble Card can represent the touch surface with pop-ups, select cards,
+buttons, sub-buttons, and Home Assistant call-service actions. It should not be
+treated as the owner of Homekeep state.
+
+The MVP dashboard example uses Home Assistant helper entities and small scripts
+as a bridge because dashboard cards do not cleanly persist service response
+payloads such as `snapshot_id`, `recommendation_id`, `session_id`, and
+`session_item_id` for later button calls.
+
+The scripts should:
+
+- read local setup helpers for time, energy, goal, and mood
+- call Homekeep services
+- store returned ids in helper entities for the next action
+- leave the authoritative Chore Session and To-do projections in Homekeep
+  storage
+
+The dashboard itself displays Homekeep sensors and To-do projections rather
+than copying recommendation or session state into Lovelace-only data.

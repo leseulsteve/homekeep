@@ -7,15 +7,14 @@ Use it as the resume point for future sessions. Do not rely on chat memory.
 ## Current Status
 
 ```yaml
-current_phase: 7
-current_phase_name: Bubble Card MVP
+current_phase: 8
+current_phase_name: Hardening and release readiness
 last_updated: 2026-06-21
 last_codex_summary: >
-  Phase 6 Calendar Context is complete. Homekeep can select calendar entities
-  via options, derive minimized Calendar Context snapshots, track source
-  calendar versions, invalidate context and dependent recommendations on
-  selected calendar state changes, and refresh stale context lazily before
-  recommendation generation.
+  Phase 7 Bubble Card MVP is complete as an example dashboard. The dashboard
+  uses Bubble Card pop-ups, select cards, buttons, and sub-buttons where they
+  fit, native Home Assistant To-do/entities cards for projections, and helper
+  scripts for service response ids that Lovelace cards cannot hold cleanly.
 ```
 
 ## Phase Checklist
@@ -27,7 +26,7 @@ last_codex_summary: >
 - [x] Phase 4: Recommendation Engine V1
 - [x] Phase 5: Home Assistant services and entities
 - [x] Phase 6: Calendar Context
-- [ ] Phase 7: Bubble Card MVP
+- [x] Phase 7: Bubble Card MVP
 - [ ] Phase 8: Hardening and release readiness
 
 ## Phase Log
@@ -511,6 +510,62 @@ Known gaps / next prompt:
   6 implementation work.
 - Next recommended prompt: Implement Phase 7 Bubble Card MVP dashboard example
   and service wiring around the completed Homekeep services.
+
+### 2026-06-21 - Phase 7: Bubble Card MVP dashboard example
+
+Status: completed
+
+Implemented:
+- Added `examples/bubble_card_dashboard.yaml` with a Homekeep dashboard view,
+  Ready-Now launcher, time/energy/goal/mood controls, recommendation display,
+  active-session controls, Done for now, One more, and Accept one more flow.
+- Used Bubble Card pop-ups, select cards, buttons, horizontal button stack, and
+  sub-buttons for the touch-oriented dashboard surface.
+- Used native Home Assistant To-do list and entities cards where Bubble Card is
+  not the best fit for authoritative Homekeep projections or helper ids.
+- Documented required companion helper entities and scripts in the example
+  YAML so scripts can read local selections, call Homekeep services, and store
+  returned response ids.
+- Updated `docs/BUBBLE_CARD_MVP.md` with the Phase 7 capability gap and helper
+  script bridge.
+
+Bubble Card capability verification:
+- Verified Bubble Card supports pop-up cards with nested cards.
+- Verified Bubble Card supports button cards, name/state button types,
+  sub-buttons, select cards for `input_select`/`select`, horizontal button
+  stacks, and Home Assistant tap actions with `call-service` / `navigate`.
+- Identified a gap: Bubble Card dashboard YAML should not be relied on to
+  capture Home Assistant service response payloads and bind returned ids into
+  later service calls.
+
+Tests/checks run:
+- `python3 - <<'PY' ...` dashboard example content check
+- `git diff --check`
+
+Docs updated:
+- `docs/BUBBLE_CARD_MVP.md`
+- `docs/DECISION_LOG.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Kept the dashboard as an MVP example surface; Homekeep storage, sensors, and
+  To-do projections remain authoritative.
+- Used helper/script bridging for `snapshot_id`, `recommendation_id`,
+  `session_id`, `session_item_id`, and Bonus Chore ids because those values
+  come from Homekeep service responses or current session context.
+- Did not add runtime code for scripts or helpers in Phase 7 because the prompt
+  requested the dashboard example and not a Home Assistant package blueprint.
+
+Known gaps / next prompt:
+- The example assumes companion helpers and scripts exist. A future hardening
+  pass can add packaged helper/script examples or native Homekeep entities that
+  expose current recommendation/session ids directly.
+- The dashboard YAML was syntax/content checked locally but not rendered in a
+  live Home Assistant frontend with Bubble Card installed.
+- Next recommended prompt: Implement Phase 8 hardening and release readiness:
+  reload/unload behavior, migration edge cases, entity refresh behavior,
+  service response polish, packaged helper/script examples, and focused Home
+  Assistant integration tests where dependencies are available.
 
 ## Resume Instructions
 

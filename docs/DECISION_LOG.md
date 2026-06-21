@@ -192,6 +192,17 @@ implementation pass.
   active-session To-do items with valid Homekeep projection metadata can be
   completed directly from Home Assistant.
 
+## Bubble Card Dashboard
+
+- The Bubble Card MVP dashboard is an example surface, not source of truth.
+- Bubble Card can provide pop-ups, select cards, buttons, sub-buttons, and
+  service actions for the MVP flow.
+- The dashboard must use Home Assistant helpers or scripts for values that
+  Bubble Card cannot hold cleanly, especially service response ids returned by
+  Homekeep services.
+- The dashboard displays Homekeep sensors and To-do projections instead of
+  duplicating recommendation or session state in dashboard-only data.
+
 ## MVP Scope
 
 - Stay inside MVP unless Steve explicitly expands scope.
