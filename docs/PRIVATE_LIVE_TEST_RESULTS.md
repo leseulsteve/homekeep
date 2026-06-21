@@ -52,11 +52,16 @@ not a public release note.
 - Sample Chore YAML loading initially caused Home Assistant blocking file I/O
   warnings during setup. Loading now uses Home Assistant's executor when
   `hass` is available.
+- Calendar Context freshness was hardened with a minimized event fingerprint
+  so added or modified selected calendar events can refresh context before
+  recommendation reuse even when the Home Assistant calendar entity state does
+  not change.
 
 ## Open Items
 
 - Explicit Calendar Context invalidation after modifying a selected calendar
-  entity was not confirmed; the calendar context sensor stayed `clear`.
+  entity was not confirmed during the first live pass; follow-up code is
+  covered locally and still needs private HACS retest.
 - Calendar listener behavior after reload is not live-confirmed.
 - Manual unload was not available in the Home Assistant UI; local automated
   unload tests cover this path.

@@ -238,6 +238,11 @@ Gate 6 partial live result on 2026-06-21:
 - `sensor.homekeep_next_calendar_context` reported `clear`.
 - After a synthetic calendar check, Steve reported the calendar context sensor
   still `clear`; explicit stale invalidation is not yet confirmed.
+- Follow-up code hardening added a minimized event fingerprint check so
+  recommendation generation refreshes Calendar Context when selected calendar
+  events change even if the Home Assistant calendar entity state metadata does
+  not change. This is covered by local tests and still needs a private HACS
+  live retest.
 
 ## Gate 7: Reload And Unload
 

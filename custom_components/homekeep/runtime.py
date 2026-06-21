@@ -283,7 +283,7 @@ class HomekeepServiceRuntime:
         if not entity_ids:
             return
         engine = self._calendar_context_engine()
-        if engine.is_fresh(
+        if await engine.async_is_fresh(
             entity_ids=entity_ids,
             target_time_window=data.get(ATTR_TARGET_TIME_WINDOW),
             recommendation_mode=data.get(ATTR_RECOMMENDATION_MODE, "ready_now"),

@@ -108,6 +108,11 @@ implementation pass.
 - Selected calendar entities are Home Assistant config entry options.
 - Calendar Context source versions are based on selected calendar entity state,
   `last_changed`, and `last_updated`.
+- Calendar Context also stores a hash of minimized event facts so added or
+  modified events can make a snapshot stale even when the Home Assistant
+  calendar entity state remains unchanged. The hash may include event
+  start/end times and derived category flags, but not raw event summary,
+  description, or location text.
 - Calendar entity state changes invalidate the current Calendar Context and
   dependent RecommendationSnapshots; recommendation refresh remains lazy.
 - Session-History Learning time buckets use Home Assistant local time.

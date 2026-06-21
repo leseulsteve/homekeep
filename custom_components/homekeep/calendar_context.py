@@ -65,6 +65,10 @@ class CalendarContextEngine:
         }
         events_by_entity = await self._event_provider(selected, start, end)
         derived = derive_calendar_signals(events_by_entity, now=snapshot_time)
+        event_fingerprint = calendar_event_fingerprint(
+            events_by_entity,
+            now=snapshot_time,
+        )
         expires_at = _expires_at(
             snapshot_time,
             recommendation_mode=recommendation_mode,
@@ -75,6 +79,7 @@ class CalendarContextEngine:
             {
                 "target_time_window": target_time_window,
                 "recommendation_mode": recommendation_mode,
+                "source_calendar_event_fingerprint": event_fingerprint,
                 "derived": {
                     key: derived[key]
                     for key in (
@@ -104,6 +109,7 @@ class CalendarContextEngine:
             "event_count": derived["event_count"],
             "source_calendar_entities": selected,
             "source_calendar_versions": versions,
+            "source_calendar_event_fingerprint": event_fingerprint,
             "invalidated_at": None,
             "invalidation_reason": None,
             "diagnostics": {
@@ -111,9 +117,68 @@ class CalendarContextEngine:
                 "calendar_entity_count": len(selected),
             },
         }
+        old_snapshot_id = self.store.calendar_context.get("snapshot_id")
+        old_version = self.store.calendar_context.get("calendar_context_version")
+        if (
+            old_snapshot_id
+            and old_version
+            and old_version != context_version
+            and not self.store.calendar_context.get("invalidated_at")
+        ):
+            invalidate_recommendations_for_calendar_context(
+                self.store,
+                old_snapshot_id,
+                "calendar_context_refreshed",
+            )
         self.store.calendar_context.clear()
         self.store.calendar_context.update(snapshot)
         return snapshot
+
+    async def async_is_fresh(
+        self,
+        *,
+        entity_ids: Iterable[str],
+        target_time_window: Optional[str] = None,
+        recommendation_mode: str = "ready_now",
+        now: Optional[datetime] = None,
+    ) -> bool:
+        """Return whether the stored Calendar Context can be reused.
+
+        This checks both Home Assistant calendar entity state metadata and a
+        minimized event fingerprint, because calendar event edits may not
+        change the entity state when the calendar remains off.
+        """
+
+        snapshot_time = now or _now()
+        selected = normalize_calendar_entity_ids(entity_ids)
+        if not self.is_fresh(
+            entity_ids=selected,
+            target_time_window=target_time_window,
+            recommendation_mode=recommendation_mode,
+            now=snapshot_time,
+        ):
+            return False
+        fingerprint = self.store.calendar_context.get(
+            "source_calendar_event_fingerprint"
+        )
+        if not fingerprint:
+            return False
+        created_at = parse_datetime(
+            self.store.calendar_context.get("created_at"),
+            "created_at",
+        )
+        if created_at is None:
+            return False
+        start, end = _event_window(
+            created_at,
+            target_time_window=target_time_window,
+            recommendation_mode=recommendation_mode,
+        )
+        events_by_entity = await self._event_provider(selected, start, end)
+        return (
+            calendar_event_fingerprint(events_by_entity, now=created_at)
+            == fingerprint
+        )
 
     def is_fresh(
         self,
@@ -338,6 +403,68 @@ def calendar_context_version(
         default=str,
     )
     return f"cal:{hashlib.sha256(payload.encode()).hexdigest()[:16]}"
+
+
+def calendar_event_fingerprint(
+    events_by_entity: Mapping[str, list[Any]], *, now: datetime
+) -> str:
+    """Hash minimized event facts without storing raw event text."""
+
+    event_facts: dict[str, list[dict[str, Any]]] = {}
+    for entity_id, events in events_by_entity.items():
+        facts = []
+        for event in events:
+            start = _event_datetime(event, "start")
+            end = _event_datetime(event, "end")
+            text = _event_text(event)
+            facts.append(
+                {
+                    "start": start.isoformat() if start else None,
+                    "end": end.isoformat() if end else None,
+                    "guest": any(
+                        word in text
+                        for word in ("guest", "visitor", "visit", "dinner", "party")
+                    ),
+                    "travel": any(
+                        word in text
+                        for word in ("travel", "airport", "leave home", "drive")
+                    ),
+                    "trash": any(
+                        word in text
+                        for word in ("trash", "garbage", "recycling", "compost")
+                    ),
+                    "evening": bool(start and _is_evening(start)),
+                }
+            )
+        event_facts[entity_id] = sorted(
+            facts,
+            key=lambda item: (
+                item["start"] or "",
+                item["end"] or "",
+                str(item["guest"]),
+                str(item["travel"]),
+                str(item["trash"]),
+                str(item["evening"]),
+            ),
+        )
+
+    derived = derive_calendar_signals(events_by_entity, now=now)
+    payload = json.dumps(
+        {
+            "events": event_facts,
+            "derived": {
+                "has_guests_soon": derived["has_guests_soon"],
+                "leaving_home_soon": derived["leaving_home_soon"],
+                "trash_day_tomorrow": derived["trash_day_tomorrow"],
+                "busy_evening": derived["busy_evening"],
+                "event_count": derived["event_count"],
+            },
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    )
+    return f"calevt:{hashlib.sha256(payload.encode()).hexdigest()[:16]}"
 
 
 def _event_window(

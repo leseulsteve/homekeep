@@ -11,6 +11,8 @@ Calendar Context snapshots become stale when any of these happen:
 - A selected calendar entity changes state.
 - A selected calendar entity has a newer `last_changed` or `last_updated` value
 than the snapshot recorded.
+- The fetched events for the selected window produce a different minimized
+  event fingerprint.
 - The snapshot exceeds its max age.
 - The target time window changes.
 - The selected calendar entity list changes.
@@ -53,6 +55,8 @@ elif snapshot is expired:
   refresh Calendar Context
 elif source calendar entity version changed:
   refresh Calendar Context
+elif minimized event fingerprint changed:
+  refresh Calendar Context
 else:
   use snapshot
 ```
@@ -75,3 +79,15 @@ source_calendar_versions:
 
 Exact values can be implementation-specific, but they must be sufficient to
 detect a calendar change after snapshot creation.
+
+## Event Fingerprint
+
+Homekeep stores a `source_calendar_event_fingerprint` hash alongside the
+Calendar Context snapshot. The fingerprint is built from minimized event facts
+such as start/end times and derived category flags for guest, travel, trash,
+and evening signals. It must not include raw event summary, description, or
+location text.
+
+Recommendation generation checks this fingerprint before reusing Calendar
+Context. This covers Home Assistant calendars where editing or adding events
+does not change the calendar entity state while it remains `off`.

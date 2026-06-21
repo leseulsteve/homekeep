@@ -9,6 +9,7 @@ from typing import Any, Mapping
 
 from custom_components.homekeep.calendar_context import (
     CalendarContextEngine,
+    calendar_event_fingerprint,
     calendar_context_version,
     derive_calendar_signals,
     invalidate_calendar_context_for_entity,
@@ -135,6 +136,9 @@ class CalendarContextTest(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("Private details", encoded)
         self.assertNotIn("Private place", encoded)
         self.assertFalse(snapshot["diagnostics"]["raw_event_details_stored"])
+        self.assertTrue(
+            snapshot["source_calendar_event_fingerprint"].startswith("calevt:")
+        )
         self.assertEqual(self.store.calendar_context, snapshot)
 
     async def test_max_age_target_and_version_changes_make_snapshot_stale(self) -> None:
@@ -230,6 +234,83 @@ class CalendarContextTest(unittest.IsolatedAsyncioTestCase):
             "calendar_entity_changed",
         )
 
+    async def test_added_event_makes_context_stale_without_state_change(self) -> None:
+        events_by_entity = {"calendar.family": []}
+        engine = CalendarContextEngine(
+            self.store,
+            event_provider=lambda entity_ids, start, end: self._events_from(
+                events_by_entity,
+                entity_ids,
+            ),
+            state_provider=lambda entity_ids: self.versions,
+        )
+        snapshot = await engine.async_refresh(
+            entity_ids=["calendar.family"],
+            now=NOW,
+        )
+        self.store.recommendations["snapshot-1"] = {
+            "snapshot_id": "snapshot-1",
+            "calendar_context_id": snapshot["snapshot_id"],
+            "invalidated_at": None,
+            "invalidation_reason": None,
+        }
+
+        self.assertTrue(
+            await engine.async_is_fresh(
+                entity_ids=["calendar.family"],
+                now=NOW + timedelta(minutes=1),
+            )
+        )
+
+        events_by_entity["calendar.family"] = [
+            {
+                "start": (NOW + timedelta(hours=2)).isoformat(),
+                "end": (NOW + timedelta(hours=3)).isoformat(),
+                "summary": "Synthetic calendar hold",
+            }
+        ]
+
+        self.assertFalse(
+            await engine.async_is_fresh(
+                entity_ids=["calendar.family"],
+                now=NOW + timedelta(minutes=1),
+            )
+        )
+        refreshed = await engine.async_refresh(
+            entity_ids=["calendar.family"],
+            now=NOW + timedelta(minutes=1),
+        )
+        self.assertNotEqual(refreshed["snapshot_id"], snapshot["snapshot_id"])
+        self.assertEqual(
+            self.store.recommendations["snapshot-1"]["invalidation_reason"],
+            "calendar_context_refreshed",
+        )
+
+    async def test_modified_event_signal_changes_event_fingerprint(self) -> None:
+        original = {
+            "calendar.family": [
+                {
+                    "start": (NOW + timedelta(hours=2)).isoformat(),
+                    "end": (NOW + timedelta(hours=3)).isoformat(),
+                    "summary": "Synthetic calendar hold",
+                }
+            ]
+        }
+        modified = {
+            "calendar.family": [
+                {
+                    "start": (NOW + timedelta(hours=2)).isoformat(),
+                    "end": (NOW + timedelta(hours=3)).isoformat(),
+                    "summary": "Guest visit",
+                }
+            ]
+        }
+
+        self.assertNotEqual(
+            calendar_event_fingerprint(original, now=NOW),
+            calendar_event_fingerprint(modified, now=NOW),
+        )
+
     async def test_runtime_refresh_and_recommendation_uses_selected_calendar_context(self) -> None:
         storage = FakeStorage(
             make_store(),
@@ -271,6 +352,16 @@ class CalendarContextTest(unittest.IsolatedAsyncioTestCase):
     ) -> Mapping[str, list[Any]]:
         return {
             entity_id: self.events_by_entity.get(entity_id, [])
+            for entity_id in entity_ids
+        }
+
+    async def _events_from(
+        self,
+        events_by_entity: Mapping[str, list[Any]],
+        entity_ids: list[str],
+    ) -> Mapping[str, list[Any]]:
+        return {
+            entity_id: events_by_entity.get(entity_id, [])
             for entity_id in entity_ids
         }
 

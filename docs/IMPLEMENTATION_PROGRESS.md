@@ -11,10 +11,10 @@ current_phase: 8
 current_phase_name: Hardening and release readiness
 last_updated: 2026-06-21
 last_codex_summary: >
-  Phase 8 hardening is complete for local developer readiness. Homekeep now has
-  stronger storage migration coverage, malformed service payload guards, stale
-  session response tests, config entry unload/reload mock coverage, and a
-  pre-1.0 mock adequacy review. No deploy or release was performed.
+  Private live-test readiness is continuing after Phase 8. Calendar Context now
+  stores a minimized event fingerprint and recommendation generation refreshes
+  context when selected calendar events change even if the Home Assistant
+  calendar entity state stays unchanged. No deploy or release was performed.
 ```
 
 ## Phase Checklist
@@ -701,6 +701,50 @@ Known gaps / next prompt:
 - Gate 3 synthetic data setup is live-confirmed on the private HACS install.
 - Next prompt: run Gate 4 service smoke tests from Developer Tools > Actions,
   starting with `homekeep.generate_smart_chore_list`.
+
+### 2026-06-21 - Calendar Context live-test hardening
+
+Status: completed locally, pending private HACS live retest
+
+Implemented:
+- Added `source_calendar_event_fingerprint` to Calendar Context snapshots.
+- Built the fingerprint from minimized event facts: event start/end times and
+  derived guest, travel, trash, and evening flags. Raw event summary,
+  description, and location text are not stored.
+- Updated Calendar Context freshness checks so recommendation generation can
+  detect added or modified selected calendar events even when the Home
+  Assistant calendar entity state metadata remains unchanged.
+- Changed Calendar Context refresh to invalidate dependent
+  RecommendationSnapshots when the refreshed minimized calendar context version
+  changes.
+
+Tests/checks run:
+- `python3 -m unittest tests.test_calendar_context -v`
+- `python3 -m unittest discover -s tests -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+
+Docs updated:
+- `docs/DECISION_LOG.md`
+- `docs/CALENDAR_CONTEXT.md`
+- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/PRIVATE_LIVE_TEST_RESULTS.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Kept the durable calendar data minimized by storing only a hash of reduced
+  event facts and derived category flags.
+- Treated event additions/modifications as enough to refresh Calendar Context
+  before recommendation reuse, because some Home Assistant calendar providers
+  may keep the calendar entity state as `off` after an event edit.
+
+Known gaps / next prompt:
+- Update Homekeep through HACS, restart/reload, then retest Gate 6 by adding or
+  modifying a synthetic event on the selected test calendar and generating a
+  fresh Smart Chore List. Confirm the Calendar Context snapshot changes and the
+  old dependent RecommendationSnapshot is not reused.
+- Bubble Card dashboard Gate 8 still needs private live testing.
+- Home Assistant package-backed automated tests remain a public-release
+  blocker.
 
 ## Resume Instructions
 
