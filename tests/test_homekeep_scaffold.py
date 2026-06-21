@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import json
+import types
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from custom_components.homekeep.const import (
     DATA_PRODUCING_SERVICES,
@@ -45,8 +47,13 @@ class HomekeepScaffoldTest(unittest.TestCase):
         self.assertIn('domain="calendar"', source)
 
     def test_services_are_registered_with_response_support(self) -> None:
+        from custom_components.homekeep import _build_service_schemas
+
         source = (HOMEKEEP / "__init__.py").read_text()
         services = (HOMEKEEP / "services.yaml").read_text()
+        schemas = self._build_service_schemas_without_home_assistant(
+            _build_service_schemas
+        )
 
         self.assertIn("supports_response", source)
         self.assertIn("SupportsResponse.ONLY", source)
@@ -58,10 +65,40 @@ class HomekeepScaffoldTest(unittest.TestCase):
         self.assertIn("generate_smart_chore_list:", services)
         self.assertIn("start_recommendation:", services)
         self.assertIn("create_chore:", services)
+        self.assertIn(SERVICE_CREATE_CHORE, schemas)
         self.assertNotIn("load_sample_chores:", services)
         self.assertNotIn("answer_session_question:", services)
         self.assertIn("_service_handler(hass, service_name)", source)
         self.assertNotIn("implemented\": False", source)
+
+    def _build_service_schemas_without_home_assistant(self, build_schemas):
+        vol = types.ModuleType("voluptuous")
+        vol.Schema = lambda schema: schema
+        vol.Optional = lambda key, default=None: ("optional", key, default)
+        vol.Required = lambda key: ("required", key)
+        vol.In = lambda values: ("in", tuple(values))
+        vol.Any = lambda *values: ("any", values)
+        vol.Coerce = lambda value_type: ("coerce", value_type)
+        vol.All = lambda *validators: ("all", validators)
+        vol.Range = lambda **kwargs: ("range", tuple(sorted(kwargs.items())))
+
+        cv = types.ModuleType("config_validation")
+        cv.string = str
+        cv.positive_int = int
+        cv.boolean = bool
+
+        homeassistant = types.ModuleType("homeassistant")
+        helpers = types.ModuleType("homeassistant.helpers")
+        helpers.config_validation = cv
+
+        modules = {
+            "voluptuous": vol,
+            "homeassistant": homeassistant,
+            "homeassistant.helpers": helpers,
+            "homeassistant.helpers.config_validation": cv,
+        }
+        with patch.dict("sys.modules", modules):
+            return build_schemas()
 
     def test_phase5_platforms_are_declared(self) -> None:
         self.assertEqual(PLATFORMS, ["sensor", "binary_sensor", "todo"])

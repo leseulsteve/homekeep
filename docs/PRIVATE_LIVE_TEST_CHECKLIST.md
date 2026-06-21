@@ -398,10 +398,10 @@ Result note:
 
 - [ ] Home Assistant package-backed tests or approved live synthetic candidate
   results
-- [x] Version bump decision: `0.0.2`
+- [x] Version bump decision: `0.0.3`
 - [x] Release notes for private HACS publish:
-  - remove private dev mode and bundled synthetic Chore seeding
-  - remove `homekeep.load_sample_chores`
-  - keep setup storage-only; create setup Chores explicitly with services
+  - fix Homekeep startup failure from missing `ATTR_VISIBILITY` service schema
+    import
+  - add a focused schema construction test for service registration constants
 - [x] Mock adequacy review updated for the release diff
 - [x] Explicit Steve approval for this private publish action

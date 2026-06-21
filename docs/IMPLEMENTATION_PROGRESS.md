@@ -18,9 +18,10 @@ last_codex_summary: >
   English and basic French terms, Gate 6 is live-confirmed in the private HACS
   test instance, Gate 8 main Lovelace helper flow is live-confirmed, and the
   prior Bubble Card dashboard example has been replaced with stock Lovelace
-  YAML plus companion helpers/scripts. Steve accepted untested Skip/Snooze
-  helper buttons as good enough for the private MVP pass. No deploy or release
-  was performed.
+  YAML plus companion helpers/scripts. A live Home Assistant startup failure
+  caused by a missing `ATTR_VISIBILITY` import in service schema registration
+  has been fixed and prepared for private `0.0.3` HACS publish. Steve accepted
+  untested Skip/Snooze helper buttons as good enough for the private MVP pass.
 ```
 
 ## Phase Checklist
@@ -1096,7 +1097,11 @@ Implemented:
   active item after helper ids were restored from the Start trace.
 
 Tests/checks run:
-- Pending in this pass.
+- `python3 -m unittest discover -s tests -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `git diff --check`
+- Secret/private-detail scan over changed files with `rg`; hits were limited
+  to benign documented field names and checklist text.
 
 Docs updated:
 - `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
@@ -1145,6 +1150,65 @@ Known gaps / next prompt:
   live-confirmed.
 - Home Assistant package-backed automated tests remain a public-release
   blocker.
+
+### 2026-06-21 - Homekeep Not Loaded startup fix
+
+Status: completed locally, pending private HACS live retest
+
+Implemented:
+- Investigated Steve's Home Assistant log export after the UI showed
+  `Hubs > Homekeep > Not loaded`.
+- Fixed Homekeep setup failing during service schema registration by importing
+  `ATTR_VISIBILITY` in `custom_components/homekeep/__init__.py`.
+- Added a scaffold test that actually builds Homekeep's service schemas with
+  lightweight Home Assistant and voluptuous stand-ins, so missing schema
+  constants fail in unit tests before a live Home Assistant restart.
+
+Tests/checks run:
+- `python3 -m unittest tests.test_homekeep_scaffold tests.test_services -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `git diff --check`
+
+Docs updated:
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Treated the log's `NameError: name 'ATTR_VISIBILITY' is not defined` as the
+  direct cause of the Homekeep "Not loaded" state.
+- Kept the fix limited to startup/schema registration and test coverage; no
+  service contract changes were needed.
+
+Known gaps / next prompt:
+- Commit/push or reinstall this local fix, then reload or restart the private
+  Home Assistant instance and confirm Homekeep loads.
+
+### 2026-06-21 - Version 0.0.3 private publish prep
+
+Status: completed locally, pending push and private HACS live retest
+
+Implemented:
+- Bumped Homekeep integration version to `0.0.3`.
+- Updated mock adequacy and private live-test release notes for the Homekeep
+  startup schema import fix.
+
+Tests/checks run:
+- Pending in this pass.
+
+Docs updated:
+- `custom_components/homekeep/manifest.json`
+- `docs/MOCK_ADEQUACY_REVIEW.md`
+- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- No tag will be created because the repository has no established tag
+  convention.
+- No deploy script exists in the workspace; this publish is a commit and push
+  to `main` for private HACS consumption.
+
+Known gaps / next prompt:
+- Update Homekeep through HACS in the private Home Assistant instance and
+  confirm version `0.0.3` loads.
 
 ## Resume Instructions
 

@@ -9,8 +9,8 @@ Homekeep is pre-`1.0`. A version bump is not ready to publish unless the
 changed behavior is covered by realistic local mocks or by an approved live
 candidate workflow.
 
-For the `0.0.2` MVP implementation pass, mock coverage is adequate for a
-private HACS publish and developer readiness checkpoint, but not yet adequate
+For the `0.0.3` startup-fix implementation pass, mock coverage is adequate for
+a private HACS publish and developer readiness checkpoint, but not yet adequate
 for a public production release.
 
 ## Covered By Local Tests
@@ -28,6 +28,8 @@ Storage:
 
 Services:
 
+- service schema construction is exercised with lightweight Home Assistant and
+  voluptuous stand-ins, covering missing schema constants before live startup
 - malformed payloads rejected before raw `KeyError`
 - unknown Chore ids and session ids return clear validation errors
 - duplicate request ids avoid duplicate session mutations
@@ -101,7 +103,7 @@ Calendar:
 ## Release Readiness Decision
 
 Mock coverage is adequate for continuing MVP implementation and for a
-private `0.0.2` HACS publish, provided the version bump does not claim live
+private `0.0.3` HACS publish, provided the version bump does not claim live
 Home Assistant production readiness.
 
 Mock coverage is not yet adequate for a public pre-`1.0` release without one
