@@ -34,6 +34,9 @@ not a public release note.
   Homekeep validation.
 - Calendar Context manual refresh with minimized derived output only.
 - Recommendation generation after Calendar Context refresh.
+- Calendar Context refresh after a synthetic French event, including
+  `has_guests_soon: true`, minimized event fingerprint storage, and
+  `sensor.homekeep_next_calendar_context` reporting `guests`.
 - Reload and restart recovery.
 - Privacy/diagnostics scan for Homekeep logs after fixes.
 
@@ -59,9 +62,6 @@ not a public release note.
 
 ## Open Items
 
-- Explicit Calendar Context invalidation after modifying a selected calendar
-  entity was not confirmed during the first live pass; follow-up code is
-  covered locally and still needs private HACS retest.
 - Calendar listener behavior after reload is not live-confirmed.
 - Manual unload was not available in the Home Assistant UI; local automated
   unload tests cover this path.
@@ -74,8 +74,6 @@ not a public release note.
 - Before any version bump or public release, add or run Home Assistant
   package-backed tests for config flow, services, entities, To-do projections,
   calendar invalidation, reload/unload, and service responses.
-- Resolve or explicitly accept the remaining Calendar Context invalidation
-  uncertainty.
 - Complete Bubble Card helper/script live testing if dashboard readiness is
   part of the release target.
 - Update mock adequacy review for the release diff.

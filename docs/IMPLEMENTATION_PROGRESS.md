@@ -15,7 +15,8 @@ last_codex_summary: >
   stores a minimized event fingerprint and recommendation generation refreshes
   context when selected calendar events change even if the Home Assistant
   calendar entity state stays unchanged. Calendar signal matching now includes
-  English and basic French terms. No deploy or release was performed.
+  English and basic French terms, and Gate 6 is live-confirmed in the private
+  HACS test instance. No deploy or release was performed.
 ```
 
 ## Phase Checklist
@@ -775,6 +776,39 @@ Important decisions:
 Known gaps / next prompt:
 - Commit and push, update through HACS, then retest with a synthetic French
   event title such as `Visite d'invités pour souper`.
+
+### 2026-06-21 - Gate 6 Calendar Context live confirmation
+
+Status: completed and live-confirmed
+
+Implemented:
+- No code change in this pass; recorded private HACS live-test evidence for
+  Calendar Context event-fingerprint and French keyword behavior.
+
+Tests/checks run:
+- Private HACS live test on Home Assistant Core `2026.6.3`.
+- `homekeep.refresh_calendar_context` with selected calendar entity
+  `calendar.activites`.
+- `homekeep.generate_smart_chore_list` after refreshed Calendar Context.
+- `sensor.homekeep_next_calendar_context` state check.
+
+Docs updated:
+- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/PRIVATE_LIVE_TEST_RESULTS.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Treated Gate 6 as live-confirmed after Homekeep detected a synthetic French
+  event, derived `has_guests_soon: true`, stored only
+  `source_calendar_event_fingerprint`, generated a fresh Smart Chore List, and
+  exposed `guests` through `sensor.homekeep_next_calendar_context`.
+
+Known gaps / next prompt:
+- Calendar listener behavior after reload is still not separately
+  live-confirmed.
+- Bubble Card dashboard Gate 8 remains the next private live-test gate.
+- Home Assistant package-backed automated tests remain a public-release
+  blocker.
 
 ## Resume Instructions
 

@@ -102,8 +102,8 @@ Gate 3 live result on 2026-06-21:
 
 Use Developer Tools > Actions.
 
-- [ ] `homekeep.refresh_calendar_context` returns derived context only
-- [ ] Calendar Context storage does not include raw event summary, description,
+- [x] `homekeep.refresh_calendar_context` returns derived context only
+- [x] Calendar Context storage does not include raw event summary, description,
   or location text
 - [x] `homekeep.generate_smart_chore_list` returns a Smart Chore List response
 - [x] Response includes `snapshot_id`
@@ -218,9 +218,9 @@ Gate 5 partial live result on 2026-06-21:
 - [x] Select at least one safe test calendar entity in Homekeep options
 - [x] Refresh Calendar Context manually
 - [x] Generate recommendations with fresh Calendar Context
-- [ ] Modify/add a synthetic event on a selected calendar entity
-- [ ] Confirm Calendar Context is invalidated or refreshed before reuse
-- [ ] Confirm dependent RecommendationSnapshots become invalidated when the
+- [x] Modify/add a synthetic event on a selected calendar entity
+- [x] Confirm Calendar Context is invalidated or refreshed before reuse
+- [x] Confirm dependent RecommendationSnapshots become invalidated when the
   Calendar Context source changes
 - [x] Confirm `sensor.homekeep_next_calendar_context` reflects stale/clear/guest
   or busy state as expected
@@ -237,12 +237,29 @@ Gate 6 partial live result on 2026-06-21:
   `snapshot_1fe27eef0c27b260` after Calendar Context refresh.
 - `sensor.homekeep_next_calendar_context` reported `clear`.
 - After a synthetic calendar check, Steve reported the calendar context sensor
-  still `clear`; explicit stale invalidation is not yet confirmed.
+  still `clear`; explicit stale invalidation was not yet confirmed in the
+  first pass.
 - Follow-up code hardening added a minimized event fingerprint check so
   recommendation generation refreshes Calendar Context when selected calendar
   events change even if the Home Assistant calendar entity state metadata does
   not change. This is covered by local tests and still needs a private HACS
   live retest.
+
+Gate 6 live-confirmed result on 2026-06-21:
+
+- Updated through HACS after the Calendar Context event-fingerprint and French
+  keyword commits.
+- `homekeep.refresh_calendar_context` returned `calendar_0236464ff3c84bbc`
+  for selected entity `calendar.activites`.
+- A synthetic French event was detected with `event_count: 1`,
+  `has_guests_soon: true`, and
+  `source_calendar_event_fingerprint: calevt:eb0e555716088972`.
+- Calendar Context diagnostics still reported
+  `raw_event_details_stored: false`.
+- `homekeep.generate_smart_chore_list` returned fresh RecommendationSnapshot
+  `snapshot_1050de6b8b935d32` with non-empty recommendations after the
+  Calendar Context refresh.
+- Steve confirmed `sensor.homekeep_next_calendar_context` reported `guests`.
 
 ## Gate 7: Reload And Unload
 
