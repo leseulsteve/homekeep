@@ -76,6 +76,9 @@ The current approved design work covers enough to prototype and test:
 - Done for now / Bonus Chore ending flow
 - Homekeep Voice System
 
+It does not mean the whole dashboard is planned. The current implementation is
+ready for a live-feel test of the mocked Ready Now slice only.
+
 Implementation boundary:
 
 - Implement only the Ready Now test slice first.
@@ -89,6 +92,8 @@ Implementation boundary:
 - Do not implement the full navigation model.
 - Do not treat unresolved workflow placeholders as permission to invent
   behavior.
+- Treat live-test feedback as input for the Ready Now prototype and future
+  planning, not as approval to wire or build unplanned dashboard areas.
 
 Later workflow decisions are partially documented, but they are not part of the
 first implementation slice. The next workflow review should continue from:

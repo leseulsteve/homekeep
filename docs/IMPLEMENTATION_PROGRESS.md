@@ -11,12 +11,11 @@ current_phase: 8
 current_phase_name: Hardening and release readiness
 last_updated: 2026-06-22
 last_codex_summary: >
-  Homekeep UI planning now has Codex-facing guardrails in
-  `docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md` and phased Steve prompts in
-  `docs/DASHBOARD_UI_STEVE_PROMPTS.md`. Steve intends to quickly implement a
-  mocked Today prototype first. Buttons should exist and feel real, but shuffle
-  does not need to work initially. Later workflow decisions remain intentionally
-  undocumented and must not be invented during the Today implementation.
+  Homekeep has a committed mocked Ready Now sidebar prototype for live-feel
+  testing. Dashboard planning is not complete for the whole app: Home Health,
+  Plan, Add Chore, Activity, Settings, diagnostics, full navigation, and real
+  stale-state recovery still need planning. The next step is a private live
+  smoke test of the mocked Ready Now slice before wiring services.
 ```
 
 ## Phase Checklist
@@ -91,6 +90,8 @@ Known gaps / next prompt:
 - Wire Ready Now to Homekeep services only after the mock feel is reviewed.
 - Review the mocked Homekeep sidebar app in a real Home Assistant frontend and
   tune visual feel before service wiring.
+- Continue dashboard planning after the live Ready Now review; do not treat
+  the mocked prototype as full-dashboard approval.
 
 ### 2026-06-22 - Area Health documentation clarification
 
@@ -186,7 +187,7 @@ Important decisions:
 - Future UI sessions should resume the human design review at Home Health and
   Areas before implementing frontend code.
 - The last Steve prompt explicitly restarts from the current conversation state.
-- A first frontend implementation may be limited to the Today test slice;
+- A first frontend implementation may be limited to the Ready Now test slice;
   unresolved later workflows remain out of scope.
 
 Known gaps / next prompt:

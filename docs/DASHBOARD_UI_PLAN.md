@@ -212,6 +212,42 @@ Temporary identifiers such as `snapshot_id`, `recommendation_id`,
 `session_id`, and `session_item_id` belong in frontend memory for the active
 flow. Homekeep storage remains the source of truth.
 
+## Planning Status Before Live Test
+
+The Homekeep app/dashboard is not fully planned yet.
+
+The current plan is complete enough to live-test the mocked Ready Now slice and
+evaluate whether the main loop feels right:
+
+- Ready Now / Ready-Now Mode
+- Mood-aware greeting and context chips
+- Smart Chore List presentation
+- suggested Chore Bundle confirmation
+- mocked active Chore Session behavior
+- Done for now
+- One more / Bonus Chore reveal
+- Homekeep Voice System direction
+- Home Assistant sidebar app direction
+
+The live test should be treated as a product-feel review of this narrow slice,
+not as validation of the full Homekeep app.
+
+The following areas still need planning or deeper review before implementation:
+
+- Home Health and Area Health as a full app view
+- Plan / Scheduled Chores
+- Add Chore UX
+- Activity and recent history
+- Settings and diagnostics
+- full navigation model
+- real service-wired stale state, expired RecommendationSnapshot, and ended
+  session recovery
+- entity/projection refresh after service calls
+
+Do not implement those later areas from inference during the Ready Now live
+test. Record observations, tune the mock when useful, and continue product
+planning after the Ready Now flow is reviewed.
+
 ## Why An App View Fits The Product
 
 Homekeep's core interaction depends on short-lived service response data:

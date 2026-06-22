@@ -88,6 +88,46 @@ Install method selected by Steve: HACS custom repository.
   - [x] `todo.homekeep_active_session`
 - [x] Confirm per-Chore due binary sensors are created for configured Chores
 
+## Gate 3A: Mocked Homekeep Sidebar App Smoke Test
+
+This gate tests only the mocked Ready Now sidebar prototype. It does not prove
+that the full Homekeep app is planned or service-wired.
+
+- [ ] Update Homekeep from HACS or otherwise install commit `d30932b` or newer
+- [ ] Restart Home Assistant
+- [ ] Confirm a Homekeep sidebar entry appears
+- [ ] Open Homekeep and confirm it is not iframe-embedded
+- [ ] Confirm the first screen is the mocked Ready Now surface
+- [ ] Confirm synthetic data only appears; no private household details,
+  calendar text, addresses, device identifiers, or personal schedules
+- [ ] Confirm context chips open inline selectors
+- [ ] Change time, energy, mood, goal, and area chips and confirm the mocked
+  suggestion refines after a short fuzzy state
+- [ ] Confirm the shuffle button swaps to another mocked Chore Bundle
+- [ ] Expand the suggested Chore Bundle and confirm Projected Impact, Keeps,
+  time estimates, and area display feel understandable
+- [ ] Remove a Chore and confirm the undo toast appears
+- [ ] Choose the suggested reset and confirm the active Chore Session appears
+- [ ] Start a Chore and confirm the timer appears only while a Chore is ongoing
+- [ ] Complete Chores and confirm completed Chores collapse into a summary
+- [ ] Confirm the quick completion effect is noticeable but not noisy
+- [ ] Complete all planned Chores and confirm both `Done for now` and `One more`
+  are visible
+- [ ] Tap `One more` and confirm the Bonus Chore is revealed without accepting
+  it automatically
+- [ ] Confirm the Bonus Chore redraw button is visible but not treated as wired
+  backend behavior
+- [ ] Tap `Done for now` and confirm the final summary appears, then returns to
+  Ready Now
+- [ ] Record visual, copy, layout, or flow changes needed before service wiring
+
+Known live-test boundary:
+
+- Ready Now is mocked local UI state.
+- Homekeep services are not called by the sidebar app yet.
+- Full dashboard planning is still incomplete for Home Health, Plan, Add Chore,
+  Activity, Settings, diagnostics, navigation, and stale-state recovery.
+
 Gate 3 live result on 2026-06-21:
 
 - HACS-installed Homekeep loaded bundled synthetic Chores.
