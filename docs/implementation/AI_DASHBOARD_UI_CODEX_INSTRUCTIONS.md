@@ -195,20 +195,31 @@ Stub, hide, or defer navigation to later workflows.
 
 ## Suggested Chore Bundle Requirements
 
-The suggested Chore Bundle is collapsed by default.
+The suggested Chore Bundle shows its core Chores by default.
 
-Collapsed display must include:
+Default display must include:
 
+- stable invite line
 - evocative Chore Bundle title
-- estimated total time
-- compact context
+- compact bundle count and estimated total time
+- scoped health context when it explains the recommendation
 - short reason
-- bundle-selection action
-- always-visible shuffle action
-- expand affordance
+- included Chores
+- removed Chores, if any, with removed styling and restore
+- bundle bonus/Keeps footer
+- compact projected-benefit action
+
+Do not hide the core Chores behind an expand/details control. A Chore Bundle is
+the set of Chores the user is choosing, so the list should be visible by
+default. Expansion can be used later for deeper explanations, but not for
+revealing the core bundle contents.
+
+The randomize/shuffle control belongs with the context chips, not inside the
+suggestion card.
 
 The main action confirms bundle selection. It must not imply the user has
-started doing the first Chore.
+started doing the first Chore. Visible button text should emphasize Projected
+Impact, with an action icon on the right and an accessible action label.
 
 Avoid labels like a hard `Start now` here. Use bundle-selection language such
 as:
@@ -247,36 +258,40 @@ Example directions:
 - `Five-Minute Floor Rescue`
 - `Evening Reset`
 
-## Expanded Bundle Requirements
+## Bundle Detail Requirements
 
-Expanded bundle details open inline below the suggestion.
+Bundle details live inside the suggestion.
 
-Expanded details must:
+Bundle details must:
 
 - keep the user anchored on Ready Now
 - show only the selected suggested bundle
 - not show alternate suggestions underneath
-- show Projected Impact by default
+- fold Projected Impact into the primary projected-benefit action
 - show each Chore with estimated time
 - show Keeps per Chore
-- show bundle-level bonus Keeps, such as `+4 Keeps bonus`
+- show bundle-level bonus Keeps, such as `+4 Keeps bonus`, in a quiet footer
 - conditionally show Home Assistant Area
 
 Area display rule:
 
-- if all Chores share one Home Assistant Area, show the area at bundle level
+- if all Chores share one Home Assistant Area, combine area and health change in
+  one scoped metadata chip
 - if the bundle spans multiple areas, show each Chore row's area
 
 ## Pre-Start Editing
 
-Expanded Chore rows may include remove only.
+Suggested Chore rows may include remove only.
 
 Do:
 
 - make remove secondary
 - use icons with accessible labels
 - remove instantly with undo
+- keep removed Chores visible with removed styling
+- provide row-level restore
 - recalculate time and Projected Impact after removal
+- show lost bundle bonus or projected-benefit treatment when applicable
 - keep the original recommendation recoverable through shuffle or visible
   context changes
 - offer optional context-specific preference learning in the undo toast
@@ -306,8 +321,8 @@ Do not offer vague or misleading context-specific preferences.
 
 ## Projected Impact And Keeps
 
-Projected Impact should be visible in expanded details and should be simple,
-encouraging, lightly gamified, and non-punitive.
+Projected Impact should be folded into the primary recommendation action and
+should be simple, encouraging, lightly gamified, and non-punitive.
 
 Use a combination of numbers and friendly labels:
 
@@ -330,6 +345,9 @@ Keeps rules:
 - award extra intact-bundle bonus when the originally suggested bundle is
   completed with no pre-start removals
 - do not subtract Keeps for removing, skipping, snoozing, ending, or stopping
+- showing a lost bundle bonus during pre-start removal is allowed, but it must
+  communicate an unclaimed opportunity, not a penalty or subtraction from earned
+  Keeps
 - do not show a persistent running Keeps total in MVP
 - keep Keeps math explainable in one line
 - keep Keeps feedback restrained; avoid arcade-like celebration

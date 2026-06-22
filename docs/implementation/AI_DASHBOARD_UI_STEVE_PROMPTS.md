@@ -345,3 +345,74 @@ Ask me:
 Should Home Health be shown mostly as a numeric score, a friendly status label,
 or area-level language like "Kitchen could use attention"?
 ```
+
+## Prompt 11: Build Second Right Now Live-Test Candidate
+
+```text
+Build the second Homekeep Right Now live-test candidate from the live visual
+review notes.
+
+Before coding, read:
+- docs/AI_DECISION_LOG.md
+- docs/AI_IMPLEMENTATION_PROGRESS.md
+- docs/product/HOMEKEEP_APP_PLAN.md
+- docs/product/HOMEKEEP_VOICE_SYSTEM.md
+- docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md
+- docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md
+- custom_components/homekeep/frontend/homekeep-panel.js
+
+Scope:
+- Right Now mocked sidebar component only.
+- Keep the app non-iframe and non-Lovelace.
+- Do not wire Homekeep services yet.
+- Do not build Home Health, Plan, Add Chore, Activity, Settings, diagnostics,
+  full navigation, or real stale-state recovery.
+- Use only synthetic data.
+- Treat live visual review notes in docs/product/HOMEKEEP_APP_PLAN.md as global
+  design-system direction unless explicitly scoped.
+
+Implement the second-test polish:
+- Make the visual system fit Home Assistant dark theme: darker translucent
+  surfaces, theme tokens where practical, softer borders, less pale white/green
+  treatment, and more transparent layering.
+- Apply a consistent typography and line-height scale across the mocked Right
+  Now, active session, ending, Bonus Chore, toast, and summary states.
+- Keep `Ready Now` and `Suggested Chore Bundle` out of visible user-facing
+  labels.
+- Keep greeting/invitation copy from repeating the Chore Bundle name.
+- Keep the recommendation invite line stable during the page session but able
+  to vary on reload using lightly contextual mood/energy copy families.
+- Keep randomize/shuffle with the filter/context chips.
+- Show Chores in the suggested bundle by default. Do not hide them behind an
+  expand/details control.
+- Show suggested Chores as included/selected by default, not completed.
+- Keep removed Chores visible with removed styling and row-level restore.
+- Use one scoped metadata chip for bundle count/time and one for area health
+  scope, for example `3 chores · 15 min` and `Kitchen 48 -> 72`.
+- Fold Projected Impact into the compact primary action button: projected
+  benefit on the left, action icon on the right, accessible action label.
+- Move bundle bonus/Keeps information into a quieter footer near the Chore list
+  or primary action. When a Chore is deselected, show the lost bundle bonus or
+  lost projected benefit.
+- Tighten reason text so it answers `why this now?` without repeating area,
+  impact, or bundle title content.
+- Recheck mobile scan order: invite, title/reason, bundle size, included
+  Chores, projected-benefit action.
+
+Run:
+- bundled Node syntax check for custom_components/homekeep/frontend/homekeep-panel.js
+- `git diff --check`
+- focused Python tests that cover frontend registration/reload if touched
+
+Update:
+- docs/AI_IMPLEMENTATION_PROGRESS.md with the second Right Now candidate status,
+  summary, checks run, remaining risks, and next recommended live-test prompt.
+- docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md if the live-test steps need
+  to change.
+
+End with:
+- what changed
+- what was verified
+- exact checks run
+- what Steve should test in the private Home Assistant sidebar next
+```

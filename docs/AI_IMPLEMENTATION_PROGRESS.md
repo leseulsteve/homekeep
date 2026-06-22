@@ -11,11 +11,12 @@ current_phase: 8
 current_phase_name: Hardening and release readiness
 last_updated: 2026-06-22
 last_codex_summary: >
-  Homekeep has a committed mocked Ready Now sidebar prototype for live-feel
-  testing. Dashboard planning is not complete for the whole app: Home Health,
-  Plan, Add Chore, Activity, Settings, diagnostics, full navigation, and real
-  stale-state recovery still need planning. The next step is a private live
-  smoke test of the mocked Ready Now slice before wiring services.
+  The second mocked Right Now live-test candidate is locally ready for Steve's
+  private Home Assistant review. It applies the dark-theme visual pass,
+  transparent layering, typography cleanup, visible included Chores, removed
+  Chore restore, projected-benefit primary action, and bonus-loss treatment.
+  Use Gate 3B in docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md for the next
+  live review. Homekeep services are still not wired to the sidebar app.
 ```
 
 ## Phase Checklist
@@ -56,6 +57,139 @@ Important decisions:
 Known gaps / next prompt:
 - ...
 ```
+
+### 2026-06-22 - Second Right Now live-test candidate
+
+Status: completed locally, pending private Home Assistant live review
+
+Implemented:
+- Applied the second Right Now visual-system pass to the mocked sidebar panel:
+  darker Home Assistant-theme-aware surfaces, translucent layering, softer
+  borders, and less pale white/green treatment.
+- Tightened typography and line-height rhythm across Right Now, active session,
+  ending, Bonus Chore, toast, timer, and summary states.
+- Kept randomize with the context chips, kept the invite line stable during the
+  page session, and kept internal labels out of the visible Right Now surface.
+- Made suggested Chores visible by default, quieter as selected/included rather
+  than completed, and restorable in place after removal.
+- Folded Projected Impact into the primary projected-benefit action and moved
+  bundle bonus/Keeps into a quiet footer with lost-bonus treatment after Chore
+  removal.
+- Updated the mocked final summary so intact-bundle bonus Keeps are not awarded
+  after pre-start Chore removal.
+- Aligned Codex-facing UI implementation instructions with the second-candidate
+  Right Now design.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md docs/implementation/AI_DASHBOARD_UI_STEVE_PROMPTS.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+
+Docs updated:
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+
+Important decisions:
+- The second candidate remains mocked and visual-first.
+- Sidebar service wiring still waits until Steve completes Gate 3B live review.
+
+Known gaps / next prompt:
+- Install/update the private Home Assistant test instance with this candidate
+  and run Gate 3B from `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`.
+- Continue to avoid treating this Right Now live test as validation for Home
+  Health, Plan, Add Chore, Activity, Settings, diagnostics, full navigation, or
+  stale-state recovery.
+
+### 2026-06-22 - Live Test 2 checklist from recommendations
+
+Status: completed
+
+Implemented:
+- Accepted Codex recommendations as provisional defaults for remaining
+  pre-Live-Test-2 Home Health questions.
+- Documented that the full Home Health view remains a top-level app destination,
+  but Live Test 2 should focus only on the mocked Right Now component.
+- Added Gate 3B as a concrete second Right Now live-test checklist.
+
+Tests/checks run:
+- `git diff --check -- docs/product/HOMEKEEP_APP_PLAN.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Stop broad app-question review before Live Test 2.
+- Build the second Right Now candidate from Prompt 11, then verify it with Gate
+  3B.
+
+Known gaps / next prompt:
+- Use `docs/implementation/AI_DASHBOARD_UI_STEVE_PROMPTS.md` Prompt 11 to build
+  the second Right Now candidate.
+- Use Gate 3B in `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md` for Steve's
+  second live-test double-check.
+
+### 2026-06-22 - Second Right Now live-test handoff
+
+Status: completed
+
+Implemented:
+- Added a reusable Steve prompt for building the second mocked Right Now
+  live-test candidate from the live visual review notes.
+- Updated the private live-test checklist so Gate 3A reflects the current Right
+  Now direction: visible included Chores, no expand/details control, randomize
+  with filters, projected-benefit action, and removed-state restoration.
+- Updated the current progress summary to point future sessions to Prompt 11
+  before service wiring.
+
+Tests/checks run:
+- `git diff --check -- docs/implementation/AI_DASHBOARD_UI_STEVE_PROMPTS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/implementation/AI_DASHBOARD_UI_STEVE_PROMPTS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Steve now has a single copy-paste prompt to ask Codex for the second Right Now
+  live-test candidate.
+- The second candidate remains mocked and visual-first; Homekeep service wiring
+  still waits.
+
+Known gaps / next prompt:
+- Use `docs/implementation/AI_DASHBOARD_UI_STEVE_PROMPTS.md` Prompt 11 to build
+  the second Right Now live-test candidate.
+
+### 2026-06-22 - First sidebar live design review planning
+
+Status: completed
+
+Implemented:
+- Added a design-and-visual-first checklist for the first mocked Homekeep
+  sidebar app live review.
+- Made the next-build rule explicit: tune the mocked Ready Now visual feel
+  before wiring Homekeep services if the live review finds friction.
+- Updated the current progress summary so future sessions start with the
+  design/visual review gate.
+
+Tests/checks run:
+- `git diff --check -- docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/product/HOMEKEEP_APP_PLAN.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- The first live sidebar app review starts with design and visuals before
+  functional readiness.
+- Service wiring waits until Ready Now visual feel, copy tone, and core flow are
+  acceptable for private live review.
+
+Known gaps / next prompt:
+- Run Gate 3A in a private Home Assistant frontend and record Keep / Change
+  before service wiring / Can wait / Open question findings.
 
 ### 2026-06-22 - Docs taxonomy and AI-prefix cleanup
 

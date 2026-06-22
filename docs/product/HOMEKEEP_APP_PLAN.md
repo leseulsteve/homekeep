@@ -955,6 +955,14 @@ The number should provide clarity, progress, and quick comparison. It should not
 feel like a grade on the user. Pair the number with friendly household language
 so the meaning is obvious without making the screen clinical.
 
+Decision: Home Health should lead with a friendly status label, supported by
+area-level language, with the numeric score visible but visually secondary.
+
+The primary read should be human and household-oriented, such as `The home is
+holding steady`. Area-level language should explain where care would help, such
+as `Kitchen could use attention`. The number should remain available for
+clarity and comparison, but it should not be the emotional headline of the view.
+
 Decision: Home Health and Area Health use a `0-100` scale where higher is
 healthier.
 
@@ -997,6 +1005,13 @@ Area trends should be visually smaller than the health number and status label.
 They should help the user understand recent movement without turning each row
 into analytics. Use the same `last 7 days` period as the Home Health header
 unless implementation discovers a better derived context.
+
+Decision: Show Area Health trends only when they are meaningful.
+
+Do not show a trend on every Area card by default. Show trend text or movement
+only when it explains something useful, such as a recent decline, a notable
+improvement, or a change that affects the next care recommendation. Quiet,
+steady Areas can omit trend detail.
 
 Examples:
 
@@ -1042,6 +1057,23 @@ health state should work together.
 Decision: Ready Now should show both whole-home health and the most
 attention-worthy Area Health, but keep them compact and tied to the current
 suggestion.
+
+Live review correction: the first mocked Right Now live test did not provide a
+way to inspect Home Health as its own view or full experience.
+
+Treat Home Health visibility as still unvalidated in live use. The mocked Right
+Now card may show compact health/impact context, but that does not count as a
+live review of the Home Health view, Home Health navigation, Area Health card
+layout, trends, or explanations.
+
+Decision: Right Now should show compact Home Health context only when it helps
+explain the current recommendation.
+
+Do not make Home Health an always-visible status strip on Right Now. If the
+suggested Chore Bundle is clearly driven by an attention-worthy Area Health
+state, stale care, or a meaningful Projected Impact, show compact context inside
+the suggestion. If the suggestion is neutral, light, or self-explanatory, let
+the suggestion stand without extra health context.
 
 The whole-home number gives the satisfying sense that the home is being cared
 for. The area number explains why the current Chore Bundle matters. The UI
@@ -1097,6 +1129,15 @@ The view should feel actionable, not merely informational. It should help the
 user understand which areas need care, why, and what small direct action is
 available without making the page feel punitive or like a second Ready Now screen.
 
+Decision: Home Health should not show much detail when there is not much to
+report.
+
+Healthy, steady, or uneventful Areas should stay compact and calm. Do not
+manufacture explanations, trends, or actions just to fill the card. Richer
+detail belongs where there is a meaningful reason: low Area Health, recent
+decline, stale high-impact Chores, a useful next care action, or a notable
+recent improvement.
+
 Decision: The `Home Health` view should be organized primarily as a
 list of large Home Assistant Area cards.
 
@@ -1105,6 +1146,14 @@ Use a scannable card list rather than a home map, room diagram, or pure ranked
 card to show the area number, status, small trend, and useful detail without
 feeling cramped. The list may still sort or highlight areas that need care, but
 the user's mental model should remain `these are the areas of my home`.
+
+Decision: Area Health cards should lead with the Area name, then the friendly
+status label.
+
+People think first in terms of places in the home, such as `Kitchen` or
+`Entryway`, then ask how that place is doing. The status label should sit close
+to the Area name, with the numeric Area Health score visible but secondary to
+the place/status read.
 
 Decision: Use one vertical column of large Area Health cards.
 
@@ -1280,10 +1329,12 @@ or would provide a clear Projected Impact if completed. It should be explainable
 through Staleness, Area Health impact, Projected Impact, or a useful small
 variant.
 
-Show the top contributing Chore visibly so the card has a clear next action.
+Show one top contributing Chore visibly so the card has a clear next action.
 Represent the remaining contributors as a compact line, such as `2 more ways to
-help`, rather than listing every Chore by default. This keeps the cards calm and
-scannable while still indicating that the area has more useful care options.
+help`, only when there are genuinely useful extra contributors. Do not list
+`2-3` Chores by default on every Area card, because that turns Home Health into
+another overdue list. This keeps the cards calm and scannable while still
+indicating that the area has more useful care options when that is true.
 
 Decision: Tapping `2 more ways to help` should expand the extra Chores inline
 inside the Area Health card.
@@ -1438,6 +1489,21 @@ details directly.
 This gives the user one clear next step from an area card. The Chore details
 view can explain why that Chore helps the area and offer the soft direct start
 action. It must not silently create a Chore Bundle or imply bundle bonus Keeps.
+
+Pre-Live-Test-2 planning default: use Codex recommendations for remaining
+Home Health questions needed before the second Right Now live test.
+
+These defaults are accepted for moving to Live Test 2 and can be revisited after
+the test:
+
+- The full Home Health view lives as a top-level Homekeep app destination named
+  `Home Health`.
+- Live Test 2 should focus only on the mocked Right Now component and its active
+  session/ending loop, not a new Home Health view.
+- The next build should prioritize visual polish and Right Now interaction
+  confidence over adding new Home Health UI.
+- Home Health implementation remains planned but unvalidated until a later
+  dedicated Home Health review/test.
 
 Decision: Area cards below `70` should use `Care for this area` as the primary
 action label.
@@ -1897,6 +1963,150 @@ Design guidance:
 
 The interface should feel more like a gentle operational panel than a decorative
 landing page.
+
+## First Live Design Review
+
+The first live review of the Homekeep sidebar app should start with design and
+visuals, using the mocked Ready Now prototype. This review is intentionally about
+product feel before service wiring.
+
+Unless a review note is explicitly scoped to one screen or component, visual
+feedback from this live review applies globally to the Homekeep app. Treat these
+notes as design-system direction for future Ready Now, active session, Bonus
+Chore, Home Health, Plan, Activity, Settings, diagnostics, empty states, and
+error/stale-state surfaces.
+
+Review goals:
+
+- confirm the first impression feels like Homekeep, not a generic dashboard
+- check whether the Ready Now visual hierarchy leads naturally from greeting to
+  context to suggested Chore Bundle
+- verify the screen works on mobile and desktop without text collisions,
+  crowded controls, or oversized decorative sections
+- confirm Home Health, Area Health, Projected Impact, and Keeps feel supportive
+  rather than punitive
+- confirm the active Chore Session state feels distinct from setup and planning
+- confirm Done for now and One more feel positive, optional, and complete
+- identify copy or motion that feels too chatty, too quiet, too cute, too
+  clinical, or too much like a productivity score
+
+Findings from this review should be grouped as:
+
+- keep as-is
+- change before service wiring
+- acceptable for the mock but not for the wired app
+- can wait for later workflow planning
+- open product question
+
+The next build after this live review should first apply any Ready Now
+design/visual changes that affect confidence in the main loop. Only after that
+should the app move on to real Homekeep service wiring.
+
+Live review findings:
+
+Change before service wiring:
+
+- The mocked Ready Now colors do not fit Home Assistant dark theme yet. The
+  palette reads too pale, with too many light/opaque surfaces and not enough
+  dark-theme transparency. The next visual pass should use Home Assistant theme
+  tokens where possible, darker translucent layered surfaces, softer borders,
+  and less white/pale green treatment so the app feels embedded in the HA dark
+  UI rather than pasted over it.
+- The Suggested Chore Bundle card needs a typography pass. Font sizes and line
+  heights should be revised relative to each other so the bundle title, reason,
+  metadata chips, health/impact line, Chore rows, and action buttons have a
+  clearer hierarchy and do not feel mismatched. Apply this rule broadly across
+  the app wherever similar content appears: headings, supporting text, chips,
+  rows, timers, summaries, and buttons should use a consistent type scale and
+  line-height system instead of one-off sizing.
+- Remove `Ready Now` as a prominent user-facing title. It is an internal product
+  and implementation term, not a label the user needs to see above the main
+  greeting. The opening screen should lead with the greeting and context
+  controls.
+- Do not mention the specific Chore Bundle name in the invitation/greeting text.
+  The greeting should invite the moment and set tone; the Suggested Chore Bundle
+  card should carry the bundle title and specific recommendation details. Apply
+  this broadly to future recommendation surfaces so headings and invitation copy
+  do not repeat each other.
+- Remove redundant section labels when the UI object is already clear. For
+  example, do not show `Suggested Chore Bundle` above the suggested bundle card;
+  the card title, content, and action should make its purpose obvious. Use status
+  labels only when they add real state, such as a refining/loading message.
+- The small line above a recommendation card should be an invitation, not a
+  generated status or a second bundle label. It should remain stable when the
+  user reshuffles or changes chips, unless the app truly needs to show an error,
+  stale-state recovery, or blocking loading state. It may vary on page reload so
+  Homekeep feels fresh without making the card feel random during one review or
+  usage session.
+- Recommendation-card invitation lines should be lightly contextual but not
+  bundle-specific. Mode should choose the copy family first. Mood or energy may
+  gently influence tone: tired/low energy can use manageable copy, calm/quiet
+  can use gentle copy, focused/high energy can use clearer action-oriented copy,
+  and default/auto can use general small-start copy. Page reload may vary within
+  the selected family. Shuffle and filter changes should not change the line
+  during the same page session. Avoid area names, Chore Bundle names, or
+  generated recommendation details in this line.
+- Place the randomize/shuffle control with the filters and context chips, not
+  inside the recommendation card. It changes the suggestion inputs/result set,
+  so it belongs with the controls for shaping the current moment. Apply this
+  broadly to future recommendation surfaces.
+- In recommendation cards, combine the Area and health-change metadata into one
+  scoped impact chip. For single-area Chore Bundles, show the area and its
+  health change together, such as `Kitchen 48 -> 72`. For mixed-area bundles,
+  use a truthful whole-home or mixed-area scope, such as `Home 74 -> 77`, rather
+  than showing a separate area chip that competes with the health chip.
+- Fold the Projected Impact into the primary recommendation action instead of
+  showing it as a separate chip. Use a compact emphasis button: projected benefit
+  on the left, action icon on the right, stronger background color than secondary
+  controls. The button may use an accessible label such as `Choose this reset`,
+  but visible text should emphasize the projected benefit, such as `Kitchen +24`
+  and `Big kitchen boost`.
+- Do not hide the suggested Chores behind an expand/details control in the
+  suggestion card. A Chore Bundle is a set of Chores, so the card should show
+  the bundle contents by default while keeping the layout compact enough to
+  scan. Expansion can be reserved for deeper explanations elsewhere, not for
+  revealing the core Chores being suggested.
+- Suggested Chores in a Chore Bundle should be selected by default. The user is
+  accepting a pre-built recommendation, not assembling the bundle from scratch.
+  Make included Chores visibly checked/selected and let the user remove
+  exceptions.
+- Removed Chores should stay visible in the suggested bundle with a clear
+  removed visual style. Do not make them disappear from the card. Use muted
+  treatment, a removed indicator, and an easy restore action so the user can
+  understand what changed and reverse it without relying only on a toast.
+- Across the app, when Homekeep can reasonably infer the intended value or input
+  state, prefill it. Forms and setup controls should start from useful guessed
+  defaults so the user confirms or adjusts instead of filling everything from a
+  blank state. Guesses must remain visible, correctable, and never treated as
+  irreversible user preference learning unless the user explicitly confirms
+  that behavior.
+
+Right-now card next-build recommendations:
+
+1. Make the recommendation surface feel less like a conventional card. With
+   Chores visible by default, use darker translucent layering, softer borders,
+   and fewer nested boxed rows so the bundle reads as one coherent suggestion.
+2. Add a compact bundle count, such as `3 chores · 15 min`, so the visible list
+   feels intentional and the user understands the bundle size immediately.
+3. Make selected Chore indicators quieter than completion indicators. Included
+   Chores should read as selected/included, not already completed.
+4. Keep removed Chores visible but compact and clearly excluded, with restore
+   available on the row.
+5. Keep the primary button feeling like the next step. Visible text should lead
+   with the projected benefit, while the right-side icon carries the action.
+   The accessible label should still name the action.
+6. Move bundle bonus/Keeps information into a quieter footer near the Chore list
+   or primary action. When a Chore is deselected, the UI should indicate the
+   lost bundle bonus or lost projected benefit instead of pretending the original
+   bundle reward still applies.
+7. Tighten reason text so it answers `why this now?` in one short human
+   sentence without repeating area, health, or bundle title information already
+   shown elsewhere.
+8. Use one visual rhythm for filters, read-only metadata, and action buttons:
+   same design family, clearly different roles.
+9. Recheck mobile scan order after the visual pass. The right-now card should
+   still read naturally on a narrow screen: invite, title/reason, bundle size,
+   included Chores, projected-benefit action.
 
 ## MVP App View
 

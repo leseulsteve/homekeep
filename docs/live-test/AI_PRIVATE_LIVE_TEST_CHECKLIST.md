@@ -104,9 +104,16 @@ that the full Homekeep app is planned or service-wired.
 - [ ] Change time, energy, mood, goal, and area chips and confirm the mocked
   suggestion refines after a short fuzzy state
 - [ ] Confirm the shuffle button swaps to another mocked Chore Bundle
-- [ ] Expand the suggested Chore Bundle and confirm Projected Impact, Keeps,
-  time estimates, and area display feel understandable
-- [ ] Remove a Chore and confirm the undo toast appears
+- [ ] Confirm randomize/shuffle lives with the filter/context chips, not inside
+  the suggested bundle card
+- [ ] Confirm the suggested Chore Bundle shows included Chores by default,
+  without an expand/details control
+- [ ] Confirm the compact metadata explains bundle count, duration, and scoped
+  Area/Home Health impact
+- [ ] Confirm Projected Impact is folded into the primary action button with
+  projected benefit on the left and an action icon on the right
+- [ ] Remove a Chore and confirm it stays visible with removed styling, row-level
+  restore, and visible lost bundle bonus/projected-benefit treatment
 - [ ] Choose the suggested reset and confirm the active Chore Session appears
 - [ ] Start a Chore and confirm the timer appears only while a Chore is ongoing
 - [ ] Complete Chores and confirm completed Chores collapse into a summary
@@ -120,6 +127,177 @@ that the full Homekeep app is planned or service-wired.
 - [ ] Tap `Done for now` and confirm the final summary appears, then returns to
   Ready Now
 - [ ] Record visual, copy, layout, or flow changes needed before service wiring
+
+### Gate 3A Design And Visual Review
+
+Start the first sidebar app live review with design and visuals before treating
+the prototype as functionally ready.
+
+Review in this order:
+
+- [ ] First impression: Homekeep feels like a calm Home Assistant sidebar app,
+  not a Lovelace dashboard, marketing page, or admin console
+- [ ] Visual hierarchy: greeting, context chips, invite line, bundle title,
+  reason, metadata, included Chores, and primary projected-benefit action read
+  in the intended order
+- [ ] Mobile layout: text does not collide, controls are thumb-friendly, and
+  the main action remains obvious without scrolling through a grid
+- [ ] Desktop layout: the app uses space well without becoming card-heavy or
+  visually sparse
+- [ ] Color and contrast: health and impact treatment feels useful, not
+  punitive, alarming, or like a grade on the person
+- [ ] Typography and spacing: labels, chips, buttons, timers, and summaries feel
+  polished and scannable
+- [ ] Motion and feedback: fuzzy/refining, completion feedback, and final
+  summary are noticeable but restrained
+- [ ] Copy tone: greetings, reasons, labels, and end-state text match the
+  Homekeep voice and avoid guilt, pressure, medical claims, or over-cheer
+- [ ] Chore Bundle display: visible Chores, removed state, time, Keeps,
+  Projected Impact action, and area/health context are understandable at a
+  glance
+- [ ] Active session visuals: the ongoing Chore, timer, completed summary, Done
+  for now, and One more states feel distinct from the planning state
+- [ ] Bonus Chore visuals: One more reveal feels optional and inviting, not like
+  an obligation or productivity streak
+- [ ] Privacy check: screenshots or notes do not include private household
+  details, private calendar text, addresses, device identifiers, or personal
+  schedules
+
+Record findings as:
+
+```text
+Keep:
+- ...
+
+Change before service wiring:
+- ...
+
+Can wait until later app planning:
+- ...
+
+Open question for Steve:
+- ...
+```
+
+Next-build rule:
+
+- If the design/visual review finds friction in the mocked Ready Now loop, tune
+  the mocked sidebar prototype first.
+- Do not wire Homekeep services into the sidebar app until the Ready Now visual
+  feel, copy tone, and core flow are acceptable for the private live review.
+- Do not infer approval for Home Health, Plan, Add Chore, Activity, Settings,
+  diagnostics, full navigation, or stale-state recovery from this review.
+
+## Gate 3B: Second Right Now Live-Test Checklist
+
+Use this gate after building the second mocked Right Now candidate from
+`docs/implementation/AI_DASHBOARD_UI_STEVE_PROMPTS.md` Prompt 11.
+
+This gate is only for the Right Now component and its mocked active-session
+loop. It does not validate the full Home Health view, Plan, Add Chore, Activity,
+Settings, diagnostics, full navigation, service wiring, or stale-state recovery.
+
+Pre-test setup:
+
+- [ ] Install/update the private Home Assistant test instance to the second
+  Right Now candidate commit
+- [ ] Restart Home Assistant
+- [ ] Open the Homekeep sidebar panel
+- [ ] Confirm the app is still a non-iframe sidebar panel
+- [ ] Confirm only synthetic household data appears
+- [ ] Confirm no private calendar text, room routines, addresses, device
+  identifiers, personal schedules, credentials, or tokens appear
+
+Global visual-system checks:
+
+- [ ] Dark theme fit: surfaces feel native to Home Assistant dark theme, not
+  pale or pasted-on
+- [ ] Transparency/layering: panels, chips, rows, and overlays use darker
+  translucent layering with soft borders
+- [ ] Typography: headings, supporting text, chips, buttons, timers, rows, and
+  summaries use a consistent type scale and line-height rhythm
+- [ ] Layout: the page feels like one Right Now experience, not a stack of
+  dashboard cards
+- [ ] Mobile: no text collisions, cramped controls, clipped labels, or awkward
+  scan order
+- [ ] Desktop: the experience uses space calmly without becoming sparse or
+  card-heavy
+
+Right Now header and controls:
+
+- [ ] No visible `Ready Now` internal title
+- [ ] Greeting does not repeat the Chore Bundle name
+- [ ] Context chips are visible, compact, and editable
+- [ ] Randomize/shuffle lives with the context chips
+- [ ] Randomize/shuffle changes the suggested bundle
+- [ ] Changing time, energy, mood, goal, or area refines the suggestion
+- [ ] The recommendation invite line stays stable during shuffle/filter changes
+- [ ] The recommendation invite line can vary after page reload
+- [ ] Invite copy is lightly contextual but not tied to area names, bundle names,
+  or recommendation details
+
+Suggested bundle card:
+
+- [ ] No visible `Suggested Chore Bundle` redundant label
+- [ ] The card reads in order: invite, title, reason, metadata, included Chores,
+  bonus/loss footer, projected-benefit action
+- [ ] Reason text answers `why this now?` without repeating title, area, or
+  impact metadata
+- [ ] Metadata includes bundle count and duration, such as `3 chores · 15 min`
+- [ ] Area/Home Health context appears only when it explains the recommendation
+- [ ] Area and health-change metadata are combined into one scoped chip, such as
+  `Kitchen 48 -> 72` or `Home 74 -> 77`
+- [ ] Projected Impact is folded into the compact primary action button
+- [ ] Primary action shows projected benefit on the left and action icon on the
+  right
+- [ ] Primary action has an accessible action label
+- [ ] The visual treatment does not make Home Health feel like a grade
+
+Included and removed Chores:
+
+- [ ] Chores are visible by default; there is no expand/details control to see
+  the core bundle contents
+- [ ] Suggested Chores are visibly included/selected by default, not completed
+- [ ] Included indicators are quieter than completion indicators
+- [ ] Removing a Chore keeps it visible in place with removed styling
+- [ ] Removed Chore state is clear but not punitive
+- [ ] Removed Chores have row-level restore
+- [ ] Removing a Chore updates bundle duration/selection behavior
+- [ ] Removing a Chore shows lost bundle bonus or lost projected benefit when
+  applicable
+- [ ] Restoring a Chore restores the bonus/projected-benefit treatment when
+  applicable
+
+Active session and ending loop:
+
+- [ ] Choosing the suggested bundle opens the mocked active Chore Session
+- [ ] Active session feels visually distinct from the suggestion/planning state
+- [ ] Starting a Chore starts the timer
+- [ ] Timer appears only while a Chore is ongoing
+- [ ] Completing a Chore gives restrained feedback
+- [ ] Completed Chores collapse into a compact summary
+- [ ] `Done for now` feels complete and positive
+- [ ] `One more` feels optional, not pressuring
+- [ ] Bonus Chore reveal does not auto-accept the Bonus Chore
+- [ ] Bonus Chore redraw control is visible but clearly not wired as backend
+  behavior if it remains mocked
+- [ ] Final summary appears briefly and returns to Right Now
+
+Record findings:
+
+```text
+Keep for service wiring:
+- ...
+
+Change before service wiring:
+- ...
+
+Can wait until later app planning:
+- ...
+
+Open question for Steve:
+- ...
+```
 
 Known live-test boundary:
 
