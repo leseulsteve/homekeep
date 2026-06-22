@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
+from math import ceil
 from threading import RLock
 from typing import Any, Callable, Iterable, Optional
 from uuid import uuid4
@@ -12,6 +13,8 @@ from .health import apply_completion_to_state
 from .models import (
     ChoreCompletion,
     HomekeepValidationError,
+    duration_samples,
+    learned_duration_minutes,
     prune_event_timestamps,
     resolve_completed_by,
 )
@@ -278,8 +281,8 @@ class SessionEngine:
                     "session_item_id": self._id_factory("item"),
                     "chore_id": chore_id,
                     "variant": variant,
-                    "status": "pending",
-                    "started_at": None,
+                    "status": "active" if not items else "pending",
+                    "started_at": _iso(now) if not items else None,
                     "completed_at": None,
                     "completed_by": None,
                 }
@@ -392,6 +395,7 @@ class SessionEngine:
         self.store.completions.append(completion)
 
         if item is not None and session is not None:
+            self._train_duration_if_available(chore_id, item, completed_at)
             item["status"] = "done"
             item["completed_at"] = _iso(completed_at)
             item["completed_by"] = completed_by
@@ -399,6 +403,8 @@ class SessionEngine:
             if session["status"] == "bonus_active":
                 session["status"] = "completed"
                 session["ended_at"] = _iso(completed_at)
+            else:
+                self._activate_next_item(session, completed_at)
 
         return {
             "session_id": session_id,
@@ -649,6 +655,35 @@ class SessionEngine:
                 return completion.to_dict()
         return None
 
+    def _train_duration_if_available(
+        self, chore_id: str, item: dict[str, Any], completed_at: datetime
+    ) -> None:
+        started_at = item.get("started_at")
+        if not started_at:
+            return
+        duration_seconds = (completed_at - _parse(started_at)).total_seconds()
+        if duration_seconds <= 0:
+            return
+        minutes = ceil(duration_seconds / 60)
+        state = self._state(chore_id)
+        samples = duration_samples([*state.duration_samples_minutes, minutes])
+        if samples == state.duration_samples_minutes:
+            return
+
+        self.store.states[chore_id] = replace(
+            state,
+            duration_samples_minutes=samples,
+        )
+
+    def _activate_next_item(self, session: dict[str, Any], now: datetime) -> None:
+        for item in session["items"]:
+            if item["status"] == "pending" and not item.get("bonus"):
+                item["status"] = "active"
+                item["started_at"] = _iso(now)
+                session["current_chore"] = item["chore_id"]
+                return
+        session["current_chore"] = None
+
     def _expire_bonus_if_needed(self, session: dict[str, Any], now: datetime) -> None:
         if session["status"] != "bonus_pending":
             return
@@ -672,7 +707,10 @@ class SessionEngine:
                     "chore_id": item["chore_id"],
                     "variant": item["variant"],
                     "status": item["status"],
-                    "estimated_minutes": self._chore(item["chore_id"]).estimated_minutes,
+                    "estimated_minutes": learned_duration_minutes(
+                        self._chore(item["chore_id"]),
+                        self._state(item["chore_id"]),
+                    ),
                     "area_id": self._chore(item["chore_id"]).area_id,
                 }
                 for item in session["items"]

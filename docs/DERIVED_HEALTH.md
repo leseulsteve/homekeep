@@ -64,6 +64,52 @@ cache_updated_at: datetime | null
 
 The MVP can skip storing this cache entirely.
 
+## Area Health Calculation
+
+Area Health answers `how much would this Home Assistant Area benefit from care
+right now?` It must not be implemented as a percent of chores completed.
+
+In MVP, Area Health is the health-weighted average of enabled Chores assigned
+to the requested Home Assistant Area:
+
+```text
+display_staleness = min(staleness, 100)
+chore_health = 100 - display_staleness
+area_health = weighted_average(chore_health, ChoreDefinition.health_weight)
+```
+
+Where Staleness derives from durable scheduling facts, especially
+`ChoreState.next_due_at` when available. Area Health must clamp to `0..100`,
+where `100` means no enabled Chore in the area is meaningfully stale. Disabled
+Chores do not participate in Area Health.
+
+An area with no enabled Chores may return `100` for calculation stability, but
+user-facing surfaces should avoid presenting that as a meaningful health win.
+Prefer neutral language such as `No tracked Chores yet`.
+
+Area Health explanations should expose the top `1-3` contributors when the
+area needs care. A contributing Chore is one that currently pulls Area Health
+down or would provide a clear Projected Impact if completed. Explanations
+should be short, inspectable, and based on derived values such as Staleness,
+health weight, and Projected Impact.
+
+Example explanation payload:
+
+```yaml
+area_id: kitchen
+score: 62
+label: Starting to build up
+contributors:
+  - chore_id: wipe_counters
+    reason: overdue enough to affect Kitchen health
+  - chore_id: mop_floor
+    reason: high-impact Chore is stale
+```
+
+Keep Area Health stable in MVP. Mood Context, Ready-Now Mode, and
+Scheduled-Suggestion Mode may influence recommendations, but they should not
+change the underlying Area Health score.
+
 ## Area Health Event Threshold
 
 Area Health is derived, but Homekeep may emit `homekeep_area_health_changed`

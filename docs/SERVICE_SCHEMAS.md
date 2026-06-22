@@ -24,6 +24,13 @@ homekeep.create_chore
 -> creates a Chore definition for the chore list without starting a session
 ```
 
+Session setup friction should stay low. `generate_smart_chore_list` accepts
+nullable setup fields and records the normalized request context on the
+RecommendationSnapshot. `start_recommendation` infers the Chore Session's mode,
+time budget, energy level, target time window, and area preference from that
+context and the selected recommendation, so callers do not repeat those fields
+when starting.
+
 `homekeep.start_chore_session` is intentionally not part of the MVP service
 contract. It overlaps with both steps, creates ambiguity in
 Scheduled-Suggestion Mode, and would create a second path that could bypass
@@ -121,6 +128,14 @@ Validation:
 - `recommendation_id` must exist in the snapshot.
 - If the snapshot has already been materialized into a session, reject unless
   the request is an idempotent retry for the same session.
+- Session `mode` is inferred from the snapshot goal when present, otherwise
+  defaults to `quick_wins`.
+- Session `time_budget_minutes` is inferred from the snapshot time budget when
+  present, otherwise from the selected recommendation's estimated minutes.
+- Session `energy_level` is inferred from the snapshot energy when present,
+  otherwise from the selected Chore definitions.
+- Session `target_time_window` and `location_preference` are copied from the
+  snapshot context when present.
 
 Result:
 
@@ -143,7 +158,7 @@ StartRecommendationResult:
 ```
 
 `MaterializedSessionItem` is the caller-facing session item shape. It is a
-subset of the stored `SessionItem` plus display fields needed by Lovelace and
+subset of the stored `SessionItem` plus display fields needed by Homekeep app and
 automations.
 
 ```yaml
@@ -160,6 +175,9 @@ MaterializedSessionItem:
 these IDs for subsequent session item mutations. Do not use cached
 `RecommendationItem.session_item_id` values from the Smart Chore List; those
 are null before materialization.
+
+`estimated_minutes` uses learned Chore duration when bounded timing samples
+exist, otherwise the Chore definition's user-entered estimate.
 
 After the session is created, later snapshot expiry must not invalidate the
 active session.
@@ -258,7 +276,7 @@ session_id: string | null
 session_item_id: string | null
 variant: tiny | normal | deep
 completed_by: string | null
-source: service | todo | lovelace | voice | automation
+source: service | todo | dashboard | voice | automation
 request_id: string | null
 ```
 
@@ -384,14 +402,14 @@ Behavior:
 
 Not implemented in MVP.
 
-This service is reserved for a future multi-step Lovelace or Assist flow. Do
+This service is reserved for a future multi-step Homekeep app or Assist flow. Do
 not register it in the MVP Home Assistant integration.
 
 MVP behavior:
 
 ```text
-Lovelace collects time, energy, goal, area, and mood locally
--> Lovelace calls homekeep.generate_smart_chore_list with those fields
+Homekeep app collects time, energy, goal, area, and mood locally
+-> Homekeep app calls homekeep.generate_smart_chore_list with those fields
 -> Homekeep returns a RecommendationSnapshot and Smart Chore List
 ```
 

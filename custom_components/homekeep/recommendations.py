@@ -9,7 +9,12 @@ from typing import Any, Optional
 
 from .health import clamp_score, projected_impact, priority_staleness
 from .history import context_bucket, history_fit_score
-from .models import ChoreDefinition, ChoreState, prune_event_timestamps
+from .models import (
+    ChoreDefinition,
+    ChoreState,
+    learned_duration_minutes,
+    prune_event_timestamps,
+)
 from .sessions import SessionEngine
 from .storage import HomekeepStore
 from .text_signals import (
@@ -92,6 +97,16 @@ class RecommendationEngine:
             "home_assistant_area_ids": sorted(
                 {chore.area_id for chore in enabled_chores.values() if chore.area_id}
             ),
+            "user_id": user_id,
+        }
+        request_context = {
+            "recommendation_mode": recommendation_mode,
+            "target_time_window": target_time_window,
+            "time_budget_minutes": time_budget_minutes,
+            "energy_level": energy_level,
+            "goal": goal,
+            "area_id": area_id,
+            "mood": mood,
             "user_id": user_id,
         }
         fingerprint = context_fingerprint(fingerprint_payload)
@@ -207,6 +222,7 @@ class RecommendationEngine:
                 if calendar_context
                 else None
             ),
+            "request_context": request_context,
             "result": result,
         }
         self.store.recommendations[snapshot_id] = snapshot
@@ -242,11 +258,17 @@ class RecommendationEngine:
             participants=[user_id] if user_id else [],
             variants=variants,
             source_recommendation_snapshot_id=snapshot_id,
+            mode=_infer_session_mode(snapshot, recommendation),
             recommendation_mode=snapshot["recommendation_mode"],
+            time_budget_minutes=_infer_time_budget(snapshot, recommendation),
+            energy_level=_infer_energy_level(snapshot, recommendation, self.store),
             request_id=request_id,
         )
         session = self.store.sessions[result["session_id"]]
         session["context_fingerprint"] = snapshot["context_fingerprint"]
+        context = snapshot.get("request_context", {})
+        session["target_time_window"] = context.get("target_time_window")
+        session["location_preference"] = context.get("area_id")
         snapshot["materialized_session_id"] = result["session_id"]
         return result
 
@@ -286,9 +308,10 @@ class RecommendationEngine:
         user_id: Optional[str],
     ) -> dict[str, Any]:
         state = self.store.states.get(chore.id) or ChoreState.new_for_chore(chore)
+        estimated_minutes = learned_duration_minutes(chore, state)
         stale = clamp_score(priority_staleness(chore, state, now))
         impact = projected_impact(chore, state, now)
-        time_fit = _time_fit(chore.estimated_minutes, time_budget_minutes)
+        time_fit = _time_fit(estimated_minutes, time_budget_minutes)
         energy_fit = _energy_fit(chore.energy, energy_level)
         area_fit = (
             100.0
@@ -322,8 +345,8 @@ class RecommendationEngine:
             "recommendation_id": recommendation_id,
             "kind": "single",
             "title": chore.name,
-            "estimated_minutes": chore.estimated_minutes,
-            "chore_items": [_item_payload(chore)],
+            "estimated_minutes": estimated_minutes,
+            "chore_items": [_item_payload(chore, estimated_minutes)],
             "projected_impact": {
                 "home_health_delta": round(impact, 3),
                 "area_health_delta": (
@@ -399,11 +422,11 @@ class RecommendationEngine:
         }
 
 
-def _item_payload(chore: ChoreDefinition) -> dict[str, Any]:
+def _item_payload(chore: ChoreDefinition, estimated_minutes: int) -> dict[str, Any]:
     return {
         "chore_id": chore.id,
         "variant": "normal",
-        "estimated_minutes": chore.estimated_minutes,
+        "estimated_minutes": estimated_minutes,
         "area_id": chore.area_id,
         "session_item_id": None,
     }
@@ -432,6 +455,50 @@ def _find_recommendation(
         if recommendation["recommendation_id"] == recommendation_id:
             return recommendation
     return None
+
+
+def _infer_session_mode(snapshot: dict[str, Any], recommendation: dict[str, Any]) -> str:
+    context = snapshot.get("request_context", {})
+    goal = context.get("goal")
+    if goal in {"quick_wins", "overdue", "visible_impact", "prevent_future_mess", "full_reset"}:
+        return goal
+    if recommendation.get("kind") == "easiest":
+        return "quick_wins"
+    return "quick_wins"
+
+
+def _infer_time_budget(snapshot: dict[str, Any], recommendation: dict[str, Any]) -> int:
+    context = snapshot.get("request_context", {})
+    budget = context.get("time_budget_minutes")
+    if isinstance(budget, int) and not isinstance(budget, bool) and budget > 0:
+        return budget
+    estimated = recommendation.get("estimated_minutes")
+    if isinstance(estimated, int) and estimated > 0:
+        return estimated
+    return 15
+
+
+def _infer_energy_level(
+    snapshot: dict[str, Any], recommendation: dict[str, Any], store: HomekeepStore
+) -> str:
+    context = snapshot.get("request_context", {})
+    energy = context.get("energy_level")
+    if energy in {"low", "normal", "high", "quiet"}:
+        return energy
+    levels = [
+        store.chores[item["chore_id"]].energy
+        for item in recommendation.get("chore_items", [])
+        if item.get("chore_id") in store.chores
+    ]
+    if not levels:
+        return "normal"
+    if "high" in levels:
+        return "high"
+    if "normal" in levels:
+        return "normal"
+    if "low" in levels:
+        return "low"
+    return levels[0]
 
 
 def _normalize_fingerprint_payload(payload: dict[str, Any]) -> dict[str, Any]:

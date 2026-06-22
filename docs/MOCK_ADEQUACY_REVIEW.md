@@ -83,10 +83,9 @@ Home Assistant package-backed tests:
 
 Frontend/dashboard:
 
-- `examples/lovelace_dashboard.yaml` is parsed and content checked but not
-  rendered in a live Home Assistant dashboard.
-- Helper/script bridge examples are documented but not packaged or tested as
-  automations.
+- The former dashboard examples have been removed.
+- The sidebar app direction still needs frontend-specific mocks once the
+  Home Assistant extension approach is chosen.
 
 Dynamic entity behavior:
 

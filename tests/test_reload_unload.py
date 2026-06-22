@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import unittest
+import sys
+import types
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from custom_components.homekeep import (
     async_unload_entry,
@@ -63,12 +66,14 @@ class ReloadUnloadTest(unittest.IsolatedAsyncioTestCase):
             config_entries=FakeConfigEntries(unload_ok=True),
         )
 
-        unloaded = await async_unload_entry(hass, entry)
+        with patch.dict("sys.modules", self._frontend_modules()):
+            unloaded = await async_unload_entry(hass, entry)
 
         self.assertTrue(unloaded)
         self.assertEqual(storage.unsub_count, 1)
         self.assertEqual(hass.config_entries.calls, [(entry, PLATFORMS)])
         self.assertNotIn(DOMAIN, hass.data)
+        self.assertEqual(hass.removed_panel, "homekeep")
 
     async def test_failed_platform_unload_preserves_storage_and_listener(self) -> None:
         entry = SimpleNamespace(entry_id="entry-1")
@@ -83,6 +88,20 @@ class ReloadUnloadTest(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(unloaded)
         self.assertEqual(storage.unsub_count, 0)
         self.assertIn(entry.entry_id, hass.data[DOMAIN])
+
+    def _frontend_modules(self) -> dict[str, types.ModuleType]:
+        fake_frontend = types.ModuleType("homeassistant.components.frontend")
+        fake_frontend.async_remove_panel = (
+            lambda hass, path, **kwargs: setattr(hass, "removed_panel", path)
+        )
+        homeassistant = types.ModuleType("homeassistant")
+        components = types.ModuleType("homeassistant.components")
+        components.frontend = fake_frontend
+        return {
+            "homeassistant": homeassistant,
+            "homeassistant.components": components,
+            "homeassistant.components.frontend": fake_frontend,
+        }
 
 
 if __name__ == "__main__":

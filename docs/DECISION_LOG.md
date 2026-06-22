@@ -17,7 +17,7 @@ implementation pass.
 - `homekeep.start_recommendation` is the canonical MVP service that creates a
   Chore Session.
 - There is no MVP `homekeep.start_chore_session` service.
-- There is no MVP `homekeep.answer_session_question` service. Lovelace
+- There is no MVP `homekeep.answer_session_question` service. Homekeep app
   collects setup answers locally and calls `generate_smart_chore_list`.
 - `homekeep.start_chore_bundle` may exist only as a compatibility alias for
   bundle callers; new code should use `start_recommendation`.
@@ -26,6 +26,9 @@ implementation pass.
 - Expired or invalidated RecommendationSnapshots cannot start new sessions.
 - Once a Chore Session is created, later snapshot expiry does not invalidate
   that active session.
+- `start_recommendation` infers session setup fields from the stored
+  RecommendationSnapshot and selected recommendation. Callers should not need
+  to provide mode, time budget, energy, target window, or area again.
 
 ## Home Assistant Responses
 
@@ -43,7 +46,7 @@ implementation pass.
 - `RecommendationItem.session_item_id` is null before materialization.
 - `start_recommendation` returns materialized `SessionItem` records with real
   `session_item_id` values.
-- Lovelace and other callers must use the `start_recommendation` response
+- Homekeep app and other callers must use the `start_recommendation` response
   for `complete_chore`, `skip_chore`, and `snooze_chore`.
 
 ## To-do Projections
@@ -59,17 +62,28 @@ implementation pass.
 
 ## Chore State And Health
 
-- Current storage version is `2`.
+- Current storage version is `3`.
 - Version 1 ChoreState integer counters `recent_dismissals` and
   `recent_snoozes` migrate to version 2 timestamp-list fields by dropping the
   old counters and adding empty event lists.
+- Version 2 ChoreState records migrate to version 3 by adding
+  `duration_samples_minutes: []`.
 - Home Health, Area Health, Group Health, Staleness, and Projected Impact are
   derived values.
 - Cached health or staleness values are disposable and rebuildable.
 - Health scores must remain correct after cache loss or restart.
+- Area Health is a `0..100` derived, health-weighted average of enabled Chore
+  health for one Home Assistant Area. It answers how much that area would
+  benefit from care now, not what percent of its Chores are completed.
+- Area Health contributor explanations should use inspectable derived reasons
+  such as Staleness, health weight, and Projected Impact.
 - `homekeep_area_health_changed` fires only on Area Health bucket crossing or
   absolute delta of at least 10 points. It does not fire during startup/cache
   rebuild.
+- Chore duration learning uses bounded real session timing samples. Homekeep
+  keeps the user-entered `estimated_minutes` as the fallback/base estimate and
+  uses the learned median for recommendation time fit and materialized session
+  display when samples exist.
 
 ## Completion Credit
 
@@ -215,23 +229,28 @@ implementation pass.
   create synthetic Chores, repair sample state, or clear durable data for
   private testing.
 
-## Lovelace Dashboard
+## Homekeep Dashboard
 
-- The Lovelace MVP dashboard is an example surface, not source of truth.
-- The dashboard uses stock Home Assistant Lovelace cards for the MVP flow.
-- The dashboard must use Home Assistant helpers or scripts for values that
-  Lovelace cards cannot hold cleanly, especially service response ids returned
-  by Homekeep services.
-- The dashboard displays Homekeep sensors and To-do projections instead of
-  duplicating recommendation or session state in dashboard-only data.
+- The canonical Homekeep UI direction is a Home Assistant sidebar app.
+- Lovelace is not part of the Homekeep UI implementation plan.
+- Do not build, restore, ship, or maintain Lovelace dashboard templates,
+  Lovelace helper/script bridge flows, or Lovelace-specific tests.
+- Former dashboard examples are no longer part of the MVP direction.
+- The app may hold temporary UI identifiers from action responses while durable
+  state remains in Homekeep storage.
+- The first Homekeep sidebar app implementation is a mocked Ready Now prototype.
+  It registers a non-iframe custom panel and uses synthetic local UI state only;
+  it must not be treated as durable Homekeep state or backend service wiring.
+- Home Assistant sensors and To-do entities remain projections instead of
+  duplicating recommendation or session state in dashboard-only durable data.
 - Stored legacy completion records with source `bubble_card` migrate to
-  `lovelace`; new service calls should use `lovelace`.
-- The dashboard Add Chore flow calls `homekeep.create_chore`; it must not use
+  `dashboard`; new service calls should use `dashboard`.
+- The app Add Chore flow calls `homekeep.create_chore`; it must not use
   To-do create operations as a write-through path.
 
 ## MVP Scope
 
 - Stay inside MVP unless Steve explicitly expands scope.
-- Lovelace is the MVP dashboard layer.
+- Homekeep's sidebar app is the MVP dashboard layer.
 - No complex fairness scoring, punitive gamification, or broad future scope in
   MVP.

@@ -148,7 +148,7 @@ Recommended build order:
 5. Implement Recommendation Engine V1.
 6. Wire Home Assistant services, sensors, and To-do projections.
 7. Implement Calendar Context.
-8. Add the Lovelace MVP dashboard example.
+8. Add the Homekeep sidebar app MVP.
 9. Harden tests, reload/unload behavior, migrations, and release checks.
 
 Ask Steve before proceeding when:
@@ -229,10 +229,16 @@ Git rules:
 - `docs/SCHEDULED_SUGGESTION_UX.md`: future-session proposal UX.
 - `docs/SESSION_HISTORY_LEARNING.md`: context buckets and history fit scoring.
 - `docs/MOOD_CONTEXT.md`: inferred mood/readiness context rules.
+- `docs/HOMEKEEP_VOICE_SYSTEM.md`: user-facing tone, copy families, and
+  Mood Context voice rules.
 - `docs/SERVICE_SCHEMAS.md`: draft Home Assistant service payloads.
 - `docs/TEST_PLAN.md`: unit and integration test plan.
 - `docs/SCAFFOLDING_TASKS.md`: file-by-file first implementation checklist.
-- `docs/LOVELACE_MVP.md`: dashboard flow and service wiring.
+- `docs/DASHBOARD_UI_PLAN.md`: dashboard UI direction and app-view plan.
+- `docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md`: Codex-facing app UI implementation
+  guardrails translated from the current design state.
+- `docs/DASHBOARD_UI_STEVE_PROMPTS.md`: phased prompts for continuing app UI
+  design review and implementation planning.
 - `docs/CALENDAR_CONTEXT.md`: calendar freshness and invalidation rules.
 - `docs/ADAPTIVE_INTERVALS.md`: adaptive cadence bounds and update rules.
 - `docs/DERIVED_HEALTH.md`: health/staleness derivation and cache rules.

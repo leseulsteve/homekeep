@@ -11,6 +11,8 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional
 
 DISMISSAL_EVENT_WINDOW_DAYS = 14
 MAX_EVENT_TIMESTAMPS = 10
+MAX_DURATION_SAMPLES = 10
+MAX_LEARNED_DURATION_MINUTES = 240
 VALID_VARIANT_KEYS = {"tiny", "normal", "deep"}
 MIN_VARIANT_CREDIT = 0.1
 MAX_VARIANT_CREDIT = 2.0
@@ -50,7 +52,7 @@ class CompletionSource(str, Enum):
 
     SERVICE = "service"
     TODO = "todo"
-    LOVELACE = "lovelace"
+    DASHBOARD = "dashboard"
     VOICE = "voice"
     AUTOMATION = "automation"
 
@@ -218,6 +220,29 @@ def prune_event_timestamps(
     return parsed_values[-MAX_EVENT_TIMESTAMPS:]
 
 
+def duration_samples(values: Iterable[Any]) -> List[int]:
+    """Keep valid learned duration samples, capped to newest values."""
+
+    samples: List[int] = []
+    for value in values:
+        if isinstance(value, bool) or not isinstance(value, int):
+            continue
+        if value < 1 or value > MAX_LEARNED_DURATION_MINUTES:
+            continue
+        samples.append(value)
+    return samples[-MAX_DURATION_SAMPLES:]
+
+
+def learned_duration_minutes(chore: "ChoreDefinition", state: "ChoreState") -> int:
+    """Return the learned duration median, or the Chore estimate as fallback."""
+
+    samples = duration_samples(state.duration_samples_minutes)
+    if not samples:
+        return chore.estimated_minutes
+    ordered = sorted(samples)
+    return ordered[len(ordered) // 2]
+
+
 @dataclass(frozen=True)
 class ChoreVariant:
     """A completion variant for a Chore."""
@@ -372,6 +397,7 @@ class ChoreState:
     snooze_events: List[datetime] = field(default_factory=list)
     last_dismissed_at: Optional[datetime] = None
     last_snoozed_at: Optional[datetime] = None
+    duration_samples_minutes: List[int] = field(default_factory=list)
 
     @classmethod
     def new_for_chore(cls, chore: ChoreDefinition) -> "ChoreState":
@@ -418,6 +444,9 @@ class ChoreState:
             last_snoozed_at=parse_datetime(
                 data.get("last_snoozed_at"), "last_snoozed_at"
             ),
+            duration_samples_minutes=duration_samples(
+                data.get("duration_samples_minutes", [])
+            ),
         )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -437,6 +466,7 @@ class ChoreState:
             ],
             "last_dismissed_at": datetime_to_json(self.last_dismissed_at),
             "last_snoozed_at": datetime_to_json(self.last_snoozed_at),
+            "duration_samples_minutes": list(self.duration_samples_minutes),
         }
 
 

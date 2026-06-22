@@ -170,10 +170,10 @@ Done when:
 - Expired Calendar Context is refreshed or ignored before scoring.
 - Raw event details are not stored in long-lived history unless necessary.
 
-## Phase 6: Lovelace MVP
+## Phase 6: Homekeep App MVP
 
-- Document Lovelace YAML examples.
-- Build an "I'm ready" pop-up.
+- Build a Home Assistant sidebar app shell.
+- Build an "I'm ready" setup view.
 - Wire time, energy, and goal controls to services.
 - Show Smart Chore List and active session.
 - Add Scheduled-Suggestion planned proposal view with target window, expiry,

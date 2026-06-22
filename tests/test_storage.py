@@ -41,7 +41,7 @@ class StorageTest(unittest.TestCase):
         self.assertEqual(store.version, CURRENT_STORAGE_VERSION)
         self.assertEqual(store.chores, {})
 
-    def test_v1_store_migrates_chore_state_to_v2(self) -> None:
+    def test_v1_store_migrates_chore_state_to_current_version(self) -> None:
         raw = {
             "version": 1,
             "chores": {"empty_compost": chore_data()},
@@ -69,6 +69,7 @@ class StorageTest(unittest.TestCase):
         self.assertEqual(migrated_state["snooze_events"], [])
         self.assertIsNone(migrated_state["last_dismissed_at"])
         self.assertIsNone(migrated_state["last_snoozed_at"])
+        self.assertEqual(migrated_state["duration_samples_minutes"], [])
         self.assertEqual(
             migrated_state["last_completed_at"], "2026-01-01T12:00:00+00:00"
         )
@@ -77,7 +78,35 @@ class StorageTest(unittest.TestCase):
         store = load_store_dict(raw)
         self.assertEqual(store.states["empty_compost"].adaptive_interval_days, 4)
 
-    def test_version_2_store_loads_and_missing_optional_sections_are_filled(self) -> None:
+    def test_version_2_store_migrates_duration_samples(self) -> None:
+        raw = {
+            "version": 2,
+            "chores": {"empty_compost": chore_data()},
+            "states": {
+                "empty_compost": {
+                    "chore_id": "empty_compost",
+                    "last_completed_at": None,
+                    "adaptive_interval_days": 2,
+                    "next_due_at": None,
+                    "snoozed_until": None,
+                    "dismissal_events": [],
+                    "snooze_events": [],
+                    "last_dismissed_at": None,
+                    "last_snoozed_at": None,
+                }
+            },
+            "completions": [],
+        }
+
+        migrated = migrate_store_dict(raw)
+
+        self.assertEqual(migrated["version"], CURRENT_STORAGE_VERSION)
+        self.assertEqual(
+            migrated["states"]["empty_compost"]["duration_samples_minutes"],
+            [],
+        )
+
+    def test_current_store_loads_and_missing_optional_sections_are_filled(self) -> None:
         raw = {
             "version": CURRENT_STORAGE_VERSION,
             "chores": {"empty_compost": chore_data()},
@@ -96,7 +125,7 @@ class StorageTest(unittest.TestCase):
         self.assertIn("idempotency_records", migrated)
         self.assertIn("empty_compost", store.states)
 
-    def test_legacy_dashboard_completion_source_migrates_to_lovelace(self) -> None:
+    def test_legacy_dashboard_completion_source_migrates_to_dashboard(self) -> None:
         raw = empty_store_dict()
         raw["chores"] = {"empty_compost": chore_data()}
         raw["completions"] = [
@@ -114,8 +143,8 @@ class StorageTest(unittest.TestCase):
 
         store = load_store_dict(raw)
 
-        self.assertEqual(store.completions[0].source, "lovelace")
-        self.assertEqual(dump_store_dict(store)["completions"][0]["source"], "lovelace")
+        self.assertEqual(store.completions[0].source, "dashboard")
+        self.assertEqual(dump_store_dict(store)["completions"][0]["source"], "dashboard")
 
     def test_unknown_stale_state_is_ignored_during_load(self) -> None:
         raw = empty_store_dict()

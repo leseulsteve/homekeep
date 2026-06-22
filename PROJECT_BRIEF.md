@@ -23,6 +23,10 @@ needs, what is the most useful Chore Session to offer right now?
 The system should feel helpful, gentle, and practical. It should avoid a giant
 guilt-inducing list of overdue tasks.
 
+Homekeep's user-facing language should follow `docs/HOMEKEEP_VOICE_SYSTEM.md`.
+The app should use structured, mood-aware copy families rather than random
+string variation.
+
 ## Core Terms
 
 Chore
@@ -215,7 +219,7 @@ The MVP should include:
 - Home Assistant services and sensors
 - Home Assistant To-do projections
 - Chore creation from the Homekeep dashboard
-- Lovelace dashboard flow
+- Homekeep sidebar app flow
 - Calendar Context
 - Session-History Learning
 - Light Sessions and Bonus Chores
@@ -414,19 +418,18 @@ Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
 ### Phase 7 Prompt
 
 ```text
-Implement Homekeep Phase 7: Lovelace MVP dashboard example.
+Implement Homekeep Phase 7: Homekeep sidebar app MVP.
 
 Follow AGENTS.md Implementation Mode. Resume from docs/IMPLEMENTATION_PROGRESS.md.
 
 Read:
-- docs/LOVELACE_MVP.md
+- docs/DASHBOARD_UI_PLAN.md
 - docs/SERVICE_SCHEMAS.md
 - docs/TODO_PROJECTIONS.md
 
-Use stock Lovelace cards for the final YAML.
-
 Deliver:
-- examples/lovelace_dashboard.yaml
+- Home Assistant sidebar entry
+- Homekeep app shell
 - Ready-Now launcher
 - time/energy/goal controls
 - recommendation display

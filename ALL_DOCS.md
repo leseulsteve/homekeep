@@ -163,7 +163,7 @@ Recommended build order:
 5. Implement Recommendation Engine V1.
 6. Wire Home Assistant services, sensors, and To-do projections.
 7. Implement Calendar Context.
-8. Add the Lovelace MVP dashboard example.
+8. Add the Homekeep sidebar app MVP.
 9. Harden tests, reload/unload behavior, migrations, and release checks.
 
 Ask Steve before proceeding when:
@@ -247,7 +247,7 @@ Git rules:
 - `docs/SERVICE_SCHEMAS.md`: draft Home Assistant service payloads.
 - `docs/TEST_PLAN.md`: unit and integration test plan.
 - `docs/SCAFFOLDING_TASKS.md`: file-by-file first implementation checklist.
-- `docs/LOVELACE_MVP.md`: dashboard flow and service wiring.
+- `docs/DASHBOARD_UI_PLAN.md`: dashboard flow and service wiring.
 - `docs/CALENDAR_CONTEXT.md`: calendar freshness and invalidation rules.
 - `docs/ADAPTIVE_INTERVALS.md`: adaptive cadence bounds and update rules.
 - `docs/DERIVED_HEALTH.md`: health/staleness derivation and cache rules.
@@ -509,7 +509,7 @@ The MVP should include:
 - Projected Impact
 - Home Assistant services and sensors
 - Home Assistant To-do projections
-- Lovelace dashboard flow
+- Homekeep app dashboard flow
 - Calendar Context
 - Session-History Learning
 - Light Sessions and Bonus Chores
@@ -708,19 +708,18 @@ Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
 ### Phase 7 Prompt
 
 ```text
-Implement Homekeep Phase 7: Lovelace MVP dashboard example.
+Implement Homekeep Phase 7: Homekeep sidebar app MVP.
 
 Follow AGENTS.md Implementation Mode. Resume from docs/IMPLEMENTATION_PROGRESS.md.
 
 Read:
-- docs/LOVELACE_MVP.md
+- docs/DASHBOARD_UI_PLAN.md
 - docs/SERVICE_SCHEMAS.md
 - docs/TODO_PROJECTIONS.md
 
-Use stock Lovelace cards for the final YAML.
-
 Deliver:
-- examples/lovelace_dashboard.yaml
+- Home Assistant sidebar entry
+- Homekeep app shell
 - Ready-Now launcher
 - time/energy/goal controls
 - recommendation display

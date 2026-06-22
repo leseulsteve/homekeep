@@ -218,6 +218,58 @@ class RecommendationEngineTest(unittest.TestCase):
         )
         self.assertIsNotNone(session["items"][0]["session_item_id"])
 
+    def test_materialized_session_infers_missing_setup_fields(self) -> None:
+        result = self.engine.generate_smart_chore_list(now=self.now)
+        recommendation = result["easiest_chore"]
+
+        session = self.engine.start_recommendation(
+            result["snapshot_id"],
+            recommendation["recommendation_id"],
+            now=self.now + timedelta(minutes=1),
+        )
+
+        stored_session = self.store.sessions[session["session_id"]]
+        self.assertEqual(stored_session["mode"], "quick_wins")
+        self.assertEqual(
+            stored_session["time_budget_minutes"],
+            recommendation["estimated_minutes"],
+        )
+        self.assertEqual(
+            stored_session["energy_level"],
+            self.store.chores[recommendation["chore_items"][0]["chore_id"]].energy,
+        )
+
+    def test_recommendations_use_learned_duration_samples(self) -> None:
+        self.store.states["empty_compost"] = ChoreState(
+            chore_id="empty_compost",
+            last_completed_at=self.store.states["empty_compost"].last_completed_at,
+            adaptive_interval_days=self.store.states[
+                "empty_compost"
+            ].adaptive_interval_days,
+            next_due_at=self.store.states["empty_compost"].next_due_at,
+            duration_samples_minutes=[9, 11, 10],
+        )
+
+        result = self.engine.generate_smart_chore_list(
+            now=self.now,
+            time_budget_minutes=10,
+            include_alternates=True,
+        )
+        compost_item = next(
+            item
+            for rec in [
+                result["best_bundle"],
+                result["best_single_chore"],
+                result["easiest_chore"],
+                *result["alternates"],
+            ]
+            if rec
+            for item in rec["chore_items"]
+            if item["chore_id"] == "empty_compost"
+        )
+
+        self.assertEqual(compost_item["estimated_minutes"], 10)
+
     def test_calendar_context_string_guesses_include_french_chore_terms(self) -> None:
         calendar_context = {
             "has_guests_soon": True,

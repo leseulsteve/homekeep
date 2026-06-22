@@ -28,7 +28,7 @@ before proceeding.
 - [x] Ask Steve which disposable or clearly test-scoped Home Assistant instance
   to use
 - [x] Ask Steve for the Home Assistant version targeted for the private test
-- [x] Ask Steve whether Lovelace dashboard testing is included
+- [x] Ask Steve whether Homekeep app dashboard testing is included
 - [x] Confirm no production automations depend on Homekeep entities yet
 - [x] Confirm selected calendar entities are synthetic or safe
 - [x] Confirm backups/snapshots exist before installing the custom integration
@@ -36,7 +36,7 @@ before proceeding.
 Steve confirmed Gate 1 on 2026-06-21:
 
 - target is Home Assistant OS private live-test instance
-- Lovelace dashboard testing is included
+- Homekeep app dashboard testing is included
 - no production automations depend on Homekeep entities yet
 - selected calendar entities are synthetic or safe
 - backup/snapshot exists before install
@@ -285,36 +285,20 @@ Gate 7 partial live result on 2026-06-21:
 - Steve restarted Home Assistant and confirmed Homekeep recovered stored state
   and expected entities.
 
-## Gate 8: Lovelace Dashboard
+## Gate 8: Homekeep Sidebar App
 
-Use `examples/lovelace_dashboard.yaml` only after companion helpers/scripts
-exist.
+Dashboard template testing has been retired. Gate 8 should now verify the
+sidebar app once the frontend extension approach is implemented.
 
-Companion helper/script sections live in the one-file recipe:
-
-- `examples/lovelace_dashboard.yaml`
-
-- [x] Create required `input_select` helpers:
-  - [x] `input_select.homekeep_time_budget`
-  - [x] `input_select.homekeep_energy_level`
-  - [x] `input_select.homekeep_goal`
-  - [x] `input_select.homekeep_mood`
-- [x] Create required `input_text` helpers:
-  - [x] `input_text.homekeep_recommendation_snapshot_id`
-  - [x] `input_text.homekeep_recommendation_id`
-  - [x] `input_text.homekeep_session_id`
-  - [x] `input_text.homekeep_session_item_id`
-  - [x] `input_text.homekeep_chore_id`
-  - [x] `input_text.homekeep_bonus_chore_id`
-- [x] Create bridge scripts documented in the dashboard example
-- [ ] Paste/import `examples/lovelace_dashboard.yaml`
+- [ ] Homekeep appears as a Home Assistant sidebar entry
+- [ ] Homekeep app opens without iframe embedding
 - [ ] Ready-Now launcher opens
 - [ ] Time, energy, goal, and mood controls work
-- [x] Generate button or bridge script calls the intended Homekeep service
+- [x] Generate button calls the intended Homekeep service
 - [x] Recommendation display updates from Homekeep entities/projections
-- [x] Start button or bridge script materializes a recommendation
+- [x] Start button materializes a recommendation
 - [x] Done, Done for now, One more, and Accept one more call the intended
-  scripts
+  services
 - [ ] Skip and Snooze call the intended scripts
 
 Gate 8 partial live result on 2026-06-21:
@@ -386,7 +370,7 @@ release decision.
 - [x] To-do projection result:
 - [x] Calendar invalidation result:
 - [x] Reload/unload result:
-- [x] Lovelace result:
+- [x] Homekeep app result:
 - [x] Bugs found:
 - [x] Release blockers:
 

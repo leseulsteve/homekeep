@@ -130,7 +130,7 @@ def _dict_field(data: Mapping[str, Any], field_name: str) -> Dict[str, Any]:
 
 
 def migrate_store_dict(data: Mapping[str, Any]) -> Dict[str, Any]:
-    """Run explicit storage migrations and return a version 2 store dict."""
+    """Run explicit storage migrations and return a current-version store dict."""
 
     migrated = copy.deepcopy(dict(data))
     version = migrated.get("version")
@@ -150,6 +150,10 @@ def migrate_store_dict(data: Mapping[str, Any]) -> Dict[str, Any]:
         if version == 1:
             migrated = _migrate_v1_to_v2(migrated)
             version = 2
+            migrated["version"] = version
+        elif version == 2:
+            migrated = _migrate_v2_to_v3(migrated)
+            version = 3
             migrated["version"] = version
         else:
             raise UnsupportedStorageVersionError(
@@ -185,15 +189,31 @@ def _migrate_v1_to_v2(data: Mapping[str, Any]) -> Dict[str, Any]:
     return migrated
 
 
+def _migrate_v2_to_v3(data: Mapping[str, Any]) -> Dict[str, Any]:
+    """Add bounded learned duration samples to ChoreState."""
+
+    migrated = copy.deepcopy(dict(data))
+    states = migrated.setdefault("states", {})
+    if not isinstance(states, Mapping):
+        raise HomekeepValidationError("states must be a mapping")
+
+    for state in states.values():
+        if not isinstance(state, dict):
+            continue
+        state.setdefault("duration_samples_minutes", [])
+
+    return migrated
+
+
 def _normalize_legacy_completion_sources(data: Dict[str, Any]) -> None:
-    """Normalize old dashboard source labels in durable completion history."""
+    """Normalize former UI source labels in durable completion history."""
 
     completions = data.get("completions", [])
     if not isinstance(completions, list):
         return
     for completion in completions:
         if isinstance(completion, dict) and completion.get("source") == "bubble_card":
-            completion["source"] = "lovelace"
+            completion["source"] = "dashboard"
 
 
 def load_store_dict(

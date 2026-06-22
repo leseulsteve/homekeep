@@ -102,8 +102,12 @@
 
 - generate_smart_chore_list never creates a Chore Session
 - start_recommendation creates a Chore Session from a recommendation
+- start_recommendation infers session setup fields when optional generation
+  fields are omitted
 - start_recommendation response includes materialized session items with
   non-null `session_item_id`
+- session item completion records bounded learned duration samples when real
+  active timing is available
 - cached RecommendationItem `session_item_id` is null and never used for
   completion
 - start Chore Bundle rejects expired recommendation snapshot
@@ -219,6 +223,8 @@
 - start_recommendation response includes `session_id` and
   `source_recommendation_snapshot_id`
 - start_recommendation response includes concrete materialized session item IDs
+- start_recommendation response uses learned Chore duration when timing samples
+  exist
 - action response payloads are JSON-serializable dictionaries
 - service errors raise exceptions instead of returning error dictionaries
 
@@ -240,12 +246,12 @@
 - unsupported reorder triggers an entity state refresh from Homekeep projection
 - To-do entity does not become source of truth
 
-`test_lovelace_examples.py`
+App UI tests
 
-- Scheduled-Suggestion example uses `generate_smart_chore_list` for planning
-- Scheduled-Suggestion example uses Refresh/regenerate when the proposal is
+- Scheduled-Suggestion app flow uses `generate_smart_chore_list` for planning
+- Scheduled-Suggestion app flow uses Refresh/regenerate when the proposal is
   expired
-- Scheduled-Suggestion example does not depend on `session_id: null`
+- Scheduled-Suggestion app flow does not depend on `session_id: null`
 
 `test_entities.py`
 

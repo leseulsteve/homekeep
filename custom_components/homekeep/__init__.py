@@ -103,10 +103,13 @@ async def async_setup(hass: Any, config: dict[str, Any]) -> bool:
 async def async_setup_entry(hass: Any, entry: Any) -> bool:
     """Set up Homekeep from a config entry."""
 
+    from .frontend import async_register_frontend
+
     storage = HomekeepStorage(hass, entry)
     await storage.async_load()
     _entry_stores(hass)[entry.entry_id] = storage
     storage.calendar_unsub = _async_setup_calendar_listeners(hass, storage, entry)
+    await async_register_frontend(hass)
 
     if PLATFORMS:
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -121,6 +124,8 @@ async def async_unload_entry(hass: Any, entry: Any) -> bool:
         unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
     if unload_ok:
+        from .frontend import async_unregister_frontend
+
         stores = hass.data.get(DOMAIN, {})
         storage = stores.get(entry.entry_id)
         if storage is not None:
@@ -130,6 +135,7 @@ async def async_unload_entry(hass: Any, entry: Any) -> bool:
         stores.pop(entry.entry_id, None)
         if not stores:
             hass.data.pop(DOMAIN, None)
+            async_unregister_frontend(hass)
 
     return unload_ok
 

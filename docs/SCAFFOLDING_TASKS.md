@@ -122,15 +122,17 @@ Use this as the first implementation checklist.
   from Homekeep storage.
 - Require valid Homekeep metadata for To-do completion write-through.
 
-## 10. Add Lovelace Example
+## 10. Add Homekeep Sidebar App
 
-- Create `examples/lovelace_dashboard.yaml`.
-- Include launcher, question controls, recommendation display, session actions.
+- Add the app shell after the Home Assistant frontend extension approach has
+  been verified.
+- Include launcher, question controls, recommendation display, and session
+  actions.
 
 ## 11. Add Tests
 
 - Add tests in the order listed in `docs/TEST_PLAN.md`.
-- Prioritize storage, health, scoring, sessions, and services before UI examples.
+- Prioritize storage, health, scoring, sessions, and services before app UI.
 
 ## 12. Documentation Pass
 

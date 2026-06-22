@@ -28,6 +28,8 @@ Validation:
 - `recommendation_id` must be stable within a RecommendationSnapshot.
 - `kind` determines how UI labels and `start_recommendation` behave.
 - `estimated_minutes` must be positive and finite.
+- `estimated_minutes` uses the learned Chore duration median when available,
+  otherwise the user-entered Chore definition estimate.
 - `score` must be finite and bounded.
 - `reason` must be short and user-readable.
 

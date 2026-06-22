@@ -8,7 +8,7 @@ development stores. Do not rely on validation repair for known schema changes.
 ## Current Version
 
 ```text
-current_storage_version = 2
+current_storage_version = 3
 ```
 
 ## Migration Order
@@ -88,6 +88,45 @@ If a v1 state already contains new fields because an early development branch
 partially applied the new schema, keep valid new fields, add missing new fields,
 and still remove old integer counters.
 
+## Version 2 To 3
+
+Reason:
+: Homekeep learns how long Chores take from completed session item timing while
+keeping the user-entered Chore estimate as a fallback.
+
+Input shape:
+
+```yaml
+version: 2
+states:
+  <chore_id>:
+    chore_id: string
+    last_completed_at: datetime | null
+    adaptive_interval_days: float
+    next_due_at: datetime | null
+    snoozed_until: datetime | null
+    dismissal_events: list[datetime]
+    snooze_events: list[datetime]
+    last_dismissed_at: datetime | null
+    last_snoozed_at: datetime | null
+```
+
+Output shape:
+
+```yaml
+version: 3
+states:
+  <chore_id>:
+    duration_samples_minutes: list[int]
+```
+
+Migration rules for every `ChoreState`:
+
+- add `duration_samples_minutes: []` when missing
+- keep all version 2 scheduling, dismissal, and snooze fields
+- do not fabricate duration samples from `estimated_minutes` or historical
+  completions, because old records do not prove active work time
+
 ## Tests Required
 
 Implementation must test:
@@ -99,5 +138,6 @@ Implementation must test:
 - migration removes `recent_dismissals` and `recent_snoozes`
 - migration does not fabricate timestamp events from old integer counters
 - migration preserves completion and scheduling fields
-- migration is idempotent after version is 2
+- version 2 store gains `duration_samples_minutes`
+- migration is idempotent after version is 3
 - unsupported future storage versions are rejected clearly

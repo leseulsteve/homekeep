@@ -4,7 +4,7 @@ DOMAIN = "homekeep"
 NAME = "Homekeep"
 PLATFORMS: list[str] = ["sensor", "binary_sensor", "todo"]
 
-CURRENT_STORAGE_VERSION = 2
+CURRENT_STORAGE_VERSION = 3
 STORAGE_KEY = f"{DOMAIN}.store"
 
 SERVICE_GENERATE_SMART_CHORE_LIST = "generate_smart_chore_list"
@@ -77,6 +77,6 @@ GOALS = ["quick_wins", "overdue", "visible_impact", "prevent_future_mess", "full
 MOODS = ["unknown", "calm", "focused", "tired", "overwhelmed", "energized", "auto"]
 RECOMMENDATION_MODES = ["ready_now", "scheduled_suggestion"]
 SESSION_END_STATUSES = ["completed", "cancelled"]
-SOURCES = ["service", "todo", "lovelace", "voice", "automation"]
+SOURCES = ["service", "todo", "dashboard", "voice", "automation"]
 VARIANTS = ["tiny", "normal", "deep"]
 VISIBILITIES = ["low", "medium", "high"]

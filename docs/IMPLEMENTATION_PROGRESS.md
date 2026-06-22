@@ -9,19 +9,14 @@ Use it as the resume point for future sessions. Do not rely on chat memory.
 ```yaml
 current_phase: 8
 current_phase_name: Hardening and release readiness
-last_updated: 2026-06-21
+last_updated: 2026-06-22
 last_codex_summary: >
-  Private live-test readiness is continuing after Phase 8. Calendar Context now
-  stores a minimized event fingerprint and recommendation generation refreshes
-  context when selected calendar events change even if the Home Assistant
-  calendar entity state stays unchanged. Calendar signal matching now includes
-  English and basic French terms, Gate 6 is live-confirmed in the private HACS
-  test instance, Gate 8 main Lovelace helper flow is live-confirmed, and the
-  prior Bubble Card dashboard example has been replaced with stock Lovelace
-  YAML plus companion helpers/scripts. A live Home Assistant startup failure
-  caused by a missing `ATTR_VISIBILITY` import in service schema registration
-  has been fixed and prepared for private `0.0.3` HACS publish. Steve accepted
-  untested Skip/Snooze helper buttons as good enough for the private MVP pass.
+  Homekeep UI planning now has Codex-facing guardrails in
+  `docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md` and phased Steve prompts in
+  `docs/DASHBOARD_UI_STEVE_PROMPTS.md`. Steve intends to quickly implement a
+  mocked Today prototype first. Buttons should exist and feel real, but shuffle
+  does not need to work initially. Later workflow decisions remain intentionally
+  undocumented and must not be invented during the Today implementation.
 ```
 
 ## Phase Checklist
@@ -33,7 +28,7 @@ last_codex_summary: >
 - [x] Phase 4: Recommendation Engine V1
 - [x] Phase 5: Home Assistant services and entities
 - [x] Phase 6: Calendar Context
-- [x] Phase 7: Lovelace MVP
+- [x] Phase 7: Homekeep app MVP
 - [x] Phase 8: Hardening and release readiness
 
 ## Phase Log
@@ -62,6 +57,141 @@ Important decisions:
 Known gaps / next prompt:
 - ...
 ```
+
+### 2026-06-22 - Mocked Ready Now sidebar prototype
+
+Status: completed
+
+Implemented:
+- Added Homekeep sidebar frontend registration using a non-iframe custom panel.
+- Added a browser-native mocked Ready Now panel with synthetic Chore Bundle
+  variants, context chips, shuffle/refining behavior, active Chore Session
+  state, timer, completion feedback, final summary, and Bonus Chore reveal.
+- Added focused tests for panel static-path registration and unload cleanup.
+
+Tests/checks run:
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend.py custom_components/homekeep/frontend/homekeep-panel.js tests/test_frontend.py tests/test_reload_unload.py docs/DECISION_LOG.md docs/DASHBOARD_UI_PLAN.md docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/IMPLEMENTATION_PROGRESS.md`
+- Node REPL module import of `custom_components/homekeep/frontend/homekeep-panel.js`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components/homekeep tests/test_frontend.py tests/test_reload_unload.py`
+- `python3 -m unittest discover -s tests -v`
+
+Docs updated:
+- `docs/DECISION_LOG.md`
+- `docs/DASHBOARD_UI_PLAN.md`
+- `docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- The first frontend slice is explicitly mocked and local-only.
+- The selected Home Assistant frontend path is a served local JS module plus a
+  non-iframe custom panel registered with `frontend.async_register_built_in_panel`.
+
+Known gaps / next prompt:
+- Wire Ready Now to Homekeep services only after the mock feel is reviewed.
+- Review the mocked Homekeep sidebar app in a real Home Assistant frontend and
+  tune visual feel before service wiring.
+
+### 2026-06-22 - Area Health documentation clarification
+
+Status: completed
+
+Implemented:
+- Documented Area Health as a derived `0..100` health-weighted area score that
+  answers how much a Home Assistant Area would benefit from care now.
+- Clarified that Area Health is not a percent-of-chores-completed metric.
+- Added contributor explanation guidance for stale, high-impact, and
+  Projected Impact Chores.
+
+Tests/checks run:
+- `git diff --check -- docs/DERIVED_HEALTH.md docs/DASHBOARD_UI_PLAN.md docs/DECISION_LOG.md docs/IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/DERIVED_HEALTH.md`
+- `docs/DASHBOARD_UI_PLAN.md`
+- `docs/DECISION_LOG.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Mood Context, Ready-Now Mode, and Scheduled-Suggestion Mode may influence
+  recommendations, but should not change the underlying Area Health score in
+  MVP.
+- Empty areas may calculate as `100` for stability, but UI should present them
+  neutrally as having no tracked Chores yet.
+
+Known gaps / next prompt:
+- No code changes were needed because the current implementation already uses
+  enabled-Chore, health-weighted Area Health derived from durable state.
+
+### 2026-06-22 - Remove former dashboard example direction
+
+Status: completed
+
+Implemented:
+- Removed the former dashboard examples and their dedicated tests.
+- Removed the former dashboard UI doc and made `docs/DASHBOARD_UI_PLAN.md`
+  the UI direction document.
+- Updated runtime completion sources from the UI-specific label to
+  `dashboard`.
+- Kept legacy `bubble_card` completion history migration, now normalizing it to
+  `dashboard`.
+
+Tests/checks run:
+- Pending in this pass.
+
+Docs updated:
+- `AGENTS.md`
+- `PROJECT_BRIEF.md`
+- `docs/DASHBOARD_UI_PLAN.md`
+- `docs/DECISION_LOG.md`
+- `docs/HOME_ASSISTANT_CONTRACT.md`
+- `docs/IMPLEMENTATION_PLAN.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+- Supporting checklist, test plan, mock review, readiness, and UX docs.
+
+Important decisions:
+- Homekeep's canonical UI should be a Home Assistant sidebar app, not a
+  former dashboard example.
+- The app should not be iframe-embedded.
+- Lovelace is explicitly out of scope for Homekeep UI implementation.
+
+Known gaps / next prompt:
+- Verify the supported Home Assistant frontend extension path against the
+  installed package or official developer docs, then implement the sidebar app
+  shell in a small focused pass.
+
+### 2026-06-22 - Dashboard UI handoff docs
+
+Status: completed
+
+Implemented:
+- Added `docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md` with current Codex-facing
+  guardrails for future Homekeep sidebar app implementation.
+- Added `docs/DASHBOARD_UI_STEVE_PROMPTS.md` with phased prompts for continuing
+  the human UI design review, translating approved decisions, verifying Home
+  Assistant frontend assumptions, and starting the first app shell phase.
+- Updated `AGENTS.md` planning-file references for the new dashboard UI handoff
+  docs.
+
+Tests/checks run:
+- `git diff --check -- docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/DASHBOARD_UI_STEVE_PROMPTS.md AGENTS.md`
+
+Docs updated:
+- `AGENTS.md`
+- `docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/DASHBOARD_UI_STEVE_PROMPTS.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Future UI sessions should resume the human design review at Home Health and
+  Areas before implementing frontend code.
+- The last Steve prompt explicitly restarts from the current conversation state.
+- A first frontend implementation may be limited to the Today test slice;
+  unresolved later workflows remain out of scope.
+
+Known gaps / next prompt:
+- For a fast prototype, use `docs/DASHBOARD_UI_STEVE_PROMPTS.md` Prompt 9A.
+- For design review, continue with Prompt 1.
 
 ### 2026-06-21 - Remove mock/dev-mode setup paths
 
@@ -135,22 +265,22 @@ Known gaps / next prompt:
 - Update Homekeep through HACS in the private Home Assistant instance and
   confirm version `0.0.2` loads without dev mode or automatic sample Chores.
 
-### 2026-06-21 - Bubble Card to Lovelace dashboard switch
+### 2026-06-21 - Bubble Card to Homekeep app dashboard switch
 
 Status: completed
 
 Implemented:
-- Replaced the Bubble Card dashboard target with stock Lovelace as the MVP
-  dashboard layer.
-- Renamed the dashboard docs and examples to `docs/LOVELACE_MVP.md` and
-  `examples/lovelace_dashboard.yaml`.
-- Updated completion source validation so new dashboard calls use `lovelace`.
+- Replaced the Bubble Card dashboard target with the former dashboard example
+  direction.
+- That dashboard example direction has since been retired in favor of the
+  sidebar app plan in `docs/DASHBOARD_UI_PLAN.md`.
+- Updated completion source validation so new dashboard calls use `dashboard`.
 - Added storage normalization for legacy completion records that used
   `bubble_card` as their source.
-- Added tests for the Lovelace examples and legacy source normalization.
+- Added tests for the Homekeep app examples and legacy source normalization.
 
 Tests/checks run:
-- `python3 -m unittest tests.test_lovelace_examples tests.test_storage tests.test_models tests.test_services -v`
+- `python3 -m unittest tests.test_storage tests.test_models tests.test_services -v`
 - `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
 - `git diff --check`
 - `python3 -m unittest discover -s tests -v`
@@ -161,29 +291,29 @@ Docs updated:
 - `PROJECT_BRIEF.md`
 - `docs/DECISION_LOG.md`
 - `docs/HOME_ASSISTANT_CONTRACT.md`
-- `docs/LOVELACE_MVP.md`
+- `docs/DASHBOARD_UI_PLAN.md`
 - `docs/SERVICE_SCHEMAS.md`
 - `docs/DATA_MODEL.md`
 - `docs/IMPLEMENTATION_PLAN.md`
 - `docs/IMPLEMENTATION_PROGRESS.md`
 - `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
 - `docs/PRIVATE_LIVE_TEST_RESULTS.md`
-- Supporting planning and readiness docs that referenced the old dashboard
+- Supporting planning and readiness docs that referenced the former dashboard
   target.
 
 Important decisions:
-- Lovelace is the MVP dashboard layer. Bubble Card is no longer part of the MVP
+- Homekeep app is the MVP dashboard layer. Bubble Card is no longer part of the MVP
   implementation target.
-- The helper/script bridge remains necessary because Lovelace dashboard cards
-  do not persist Homekeep service response ids for later button calls.
+- The former helper/script bridge was necessary because dashboard cards did not
+  persist Homekeep service response ids for later button calls.
 
 Known gaps / next prompt:
-- The new stock Lovelace dashboard YAML has not been rendered in a live Home
-  Assistant frontend yet.
-- Lovelace Skip and Snooze helper buttons still need separate live
+- The former dashboard example had not been rendered in a live Home Assistant
+  frontend yet.
+- Homekeep app Skip and Snooze helper buttons still need separate live
   confirmation if full dashboard readiness becomes a release target.
 
-### 2026-06-21 - Lovelace assistant view and Add Chore service
+### 2026-06-21 - Homekeep app assistant view and Add Chore service
 
 Status: completed
 
@@ -195,16 +325,15 @@ Implemented:
   dashboard/script retries return the stored result.
 - Added Home Assistant service schema and service metadata for
   `create_chore`.
-- Reworked `examples/lovelace_dashboard.yaml` into the single consumer-facing
-  Lovelace recipe. It now contains helper/script sections plus a
-  `lovelace_dashboard` raw-editor block.
+- Reworked the former dashboard example into a single consumer-facing recipe
+  with helper/script sections.
 - Updated the main view to behave like a calm assistant surface: mood-colored
   greeting tiles, idle session setup, Add Chore controls, and active-session
   controls that appear when `input_text.homekeep_session_id` is populated.
-- Removed the separate `examples/lovelace_helpers.yaml` file.
+- Removed the separate helper file.
 
 Tests/checks run:
-- `python3 -m unittest tests.test_services tests.test_homekeep_scaffold tests.test_lovelace_examples -v`
+- `python3 -m unittest tests.test_services tests.test_homekeep_scaffold -v`
 - `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
 - `git diff --check`
 - `python3 -m unittest discover -s tests -v`
@@ -213,7 +342,7 @@ Docs updated:
 - `docs/DECISION_LOG.md`
 - `docs/HOME_ASSISTANT_CONTRACT.md`
 - `docs/SERVICE_SCHEMAS.md`
-- `docs/LOVELACE_MVP.md`
+- `docs/DASHBOARD_UI_PLAN.md`
 - `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
 - `docs/IMPLEMENTATION_PROGRESS.md`
 - `PROJECT_BRIEF.md`
@@ -222,12 +351,13 @@ Docs updated:
 Important decisions:
 - Add Chore is a Chore definition/list operation, not a Chore Session
   operation.
-- To-do create remains rejected as write-through; the Lovelace Add Chore
+- To-do create remains rejected as write-through; the Homekeep app Add Chore
   button calls `homekeep.create_chore` through a script.
-- The consumer example remains stock Lovelace only, with no custom cards.
+- The former consumer example used stock dashboard cards only, with no custom
+  cards.
 
 Known gaps / next prompt:
-- Render the one-file Lovelace recipe in a live Home Assistant frontend and
+- Render the one-file Homekeep app recipe in a live Home Assistant frontend and
   verify conditional idle/active switching plus tile mood colors.
 - Consider adding richer Chore Variant inputs later; MVP create uses a normal
   variant with credit `1.0`.
@@ -547,7 +677,7 @@ Known gaps / next prompt:
 - Entity coverage is intentionally MVP-minimal; unload/reload behavior,
   dynamic entity additions after chore import, and richer action response
   payloads should be hardened in the Phase 9 test/reload pass.
-- Calendar Context, Lovelace dashboard wiring, and To-do area projections
+- Calendar Context, Homekeep app dashboard wiring, and To-do area projections
   remain later phases.
 - Next recommended prompt: Implement Phase 6 Calendar Context with minimized
   durable snapshots, freshness checks, entity invalidation, and tests.
@@ -684,31 +814,31 @@ Known gaps / next prompt:
   richer source-specific semantics can be hardened later.
 - Existing uncommitted Mood/Readiness planning docs remain separate from Phase
   6 implementation work.
-- Next recommended prompt: Implement Phase 7 Lovelace MVP dashboard example
+- Next recommended prompt: Implement Phase 7 Homekeep sidebar app MVP
   and service wiring around the completed Homekeep services.
 
-### 2026-06-21 - Phase 7: Lovelace MVP dashboard example
+### 2026-06-21 - Phase 7: Former dashboard example
 
 Status: completed
 
 Implemented:
-- Added `examples/lovelace_dashboard.yaml` with a Homekeep dashboard view,
+- Added the former dashboard example with a Homekeep dashboard view,
   Ready-Now launcher, time/energy/goal/mood controls, recommendation display,
   active-session controls, Done for now, One more, and Accept one more flow.
-- Used stock Lovelace sections, tile, entities, grid, button, and To-do list
+- Used stock dashboard sections, tile, entities, grid, button, and To-do list
   cards for the dashboard surface.
 - Used Home Assistant helpers/scripts where dashboard cards need durable bridge
   state for Homekeep response ids.
 - Documented required companion helper entities and scripts in the example
   YAML so scripts can read local selections, call Homekeep services, and store
   returned response ids.
-- Updated `docs/LOVELACE_MVP.md` with the Phase 7 capability gap and helper
+- Updated `docs/DASHBOARD_UI_PLAN.md` with the Phase 7 capability gap and helper
   script bridge.
 
-Lovelace capability verification:
-- Verified the example uses stock Lovelace cards and Home Assistant tap actions
+Homekeep app capability verification:
+- Verified the example uses stock Home Assistant frontend and Home Assistant tap actions
   with `call-service`.
-- Identified a gap: Lovelace dashboard YAML should not be relied on to
+- Identified a gap: Homekeep app dashboard YAML should not be relied on to
   capture Home Assistant service response payloads and bind returned ids into
   later service calls.
 
@@ -717,7 +847,7 @@ Tests/checks run:
 - `git diff --check`
 
 Docs updated:
-- `docs/LOVELACE_MVP.md`
+- `docs/DASHBOARD_UI_PLAN.md`
 - `docs/DECISION_LOG.md`
 - `docs/IMPLEMENTATION_PROGRESS.md`
 
@@ -793,7 +923,7 @@ Known gaps / next prompt:
 - Add Home Assistant package-backed tests for config flow, service
   registration/action responses, sensors, binary sensors, To-do projections,
   calendar services, reload/unload, and entity refresh behavior.
-- Add packaged helper/script examples for `examples/lovelace_dashboard.yaml`
+- Add packaged helper/script examples for the former dashboard example
   if the dashboard should be one-copy deployable.
 - Next recommended prompt: Add Home Assistant package-backed integration tests
   and release checklist automation, or ask explicitly for a version bump/release
@@ -916,7 +1046,7 @@ Known gaps / next prompt:
   modifying a synthetic event on the selected test calendar and generating a
   fresh Smart Chore List. Confirm the Calendar Context snapshot changes and the
   old dependent RecommendationSnapshot is not reused.
-- Lovelace dashboard Gate 8 still needs private live testing.
+- Homekeep app dashboard Gate 8 still needs private live testing.
 - Home Assistant package-backed automated tests remain a public-release
   blocker.
 
@@ -978,7 +1108,7 @@ Important decisions:
 Known gaps / next prompt:
 - Calendar listener behavior after reload is still not separately
   live-confirmed.
-- Lovelace dashboard Gate 8 remains the next private live-test gate.
+- Homekeep app dashboard Gate 8 remains the next private live-test gate.
 - Home Assistant package-backed automated tests remain a public-release
   blocker.
 
@@ -1018,18 +1148,18 @@ Important decisions:
 Known gaps / next prompt:
 - Full Home Assistant package-backed automated tests remain a public-release
   blocker.
-- Lovelace dashboard Gate 8 remains the next private live-test gate.
+- Homekeep app dashboard Gate 8 remains the next private live-test gate.
 
-### 2026-06-21 - Lovelace companion helper example
+### 2026-06-21 - Homekeep app companion helper example
 
 Status: completed locally, pending private HACS live retest
 
 Implemented:
 - Added helper and bridge script sections for the dashboard recipe.
 - Updated `accept_bonus_chore` responses to include the materialized bonus
-  `session_item_id`, so the Lovelace bridge can continue after accepting
+  `session_item_id`, so the Homekeep app bridge can continue after accepting
   One more without scraping To-do internals.
-- Updated Lovelace and service docs to point at the companion helper file
+- Updated Homekeep app and service docs to point at the companion helper file
   and document the bonus accept response.
 
 Tests/checks run:
@@ -1039,7 +1169,7 @@ Tests/checks run:
 - `git diff --check`
 
 Docs updated:
-- `docs/LOVELACE_MVP.md`
+- `docs/DASHBOARD_UI_PLAN.md`
 - `docs/SERVICE_SCHEMAS.md`
 - `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
 - `docs/IMPLEMENTATION_PROGRESS.md`
@@ -1049,19 +1179,19 @@ Important decisions:
   state. Homekeep storage remains authoritative for Chores, sessions, and
   projections.
 - The dashboard bridge stores the best single recommendation by default, with
-  bundle/easiest fallback, because Lovelace cards cannot comfortably capture
+  bundle/easiest fallback, because Home Assistant frontend cannot comfortably capture
   arbitrary service response choices without scripts.
 
 Known gaps / next prompt:
 - Run focused tests, commit, push, update through HACS, then paste/create the
   helpers/scripts and dashboard YAML in Home Assistant for Gate 8 live testing.
 
-### 2026-06-21 - Lovelace start helper template fix
+### 2026-06-21 - Homekeep app start helper template fix
 
 Status: completed locally, pending private HACS live retest
 
 Implemented:
-- Fixed the Lovelace helper script to reference the
+- Fixed the Homekeep app helper script to reference the
   `start_recommendation` response `items` key with bracket notation. Home
   Assistant Jinja treats `homekeep_start.items` as the dictionary method, so
   the bridge must use `homekeep_start['items']`.
@@ -1084,16 +1214,16 @@ Known gaps / next prompt:
 - Commit and push the helper fix, update/reload scripts in Home Assistant, then
   continue Gate 8 with Done, Skip/Snooze, Done for now, and One more actions.
 
-### 2026-06-21 - Lovelace end-session helper response fix
+### 2026-06-21 - Homekeep app end-session helper response fix
 
 Status: completed locally, pending private HACS live retest
 
 Implemented:
 - Added `response_variable: homekeep_end` to
   `script.homekeep_end_session_completed` in
-  Lovelace helper script, because `homekeep.end_session` is a
+  Homekeep app helper script, because `homekeep.end_session` is a
   response-only Home Assistant action.
-- Recorded that the Lovelace complete helper successfully completed the
+- Recorded that the Homekeep app complete helper successfully completed the
   active item after helper ids were restored from the Start trace.
 
 Tests/checks run:
@@ -1115,13 +1245,13 @@ Known gaps / next prompt:
 - Commit and push this helper fix, reload scripts in Home Assistant, then
   retest Done for now and continue One more / Accept one more.
 
-### 2026-06-21 - Gate 8 Lovelace main flow confirmation
+### 2026-06-21 - Gate 8 Homekeep app main flow confirmation
 
 Status: completed for private MVP main flow
 
 Implemented:
 - No code change in this pass; recorded private HACS live-test evidence for
-  the Lovelace companion helper/scripts.
+  the Homekeep app companion helper/scripts.
 
 Tests/checks run:
 - Private HACS live test on Home Assistant Core `2026.6.3`.
@@ -1144,7 +1274,7 @@ Important decisions:
   session was already terminal.
 
 Known gaps / next prompt:
-- Lovelace Skip and Snooze helper buttons still need separate live
+- Homekeep app Skip and Snooze helper buttons still need separate live
   confirmation if full dashboard readiness becomes a release target.
 - Calendar listener behavior after reload remains not separately
   live-confirmed.
@@ -1192,7 +1322,12 @@ Implemented:
   startup schema import fix.
 
 Tests/checks run:
-- Pending in this pass.
+- `python3 -m unittest` for the former dashboard example tests
+- `ruby -e "require 'yaml'; ..."` over the former dashboard example files
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `git diff --check`
+- `python3` YAML parse check was attempted but skipped because PyYAML is not
+  installed locally.
 
 Docs updated:
 - `custom_components/homekeep/manifest.json`
@@ -1209,6 +1344,91 @@ Important decisions:
 Known gaps / next prompt:
 - Update Homekeep through HACS in the private Home Assistant instance and
   confirm version `0.0.3` loads.
+
+### 2026-06-21 - Split Homekeep app example files
+
+Status: completed locally
+
+Implemented:
+- Split the former Homekeep dashboard example into separate paste targets:
+  a helper file for package helpers/scripts and a raw dashboard editor file.
+- Replaced the old combined dashboard example with a short
+  index pointing to the two target-specific files.
+- Updated Homekeep app docs, private live-test checklist text, mock adequacy text,
+  and tests to reference the split examples.
+
+Tests/checks run:
+- Pending in this pass.
+
+Docs updated:
+- `docs/DASHBOARD_UI_PLAN.md`
+- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/MOCK_ADEQUACY_REVIEW.md`
+- `docs/SCAFFOLDING_TASKS.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+- `PROJECT_BRIEF.md`
+- `ALL_DOCS.md`
+
+Important decisions:
+- The raw dashboard file intentionally starts at `title: Homekeep`; there is no
+  wrapper key to strip before pasting into Homekeep app.
+
+Known gaps / next prompt:
+- Reload packages/scripts in Home Assistant, paste the raw dashboard file, and
+  run the dashboard smoke flow.
+
+### 2026-06-22 - Learned Chore duration and lower-friction session start
+
+Status: completed locally
+
+Implemented:
+- Added storage version `3` with `ChoreState.duration_samples_minutes` for
+  bounded learned Chore duration samples.
+- Trained duration samples from real timed Chore Session item completions when
+  `started_at` precedes `completed_at`; skips, snoozes, dismissals,
+  cancellations, direct non-session completions, and invalid timing do not
+  train duration.
+- Made the first session item active at session start and automatically
+  activates the next pending item when the current item is completed, so timing
+  can be learned without an extra form/action step.
+- Used the learned median duration for recommendation `estimated_minutes`,
+  time-fit scoring, and materialized session item display, falling back to the
+  user-entered Chore estimate when no samples exist.
+- Stored the generation request context on RecommendationSnapshots and made
+  `start_recommendation` infer session mode, time budget, energy level, target
+  time window, and area preference from that context and the selected
+  recommendation.
+
+Tests/checks run:
+- `python3 -m unittest tests.test_storage tests.test_sessions tests.test_recommendations tests.test_services -v`
+- `python3 -m unittest discover -s tests -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `git diff --check`
+- Stale-reference scan for old storage/source/dashboard wording.
+
+Docs updated:
+- `docs/DECISION_LOG.md`
+- `docs/DATA_MODEL.md`
+- `docs/STORAGE_MIGRATIONS.md`
+- `docs/SERVICE_SCHEMAS.md`
+- `docs/RECOMMENDATION_PAYLOADS.md`
+- `docs/HOME_ASSISTANT_CONTRACT.md`
+- `docs/TEST_PLAN.md`
+- `docs/IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Kept `ChoreDefinition.estimated_minutes` as the user-correctable fallback
+  instead of mutating it directly.
+- Did not add a separate `start_chore_session` path; the canonical
+  `start_recommendation` service remains the only MVP session materialization
+  path.
+- Did not fabricate learned duration from historical completions or static
+  estimates, because those records do not prove active work time.
+
+Known gaps / next prompt:
+- Private Home Assistant retest should confirm storage migration from version
+  `2` to `3` and that session forms no longer ask for fields inferred from the
+  selected recommendation.
 
 ## Resume Instructions
 

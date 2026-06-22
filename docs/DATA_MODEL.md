@@ -5,7 +5,7 @@
 Homekeep storage must include a version number from the first scaffold.
 
 ```yaml
-version: 2
+version: 3
 chores: {}
 states: {}
 completions: []
@@ -16,9 +16,11 @@ user_preference_stats: {}
 idempotency_records: {}
 ```
 
-Current storage version is `2`. Version `1` was an early draft that used
+Current storage version is `3`. Version `1` was an early draft that used
 `recent_dismissals` and `recent_snoozes` integer fields on `ChoreState`.
-Migration rules are documented in `docs/STORAGE_MIGRATIONS.md`.
+Version `2` added bounded dismissal/snooze timestamp fields. Version `3` adds
+bounded learned duration samples. Migration rules are documented in
+`docs/STORAGE_MIGRATIONS.md`.
 
 ## ChoreDefinition
 
@@ -75,6 +77,7 @@ dismissal_events: list[datetime]
 snooze_events: list[datetime]
 last_dismissed_at: datetime | null
 last_snoozed_at: datetime | null
+duration_samples_minutes: list[int]
 ```
 
 `ChoreState` stores durable scheduling facts. It must not store authoritative
@@ -103,6 +106,19 @@ Dismissal and snooze event rules:
 - Snooze validation and `snoozed_until` behavior use `docs/SNOOZE_POLICY.md`.
 - Snoozes do not add to dismissal penalty in MVP.
 
+Duration learning rules:
+
+- `estimated_minutes` on `ChoreDefinition` remains the user-entered fallback.
+- `duration_samples_minutes` stores at most the newest 10 valid real session
+  item durations.
+- Valid learned duration samples are integer minutes from `1` to `240`.
+- Samples are trained only from real session item completions with a recorded
+  `started_at` before `completed_at`.
+- Skips, snoozes, dismissals, swaps, cancellations, direct non-session
+  completions, and invalid/non-positive timing do not train duration.
+- Recommendation time fit and materialized session display use the median
+  learned duration when samples exist, otherwise `estimated_minutes`.
+
 Storage migration note:
 
 - Version 1 stores may contain `recent_dismissals: int` and
@@ -121,7 +137,7 @@ completed_at: datetime
 completed_by: string | null
 variant: tiny | normal | deep
 credit: float
-source: service | todo | lovelace | voice | automation
+source: service | todo | dashboard | voice | automation
 ```
 
 Only real completions create `ChoreCompletion` records.

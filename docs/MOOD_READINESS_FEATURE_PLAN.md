@@ -40,7 +40,7 @@ Mood Context docs were written:
 
 - the relationship between mood and chore suggestions
 - whether Energy and Mood should merge into a broader Readiness concept
-- user-facing Lovelace behavior for inferred mood and session posture
+- user-facing Homekeep app behavior for inferred mood and session posture
 - post-prototype chore-friction learning
 - safer explanation wording
 - explicit session modes
@@ -125,7 +125,7 @@ readiness_context:
 
 ## User-Facing Behavior
 
-Lovelace should keep the feature small and correctable.
+Homekeep app should keep the feature small and correctable.
 
 Recommended controls:
 
@@ -337,7 +337,7 @@ remains a reasonable starting point for inferred readiness.
 Post-prototype implementation should be split into small phases:
 
 1. Add Readiness Context docs and schemas while preserving MVP Mood Context.
-2. Add explicit session mode input to service schemas and Lovelace.
+2. Add explicit session mode input to service schemas and Homekeep app.
 3. Map explicit modes to recommendation defaults and explanations.
 4. Add chore-friction summaries from existing session history.
 5. Add user correction capture and bounded learning.

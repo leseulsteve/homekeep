@@ -14,7 +14,7 @@ Home Assistant boundary:
 - services/actions
 - sensor, binary_sensor, and todo entities
 - calendar entity access
-- Lovelace dashboard calls
+- Homekeep app dashboard calls
 
 Homekeep core:
 - chore definitions and state

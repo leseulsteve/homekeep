@@ -96,7 +96,12 @@ After `homekeep.start_recommendation`, callers must use the materialized
 Smart Chore List `RecommendationItem.session_item_id` values are proposal-only
 and null before materialization.
 
-`homekeep.answer_session_question` is not an MVP service. Lovelace should
+`homekeep.start_recommendation` infers session setup fields from the
+RecommendationSnapshot and selected recommendation. Callers should not repeat
+mode, time budget, energy level, target time window, or area preference in the
+start request.
+
+`homekeep.answer_session_question` is not an MVP service. Homekeep app should
 collect context locally and call `homekeep.generate_smart_chore_list` with the
 final answers.
 
@@ -225,9 +230,9 @@ when absolute delta < 10 and bucket is unchanged
 Entity state should still update for smaller changes; the event threshold is
 only to keep automations and logs from becoming noisy.
 
-## Lovelace MVP
+## Homekeep App MVP
 
-Lovelace is the MVP dashboard layer.
+Homekeep's sidebar app is the MVP dashboard layer.
 
 Expected controls:
 
@@ -240,5 +245,5 @@ Expected controls:
 - Start, done, skip, snooze, dismiss, end actions
 - Optional "one more" Bonus Chore action
 
-Lovelace should call Homekeep services. It should not become the source of
+The app should call Homekeep services. It should not become the source of
 truth.

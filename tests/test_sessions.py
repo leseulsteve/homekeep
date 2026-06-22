@@ -135,6 +135,42 @@ class SessionLifecycleTest(unittest.TestCase):
         self.assertTrue(second["duplicate"])
         self.assertEqual(len(self.store.completions), 1)
 
+    def test_session_item_duration_trains_learned_estimate(self) -> None:
+        session = self.start_two_item_session()
+        first = session["items"][0]
+        second = session["items"][1]
+
+        self.engine.complete_chore(
+            first["chore_id"],
+            session_id=session["session_id"],
+            session_item_id=first["session_item_id"],
+            completed_at=self.now + timedelta(minutes=8),
+        )
+
+        stored_session = self.store.sessions[session["session_id"]]
+        self.assertEqual(
+            self.store.states[first["chore_id"]].duration_samples_minutes,
+            [8],
+        )
+        self.assertEqual(stored_session["items"][1]["status"], "active")
+        self.assertEqual(
+            stored_session["items"][1]["started_at"],
+            (self.now + timedelta(minutes=8)).isoformat(),
+        )
+
+        self.engine.complete_chore(
+            second["chore_id"],
+            session_id=session["session_id"],
+            session_item_id=second["session_item_id"],
+            completed_at=self.now + timedelta(minutes=13),
+        )
+
+        self.assertEqual(
+            self.store.states[second["chore_id"]].duration_samples_minutes,
+            [5],
+        )
+        self.assertIsNone(stored_session["current_chore"])
+
     def test_request_id_idempotency_returns_stored_result(self) -> None:
         first = self.engine.start_session(
             ["wipe_counters"],
@@ -151,7 +187,9 @@ class SessionLifecycleTest(unittest.TestCase):
         self.assertEqual(len(self.store.sessions), 1)
 
         paused = self.engine.pause_session(
-            first["session_id"], request_id="same-id"
+            first["session_id"],
+            now=self.now + timedelta(minutes=2),
+            request_id="same-id",
         )
         self.assertEqual(paused["status"], "paused")
         self.assertEqual(len(self.store.idempotency_records), 2)
