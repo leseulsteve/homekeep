@@ -170,7 +170,7 @@ implementation pass.
   Readiness Context where recommendation behavior primarily uses capacity,
   energy, time, chore friction, explicit modes, and user correction. Mood should
   remain optional and should not become a hidden diagnosis layer. See
-  `docs/MOOD_READINESS_FEATURE_PLAN.md`.
+  `docs/product/MOOD_READINESS_FEATURE_PLAN.md`.
 
 ## Bonus Chores
 

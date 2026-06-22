@@ -64,7 +64,7 @@ Normalization rules:
   state blobs
 - do not include volatile timestamps such as `created_at`
 - include `target_time_window` only as the normalized local ISO window from
-  `docs/TARGET_TIME_WINDOW.md`, not the raw user input text
+  `docs/specs/TARGET_TIME_WINDOW.md`, not the raw user input text
 
 ## Storage Rules
 

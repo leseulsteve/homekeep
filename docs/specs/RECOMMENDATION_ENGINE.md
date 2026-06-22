@@ -61,22 +61,22 @@ entity changed, refresh before scoring or score without Calendar Context.
 `history_fit_score`
 : Whether similar users or sessions historically accept or complete this chore.
 Uses the bounded context bucket strategy in
-`docs/SESSION_HISTORY_LEARNING.md`. If matching history is sparse, fall back to
+`docs/specs/SESSION_HISTORY_LEARNING.md`. If matching history is sparse, fall back to
 broader buckets and then to a neutral score.
 
 `Mood Context`
-: A lightweight inferred or explicit context from `docs/MOOD_CONTEXT.md`.
+: A lightweight inferred or explicit context from `docs/specs/MOOD_CONTEXT.md`.
 Mood Context may influence energy defaults, session length, recommendation
 wording, and how many choices Homekeep shows. It must not hide urgent stale
 chores by itself.
 
 `dismissal_penalty`
 : Bounded, decaying penalty from recent dismissals. It uses the formula in
-`docs/DISMISSAL_PENALTY.md`. Snoozes do not add to this penalty in MVP; they
+`docs/specs/DISMISSAL_PENALTY.md`. Snoozes do not add to this penalty in MVP; they
 only hide a chore until the explicit snooze target time.
 
 Snoozed chores with a future `snoozed_until` are excluded from normal
-recommendations before scoring, following `docs/SNOOZE_POLICY.md`.
+recommendations before scoring, following `docs/specs/SNOOZE_POLICY.md`.
 
 The scoring implementation must compute:
 
@@ -121,7 +121,7 @@ Each recommendation must include:
 If Mood Context influenced the recommendation, the explanation should say so in
 practical language without claiming to know the user's inner state.
 
-Use the payload shape in `docs/RECOMMENDATION_PAYLOADS.md`.
+Use the payload shape in `docs/specs/RECOMMENDATION_PAYLOADS.md`.
 
 ## Explanation Examples
 

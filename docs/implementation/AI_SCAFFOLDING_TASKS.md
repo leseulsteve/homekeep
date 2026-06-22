@@ -19,8 +19,8 @@ Use this as the first implementation checklist.
 - Define enums for energy, variant, session status, item status, mode, source.
 - Define typed structures for stored objects.
 - Add validation helpers.
-- Add context fingerprint helper from `docs/CONTEXT_FINGERPRINT.md`.
-- Add target time window parser from `docs/TARGET_TIME_WINDOW.md`.
+- Add context fingerprint helper from `docs/specs/CONTEXT_FINGERPRINT.md`.
+- Add target time window parser from `docs/specs/TARGET_TIME_WINDOW.md`.
 
 ## 3. Add Storage
 
@@ -29,19 +29,19 @@ Use this as the first implementation checklist.
 - Add empty store factory.
 - Add load/save helpers.
 - Add migration hook.
-- Implement v1-to-v2 migration from `docs/STORAGE_MIGRATIONS.md`.
+- Implement v1-to-v2 migration from `docs/architecture/STORAGE_MIGRATIONS.md`.
 
 ## 4. Add Health
 
 - Create `health.py`.
 - Implement derived staleness calculation.
 - Implement completion credit and `next_due_at` rules from
-  `docs/COMPLETION_CREDIT.md`.
+  `docs/specs/COMPLETION_CREDIT.md`.
 - Implement adaptive interval update helper with write-time clamping.
 - Implement Home Health, Area Health, Group Health, and Projected Impact as
   derived calculations.
 - Implement `homekeep_area_health_changed` threshold rules from
-  `docs/DERIVED_HEALTH.md`.
+  `docs/specs/DERIVED_HEALTH.md`.
 - If adding caches, make them disposable and rebuildable.
 
 ## 5. Add Scoring And Recommendations
@@ -53,8 +53,8 @@ Use this as the first implementation checklist.
   fingerprinting.
 - Implement v1 weighted scoring.
 - Implement dismissal penalty exactly as documented in
-  `docs/DISMISSAL_PENALTY.md`.
-- Exclude future-snoozed chores according to `docs/SNOOZE_POLICY.md`.
+  `docs/specs/DISMISSAL_PENALTY.md`.
+- Exclude future-snoozed chores according to `docs/specs/SNOOZE_POLICY.md`.
 - Implement explanations.
 - Implement empty state.
 - Implement best bundle, best single chore, easiest useful chore.
@@ -71,7 +71,7 @@ Use this as the first implementation checklist.
 - Copy `context_fingerprint` from RecommendationSnapshot to ChoreSession.
 - Implement session item mutation.
 - Store bounded dismissal and snooze event timestamps.
-- Store and clear `snoozed_until` according to `docs/SNOOZE_POLICY.md`.
+- Store and clear `snoozed_until` according to `docs/specs/SNOOZE_POLICY.md`.
 - Validate session completion attribution against participants.
 - Implement Bonus Chore lifecycle with `bonus_pending` and `bonus_active`.
 - Implement `accept_bonus_chore`.
@@ -85,7 +85,7 @@ Use this as the first implementation checklist.
 - Implement deterministic v1 context bucket generation.
 - Convert Home Assistant datetimes with `homeassistant.util.dt.as_local()`
   before deriving history `day_type` or `time_block`.
-- Implement Mood Context inference from `docs/MOOD_CONTEXT.md`.
+- Implement Mood Context inference from `docs/specs/MOOD_CONTEXT.md`.
 - Implement fallback bucket matching and neutral score fallback.
 - Update stats after accept, complete, skip, snooze, dismiss.
 - Do not use Session-History Learning as a replacement for the deterministic
@@ -108,10 +108,10 @@ Use this as the first implementation checklist.
 - Create `coordinator.py`.
 - Register services.
 - Register data-producing services with Home Assistant action response support
-  according to `docs/ACTION_RESPONSES.md`.
+  according to `docs/specs/ACTION_RESPONSES.md`.
 - Add mutation lock and request-id idempotency handling.
 - Implement idempotency record TTL and pruning from
-  `docs/CONCURRENCY_AND_IDEMPOTENCY.md`.
+  `docs/architecture/CONCURRENCY_AND_IDEMPOTENCY.md`.
 - Add sensors.
 - Add binary sensors.
 - Add To-do projections.
@@ -131,7 +131,7 @@ Use this as the first implementation checklist.
 
 ## 11. Add Tests
 
-- Add tests in the order listed in `docs/TEST_PLAN.md`.
+- Add tests in the order listed in `docs/implementation/TEST_PLAN.md`.
 - Prioritize storage, health, scoring, sessions, and services before app UI.
 
 ## 12. Documentation Pass

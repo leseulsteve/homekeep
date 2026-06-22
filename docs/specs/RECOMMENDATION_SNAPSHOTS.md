@@ -6,7 +6,7 @@ The implementation must not confuse the two.
 Every RecommendationSnapshot stores a `context_fingerprint` generated from the
 exact normalized recommendation context. A Chore Session materialized from the
 snapshot copies that fingerprint for provenance and stale-response diagnostics.
-See `docs/CONTEXT_FINGERPRINT.md`.
+See `docs/specs/CONTEXT_FINGERPRINT.md`.
 
 ## Snapshot States
 
@@ -68,7 +68,7 @@ If a scheduled proposal expires before the user starts it,
 `start_recommendation` must reject it. The UI should regenerate from the same
 visible context instead of trying to recover the expired snapshot.
 
-See `docs/SCHEDULED_SUGGESTION_UX.md`.
+See `docs/specs/SCHEDULED_SUGGESTION_UX.md`.
 
 ## Active Sessions
 

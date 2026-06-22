@@ -2,14 +2,14 @@
 
 This file translates the current Homekeep app design state into future Codex
 implementation instructions. It is intentionally stricter and more operational
-than `docs/DASHBOARD_UI_PLAN.md`.
+than `docs/product/HOMEKEEP_APP_PLAN.md`.
 
 This file is currently scoped for a Ready Now-only test implementation. The first
 frontend pass may use mocked Ready Now data so Steve can quickly evaluate the app
 feel before backend wiring is complete. Do not implement the full dashboard app
 from this file. Later workflow decisions are still intentionally undocumented.
 
-Treat `docs/DASHBOARD_UI_PLAN.md` and `docs/HOMEKEEP_VOICE_SYSTEM.md` as the
+Treat `docs/product/HOMEKEEP_APP_PLAN.md` and `docs/product/HOMEKEEP_VOICE_SYSTEM.md` as the
 human product source.
 
 ## Non-Negotiables
@@ -28,7 +28,7 @@ human product source.
 - The app voice should act like a care companion for the home, not a coach for
   the person.
 - Keep gamification positive and non-punitive.
-- Follow `docs/HOMEKEEP_VOICE_SYSTEM.md` for all user-facing text.
+- Follow `docs/product/HOMEKEEP_VOICE_SYSTEM.md` for all user-facing text.
 
 ## Required Pre-Implementation Checks
 
@@ -37,7 +37,7 @@ Before coding the frontend, Codex must:
 1. Verify the supported Home Assistant sidebar/custom panel/frontend extension
    approach against the installed Home Assistant package or official developer
    docs.
-2. Record the chosen frontend approach in `docs/DASHBOARD_UI_PLAN.md` or a
+2. Record the chosen frontend approach in `docs/product/HOMEKEEP_APP_PLAN.md` or a
    follow-up implementation note.
 3. Confirm the app is not iframe-embedded.
 4. Identify how the frontend calls Homekeep services and receives action
@@ -468,12 +468,12 @@ Detailed history belongs later in Activity.
 
 Read these before any frontend implementation pass:
 
-- `docs/DASHBOARD_UI_PLAN.md`
-- `docs/HOMEKEEP_VOICE_SYSTEM.md`
-- `docs/DECISION_LOG.md`
-- `docs/HOME_ASSISTANT_CONTRACT.md`
-- `docs/SERVICE_SCHEMAS.md`
-- `docs/RECOMMENDATION_PAYLOADS.md`
-- `docs/SESSION_STATE_MACHINE.md`
-- `docs/BONUS_CHORE_LIFECYCLE.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/architecture/HOME_ASSISTANT_CONTRACT.md`
+- `docs/specs/SERVICE_SCHEMAS.md`
+- `docs/specs/RECOMMENDATION_PAYLOADS.md`
+- `docs/specs/SESSION_STATE_MACHINE.md`
+- `docs/specs/BONUS_CHORE_LIFECYCLE.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`

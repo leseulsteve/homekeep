@@ -11,8 +11,8 @@ real routines, or household-critical automations until the private live-test
 checklist and release-readiness work are complete.
 
 The integration is still missing Home Assistant package-backed integration
-tests, live validation, packaged helper/script examples for the dashboard, and
-a release process.
+tests, live validation of the mocked Homekeep sidebar app, service wiring for
+that app, and a release process.
 
 ## Private HACS Test Install
 
@@ -37,11 +37,12 @@ Private test install:
 7. Add the Homekeep integration from Settings > Devices & services.
 
 For live-test preparation, follow
-`docs/PRIVATE_LIVE_TEST_CHECKLIST.md`.
+`docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`.
 
 Start here:
 
 - `PROJECT_BRIEF.md` for the human product brief.
 - `AGENTS.md` for Codex instructions.
-- `docs/IMPLEMENTATION_PLAN.md` for the build sequence.
-- `docs/MVP_ACCEPTANCE_CRITERIA.md` for the definition of done.
+- `docs/README.md` for the documentation map.
+- `docs/implementation/IMPLEMENTATION_PLAN.md` for the build sequence.
+- `docs/product/MVP_ACCEPTANCE_CRITERIA.md` for the definition of done.

@@ -3,7 +3,7 @@
 This review records gaps found before scaffolding and the contracts added to
 avoid implementation guesswork.
 
-Implementation conflict resolution now lives in `docs/DECISION_LOG.md`. If this
+Implementation conflict resolution now lives in `docs/AI_DECISION_LOG.md`. If this
 readiness review or any older planning doc conflicts with the decision log, the
 decision log wins.
 
@@ -74,7 +74,7 @@ enabled/high-priority chores.
   Home Assistant is not installed in the local environment.
 - Local fakes now cover config entry unload behavior, storage preservation on
   failed unload, and calendar listener cleanup.
-- Pre-`1.0` mock adequacy is tracked in `docs/MOCK_ADEQUACY_REVIEW.md`.
+- Pre-`1.0` mock adequacy is tracked in `docs/live-test/MOCK_ADEQUACY_REVIEW.md`.
 - The current local mocks are adequate for developer readiness, but public
   release readiness still requires Home Assistant package-backed tests or an
   approved live synthetic candidate workflow.
@@ -84,13 +84,13 @@ enabled/high-priority chores.
 The project is ready to scaffold when Codex can implement from:
 
 1. `AGENTS.md`
-2. `docs/DECISION_LOG.md`
-3. `docs/IMPLEMENTATION_PROGRESS.md`
-4. `docs/IMPLEMENTATION_PLAN.md`
-5. `docs/SCAFFOLDING_TASKS.md`
-6. `docs/ARCHITECTURE.md`
-7. `docs/HOME_ASSISTANT_CONTRACT.md`
-8. `docs/SERVICE_SCHEMAS.md`
-9. `docs/DATA_MODEL.md`
-10. `docs/RECOMMENDATION_PAYLOADS.md`
-11. `docs/TEST_PLAN.md`
+2. `docs/AI_DECISION_LOG.md`
+3. `docs/AI_IMPLEMENTATION_PROGRESS.md`
+4. `docs/implementation/IMPLEMENTATION_PLAN.md`
+5. `docs/implementation/AI_SCAFFOLDING_TASKS.md`
+6. `docs/architecture/ARCHITECTURE.md`
+7. `docs/architecture/HOME_ASSISTANT_CONTRACT.md`
+8. `docs/specs/SERVICE_SCHEMAS.md`
+9. `docs/architecture/DATA_MODEL.md`
+10. `docs/specs/RECOMMENDATION_PAYLOADS.md`
+11. `docs/implementation/TEST_PLAN.md`

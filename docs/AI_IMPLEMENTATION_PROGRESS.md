@@ -57,6 +57,45 @@ Known gaps / next prompt:
 - ...
 ```
 
+### 2026-06-22 - Docs taxonomy and AI-prefix cleanup
+
+Status: completed
+
+Implemented:
+- Reorganized docs by purpose into `product/`, `architecture/`, `specs/`,
+  `implementation/`, and `live-test/`.
+- Added `docs/README.md` as the documentation map and AI-development convention
+  guide.
+- Prefixed AI-agent operational docs with `AI_` so product and spec docs remain
+  visually distinct from Codex runbooks and resume ledgers.
+- Renamed the dashboard plan to `docs/product/HOMEKEEP_APP_PLAN.md` to match
+  the sidebar app direction.
+- Updated repository docs and internal markdown references to the new paths.
+
+Tests/checks run:
+- `python3` markdown docs-reference existence check
+- `git diff --check`
+- stale root-path scan for moved docs
+
+Docs updated:
+- `AGENTS.md`
+- `ALL_DOCS.md`
+- `PROJECT_BRIEF.md`
+- `README.md`
+- `docs/README.md`
+- moved docs across the new docs folders
+
+Important decisions:
+- Keep `docs/AI_DECISION_LOG.md` and `docs/AI_IMPLEMENTATION_PROGRESS.md` at
+  the docs root because they are the primary AI resume and conflict-resolution
+  files.
+- Prefix AI-agent operational docs with `AI_`; do not prefix product,
+  architecture, or feature specs.
+
+Known gaps / next prompt:
+- Keep future docs in the purpose-based folder structure and update
+  `docs/README.md` when adding a new source of truth.
+
 ### 2026-06-22 - Mocked Ready Now sidebar prototype
 
 Status: completed
@@ -70,16 +109,16 @@ Implemented:
 
 Tests/checks run:
 - `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
-- `git diff --check -- custom_components/homekeep/frontend.py custom_components/homekeep/frontend/homekeep-panel.js tests/test_frontend.py tests/test_reload_unload.py docs/DECISION_LOG.md docs/DASHBOARD_UI_PLAN.md docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/IMPLEMENTATION_PROGRESS.md`
+- `git diff --check -- custom_components/homekeep/frontend.py custom_components/homekeep/frontend/homekeep-panel.js tests/test_frontend.py tests/test_reload_unload.py docs/AI_DECISION_LOG.md docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/AI_IMPLEMENTATION_PROGRESS.md`
 - Node REPL module import of `custom_components/homekeep/frontend/homekeep-panel.js`
 - `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components/homekeep tests/test_frontend.py tests/test_reload_unload.py`
 - `python3 -m unittest discover -s tests -v`
 
 Docs updated:
-- `docs/DECISION_LOG.md`
-- `docs/DASHBOARD_UI_PLAN.md`
-- `docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - The first frontend slice is explicitly mocked and local-only.
@@ -105,13 +144,13 @@ Implemented:
   Projected Impact Chores.
 
 Tests/checks run:
-- `git diff --check -- docs/DERIVED_HEALTH.md docs/DASHBOARD_UI_PLAN.md docs/DECISION_LOG.md docs/IMPLEMENTATION_PROGRESS.md`
+- `git diff --check -- docs/specs/DERIVED_HEALTH.md docs/product/HOMEKEEP_APP_PLAN.md docs/AI_DECISION_LOG.md docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Docs updated:
-- `docs/DERIVED_HEALTH.md`
-- `docs/DASHBOARD_UI_PLAN.md`
-- `docs/DECISION_LOG.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/specs/DERIVED_HEALTH.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Mood Context, Ready-Now Mode, and Scheduled-Suggestion Mode may influence
@@ -130,7 +169,7 @@ Status: completed
 
 Implemented:
 - Removed the former dashboard examples and their dedicated tests.
-- Removed the former dashboard UI doc and made `docs/DASHBOARD_UI_PLAN.md`
+- Removed the former dashboard UI doc and made `docs/product/HOMEKEEP_APP_PLAN.md`
   the UI direction document.
 - Updated runtime completion sources from the UI-specific label to
   `dashboard`.
@@ -143,11 +182,11 @@ Tests/checks run:
 Docs updated:
 - `AGENTS.md`
 - `PROJECT_BRIEF.md`
-- `docs/DASHBOARD_UI_PLAN.md`
-- `docs/DECISION_LOG.md`
-- `docs/HOME_ASSISTANT_CONTRACT.md`
-- `docs/IMPLEMENTATION_PLAN.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/architecture/HOME_ASSISTANT_CONTRACT.md`
+- `docs/implementation/IMPLEMENTATION_PLAN.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 - Supporting checklist, test plan, mock review, readiness, and UX docs.
 
 Important decisions:
@@ -166,22 +205,22 @@ Known gaps / next prompt:
 Status: completed
 
 Implemented:
-- Added `docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md` with current Codex-facing
+- Added `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md` with current Codex-facing
   guardrails for future Homekeep sidebar app implementation.
-- Added `docs/DASHBOARD_UI_STEVE_PROMPTS.md` with phased prompts for continuing
+- Added `docs/implementation/AI_DASHBOARD_UI_STEVE_PROMPTS.md` with phased prompts for continuing
   the human UI design review, translating approved decisions, verifying Home
   Assistant frontend assumptions, and starting the first app shell phase.
 - Updated `AGENTS.md` planning-file references for the new dashboard UI handoff
   docs.
 
 Tests/checks run:
-- `git diff --check -- docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/DASHBOARD_UI_STEVE_PROMPTS.md AGENTS.md`
+- `git diff --check -- docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/implementation/AI_DASHBOARD_UI_STEVE_PROMPTS.md AGENTS.md`
 
 Docs updated:
 - `AGENTS.md`
-- `docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
-- `docs/DASHBOARD_UI_STEVE_PROMPTS.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/implementation/AI_DASHBOARD_UI_STEVE_PROMPTS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Future UI sessions should resume the human design review at Home Health and
@@ -191,7 +230,7 @@ Important decisions:
   unresolved later workflows remain out of scope.
 
 Known gaps / next prompt:
-- For a fast prototype, use `docs/DASHBOARD_UI_STEVE_PROMPTS.md` Prompt 9A.
+- For a fast prototype, use `docs/implementation/AI_DASHBOARD_UI_STEVE_PROMPTS.md` Prompt 9A.
 - For design review, continue with Prompt 1.
 
 ### 2026-06-21 - Remove mock/dev-mode setup paths
@@ -217,13 +256,13 @@ Docs updated:
 - `AGENTS.md`
 - `PROJECT_BRIEF.md`
 - `ALL_DOCS.md`
-- `docs/DECISION_LOG.md`
-- `docs/HOME_ASSISTANT_CONTRACT.md`
-- `docs/SERVICE_SCHEMAS.md`
-- `docs/SCAFFOLDING_TASKS.md`
-- `docs/TEST_PLAN.md`
-- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/architecture/HOME_ASSISTANT_CONTRACT.md`
+- `docs/specs/SERVICE_SCHEMAS.md`
+- `docs/implementation/AI_SCAFFOLDING_TASKS.md`
+- `docs/implementation/TEST_PLAN.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Homekeep setup now loads existing Homekeep storage only. It must not seed
@@ -252,9 +291,9 @@ Tests/checks run:
 
 Docs updated:
 - `custom_components/homekeep/manifest.json`
-- `docs/MOCK_ADEQUACY_REVIEW.md`
-- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/live-test/MOCK_ADEQUACY_REVIEW.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - No tag will be created because the repository has no established tag
@@ -274,7 +313,7 @@ Implemented:
 - Replaced the Bubble Card dashboard target with the former dashboard example
   direction.
 - That dashboard example direction has since been retired in favor of the
-  sidebar app plan in `docs/DASHBOARD_UI_PLAN.md`.
+  sidebar app plan in `docs/product/HOMEKEEP_APP_PLAN.md`.
 - Updated completion source validation so new dashboard calls use `dashboard`.
 - Added storage normalization for legacy completion records that used
   `bubble_card` as their source.
@@ -290,15 +329,15 @@ Docs updated:
 - `AGENTS.md`
 - `ALL_DOCS.md`
 - `PROJECT_BRIEF.md`
-- `docs/DECISION_LOG.md`
-- `docs/HOME_ASSISTANT_CONTRACT.md`
-- `docs/DASHBOARD_UI_PLAN.md`
-- `docs/SERVICE_SCHEMAS.md`
-- `docs/DATA_MODEL.md`
-- `docs/IMPLEMENTATION_PLAN.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
-- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
-- `docs/PRIVATE_LIVE_TEST_RESULTS.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/architecture/HOME_ASSISTANT_CONTRACT.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/specs/SERVICE_SCHEMAS.md`
+- `docs/architecture/DATA_MODEL.md`
+- `docs/implementation/IMPLEMENTATION_PLAN.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/live-test/PRIVATE_LIVE_TEST_RESULTS.md`
 - Supporting planning and readiness docs that referenced the former dashboard
   target.
 
@@ -340,12 +379,12 @@ Tests/checks run:
 - `python3 -m unittest discover -s tests -v`
 
 Docs updated:
-- `docs/DECISION_LOG.md`
-- `docs/HOME_ASSISTANT_CONTRACT.md`
-- `docs/SERVICE_SCHEMAS.md`
-- `docs/DASHBOARD_UI_PLAN.md`
-- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/architecture/HOME_ASSISTANT_CONTRACT.md`
+- `docs/specs/SERVICE_SCHEMAS.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 - `PROJECT_BRIEF.md`
 - `ALL_DOCS.md`
 
@@ -387,7 +426,7 @@ Tests/checks run:
 - `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
 
 Docs updated:
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Kept Phase 1 pure Python because the requested deliverables do not require
@@ -431,7 +470,7 @@ Tests/checks run:
 - `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
 
 Docs updated:
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Home Assistant and Voluptuous are not installed in this local environment, so
@@ -482,7 +521,7 @@ Tests/checks run:
 - `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
 
 Docs updated:
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Used deterministic MVP health formulas where planning docs were qualitative:
@@ -540,7 +579,7 @@ Tests/checks run:
 - `git diff --check`
 
 Docs updated:
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Kept Phase 3 pure Python and storage-backed rather than wiring Home Assistant
@@ -594,7 +633,7 @@ Tests/checks run:
 - `git diff --check`
 
 Docs updated:
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Kept the Recommendation Engine pure Python and deterministic; Home Assistant
@@ -654,8 +693,8 @@ Tests/checks run:
 - `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest discover -s tests -v`
 
 Docs updated:
-- `docs/DECISION_LOG.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Kept service behavior small and local: Home Assistant handlers adapt payloads
@@ -688,9 +727,9 @@ Known gaps / next prompt:
 Status: completed
 
 Implemented:
-- Added a post-prototype improvement note to `docs/MOOD_CONTEXT.md` for
+- Added a post-prototype improvement note to `docs/specs/MOOD_CONTEXT.md` for
   evolving Mood Context into broader Readiness Context after the MVP prototype.
-- Captured the future direction in `docs/DECISION_LOG.md` so future
+- Captured the future direction in `docs/AI_DECISION_LOG.md` so future
   implementation keeps mood optional, explainable, and subordinate to practical
   planning signals.
 
@@ -698,9 +737,9 @@ Tests/checks run:
 - Not run; documentation-only update.
 
 Docs updated:
-- `docs/MOOD_CONTEXT.md`
-- `docs/DECISION_LOG.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/specs/MOOD_CONTEXT.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - The MVP Mood Context rules remain unchanged.
@@ -717,23 +756,23 @@ Known gaps / next prompt:
 Status: completed
 
 Implemented:
-- Added `docs/MOOD_READINESS_FEATURE_PLAN.md` as the coherent
+- Added `docs/product/MOOD_READINESS_FEATURE_PLAN.md` as the coherent
   post-prototype plan for evolving Mood Context into Readiness Context.
 - Consolidated session modes, chore-friction learning, safer explanation
   wording, Home Assistant signals, opt-in wearable signals, open-source/local
   source options, storage/privacy rules, implementation phases, and tests.
-- Replaced the long post-prototype note in `docs/MOOD_CONTEXT.md` with a
+- Replaced the long post-prototype note in `docs/specs/MOOD_CONTEXT.md` with a
   pointer to the dedicated feature plan.
-- Updated `docs/DECISION_LOG.md` to reference the new plan.
+- Updated `docs/AI_DECISION_LOG.md` to reference the new plan.
 
 Tests/checks run:
-- `git diff --check -- docs/MOOD_READINESS_FEATURE_PLAN.md docs/MOOD_CONTEXT.md docs/DECISION_LOG.md docs/IMPLEMENTATION_PROGRESS.md`
+- `git diff --check -- docs/product/MOOD_READINESS_FEATURE_PLAN.md docs/specs/MOOD_CONTEXT.md docs/AI_DECISION_LOG.md docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Docs updated:
-- `docs/MOOD_READINESS_FEATURE_PLAN.md`
-- `docs/MOOD_CONTEXT.md`
-- `docs/DECISION_LOG.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/product/MOOD_READINESS_FEATURE_PLAN.md`
+- `docs/specs/MOOD_CONTEXT.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - MVP Mood Context remains unchanged.
@@ -793,8 +832,8 @@ Tests/checks run:
 - `git diff --check`
 
 Docs updated:
-- `docs/DECISION_LOG.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Calendar Context stores only minimized derived signals and source version
@@ -833,7 +872,7 @@ Implemented:
 - Documented required companion helper entities and scripts in the example
   YAML so scripts can read local selections, call Homekeep services, and store
   returned response ids.
-- Updated `docs/DASHBOARD_UI_PLAN.md` with the Phase 7 capability gap and helper
+- Updated `docs/product/HOMEKEEP_APP_PLAN.md` with the Phase 7 capability gap and helper
   script bridge.
 
 Homekeep app capability verification:
@@ -848,9 +887,9 @@ Tests/checks run:
 - `git diff --check`
 
 Docs updated:
-- `docs/DASHBOARD_UI_PLAN.md`
-- `docs/DECISION_LOG.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Kept the dashboard as an MVP example surface; Homekeep storage, sensors, and
@@ -888,8 +927,8 @@ Implemented:
   sections, stale unknown-Chore state cleanup, and invalid stored values.
 - Added config entry unload/reload mock coverage for platform unload success,
   failed platform unload preservation, and calendar listener cleanup.
-- Added `docs/MOCK_ADEQUACY_REVIEW.md` for pre-`1.0` version-bump readiness.
-- Updated `docs/IMPLEMENTATION_READINESS_REVIEW.md` with Phase 8 hardening
+- Added `docs/live-test/MOCK_ADEQUACY_REVIEW.md` for pre-`1.0` version-bump readiness.
+- Updated `docs/implementation/IMPLEMENTATION_READINESS_REVIEW.md` with Phase 8 hardening
   notes and remaining public-release test gaps.
 
 Deploy workflow status:
@@ -907,9 +946,9 @@ Tests/checks run:
 - `git diff --check`
 
 Docs updated:
-- `docs/IMPLEMENTATION_PROGRESS.md`
-- `docs/IMPLEMENTATION_READINESS_REVIEW.md`
-- `docs/MOCK_ADEQUACY_REVIEW.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+- `docs/implementation/IMPLEMENTATION_READINESS_REVIEW.md`
+- `docs/live-test/MOCK_ADEQUACY_REVIEW.md`
 
 Important decisions:
 - Kept Phase 8 scoped to local hardening and release readiness review. No
@@ -959,11 +998,11 @@ Tests/checks run:
 
 Docs updated:
 - `README.md`
-- `docs/DECISION_LOG.md`
-- `docs/HOME_ASSISTANT_CONTRACT.md`
-- `docs/SERVICE_SCHEMAS.md`
-- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/architecture/HOME_ASSISTANT_CONTRACT.md`
+- `docs/specs/SERVICE_SCHEMAS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Kept sample loading as a private test seed helper, not a general Chore import
@@ -1029,11 +1068,11 @@ Tests/checks run:
 - `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
 
 Docs updated:
-- `docs/DECISION_LOG.md`
-- `docs/CALENDAR_CONTEXT.md`
-- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
-- `docs/PRIVATE_LIVE_TEST_RESULTS.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/specs/CALENDAR_CONTEXT.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/live-test/PRIVATE_LIVE_TEST_RESULTS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Kept the durable calendar data minimized by storing only a hash of reduced
@@ -1066,9 +1105,9 @@ Tests/checks run:
 - `python3 -m unittest tests.test_calendar_context -v`
 
 Docs updated:
-- `docs/CALENDAR_CONTEXT.md`
-- `docs/DECISION_LOG.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/specs/CALENDAR_CONTEXT.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Kept this as simple local keyword matching for private live testing, not a
@@ -1096,9 +1135,9 @@ Tests/checks run:
 - `sensor.homekeep_next_calendar_context` state check.
 
 Docs updated:
-- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
-- `docs/PRIVATE_LIVE_TEST_RESULTS.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/live-test/PRIVATE_LIVE_TEST_RESULTS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Treated Gate 6 as live-confirmed after Homekeep detected a synthetic French
@@ -1135,10 +1174,10 @@ Tests/checks run:
 - `git diff --check`
 
 Docs updated:
-- `docs/CALENDAR_CONTEXT.md`
-- `docs/DECISION_LOG.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
-- `docs/RECOMMENDATION_ENGINE.md`
+- `docs/specs/CALENDAR_CONTEXT.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+- `docs/specs/RECOMMENDATION_ENGINE.md`
 
 Important decisions:
 - Kept this as bounded local keyword matching, not a broad localization system
@@ -1170,10 +1209,10 @@ Tests/checks run:
 - `git diff --check`
 
 Docs updated:
-- `docs/DASHBOARD_UI_PLAN.md`
-- `docs/SERVICE_SCHEMAS.md`
-- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/specs/SERVICE_SCHEMAS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Kept helper state in Home Assistant helper entities only as dashboard bridge
@@ -1203,8 +1242,8 @@ Tests/checks run:
 - Pending in this pass.
 
 Docs updated:
-- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Kept using service response data instead of scraping To-do projection
@@ -1235,8 +1274,8 @@ Tests/checks run:
   to benign documented field names and checklist text.
 
 Docs updated:
-- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Kept `homekeep.end_session` response-only and fixed the dashboard bridge
@@ -1265,9 +1304,9 @@ Tests/checks run:
 - Bonus Chore completion and active-session To-do check.
 
 Docs updated:
-- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
-- `docs/PRIVATE_LIVE_TEST_RESULTS.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/live-test/PRIVATE_LIVE_TEST_RESULTS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Treated a second completion failure with `session cannot accept completions`
@@ -1301,7 +1340,7 @@ Tests/checks run:
 - `git diff --check`
 
 Docs updated:
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Treated the log's `NameError: name 'ATTR_VISIBILITY' is not defined` as the
@@ -1332,9 +1371,9 @@ Tests/checks run:
 
 Docs updated:
 - `custom_components/homekeep/manifest.json`
-- `docs/MOCK_ADEQUACY_REVIEW.md`
-- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/live-test/MOCK_ADEQUACY_REVIEW.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - No tag will be created because the repository has no established tag
@@ -1362,11 +1401,11 @@ Tests/checks run:
 - Pending in this pass.
 
 Docs updated:
-- `docs/DASHBOARD_UI_PLAN.md`
-- `docs/PRIVATE_LIVE_TEST_CHECKLIST.md`
-- `docs/MOCK_ADEQUACY_REVIEW.md`
-- `docs/SCAFFOLDING_TASKS.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/live-test/MOCK_ADEQUACY_REVIEW.md`
+- `docs/implementation/AI_SCAFFOLDING_TASKS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 - `PROJECT_BRIEF.md`
 - `ALL_DOCS.md`
 
@@ -1408,14 +1447,14 @@ Tests/checks run:
 - Stale-reference scan for old storage/source/dashboard wording.
 
 Docs updated:
-- `docs/DECISION_LOG.md`
-- `docs/DATA_MODEL.md`
-- `docs/STORAGE_MIGRATIONS.md`
-- `docs/SERVICE_SCHEMAS.md`
-- `docs/RECOMMENDATION_PAYLOADS.md`
-- `docs/HOME_ASSISTANT_CONTRACT.md`
-- `docs/TEST_PLAN.md`
-- `docs/IMPLEMENTATION_PROGRESS.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/architecture/DATA_MODEL.md`
+- `docs/architecture/STORAGE_MIGRATIONS.md`
+- `docs/specs/SERVICE_SCHEMAS.md`
+- `docs/specs/RECOMMENDATION_PAYLOADS.md`
+- `docs/architecture/HOME_ASSISTANT_CONTRACT.md`
+- `docs/implementation/TEST_PLAN.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
 
 Important decisions:
 - Kept `ChoreDefinition.estimated_minutes` as the user-correctable fallback

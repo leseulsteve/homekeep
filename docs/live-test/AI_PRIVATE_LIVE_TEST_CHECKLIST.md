@@ -20,7 +20,7 @@ before proceeding.
 - [x] Run syntax compile:
   `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
 - [x] Run diff hygiene before any live-test commit: `git diff --check`
-- [x] Review `docs/MOCK_ADEQUACY_REVIEW.md`
+- [x] Review `docs/live-test/MOCK_ADEQUACY_REVIEW.md`
 - [x] Confirm this is a private synthetic candidate, not a public release
 
 ## Gate 1: Home Assistant Test Instance
@@ -416,7 +416,7 @@ release decision.
 
 Result note:
 
-- See `docs/PRIVATE_LIVE_TEST_RESULTS.md`.
+- See `docs/live-test/PRIVATE_LIVE_TEST_RESULTS.md`.
 
 ## Public Release Still Requires
 

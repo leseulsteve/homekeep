@@ -13,13 +13,13 @@ decisions are documented.
 Continue the Homekeep app UI design review.
 
 Read:
-- docs/DASHBOARD_UI_PLAN.md
-- docs/HOMEKEEP_VOICE_SYSTEM.md
-- docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md
+- docs/product/HOMEKEEP_APP_PLAN.md
+- docs/product/HOMEKEEP_VOICE_SYSTEM.md
+- docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md
 
 Do not implement code.
 Ask me one question at a time.
-Document every answer in docs/DASHBOARD_UI_PLAN.md.
+Document every answer in docs/product/HOMEKEEP_APP_PLAN.md.
 
 Resume exactly where we left off:
 Home Health and Areas.
@@ -35,12 +35,12 @@ or area-level language like "Kitchen could use attention"?
 Continue the Homekeep app UI design review for Home Health and Areas.
 
 Read:
-- docs/DASHBOARD_UI_PLAN.md
-- docs/HOMEKEEP_VOICE_SYSTEM.md
+- docs/product/HOMEKEEP_APP_PLAN.md
+- docs/product/HOMEKEEP_VOICE_SYSTEM.md
 
 Do not implement code.
 Ask one question at a time.
-Document every answer in docs/DASHBOARD_UI_PLAN.md.
+Document every answer in docs/product/HOMEKEEP_APP_PLAN.md.
 
 Cover:
 - how Home Health appears on Ready Now
@@ -58,13 +58,13 @@ Cover:
 Continue the Homekeep app UI design review for Plan / Scheduled Chores.
 
 Read:
-- docs/DASHBOARD_UI_PLAN.md
-- docs/TARGET_TIME_WINDOW.md
-- docs/HOMEKEEP_VOICE_SYSTEM.md
+- docs/product/HOMEKEEP_APP_PLAN.md
+- docs/specs/TARGET_TIME_WINDOW.md
+- docs/product/HOMEKEEP_VOICE_SYSTEM.md
 
 Do not implement code.
 Ask one question at a time.
-Document every answer in docs/DASHBOARD_UI_PLAN.md.
+Document every answer in docs/product/HOMEKEEP_APP_PLAN.md.
 
 Cover:
 - where planned sessions live in navigation
@@ -81,14 +81,14 @@ Cover:
 Continue the Homekeep app UI design review for Add Chore.
 
 Read:
-- docs/DASHBOARD_UI_PLAN.md
-- docs/DATA_MODEL.md
-- docs/SERVICE_SCHEMAS.md
-- docs/HOMEKEEP_VOICE_SYSTEM.md
+- docs/product/HOMEKEEP_APP_PLAN.md
+- docs/architecture/DATA_MODEL.md
+- docs/specs/SERVICE_SCHEMAS.md
+- docs/product/HOMEKEEP_VOICE_SYSTEM.md
 
 Do not implement code.
 Ask one question at a time.
-Document every answer in docs/DASHBOARD_UI_PLAN.md.
+Document every answer in docs/product/HOMEKEEP_APP_PLAN.md.
 
 Cover:
 - quick capture versus structured form
@@ -106,13 +106,13 @@ Cover:
 Continue the Homekeep app UI design review for Activity.
 
 Read:
-- docs/DASHBOARD_UI_PLAN.md
-- docs/HOMEKEEP_VOICE_SYSTEM.md
-- docs/SESSION_HISTORY_LEARNING.md
+- docs/product/HOMEKEEP_APP_PLAN.md
+- docs/product/HOMEKEEP_VOICE_SYSTEM.md
+- docs/specs/SESSION_HISTORY_LEARNING.md
 
 Do not implement code.
 Ask one question at a time.
-Document every answer in docs/DASHBOARD_UI_PLAN.md.
+Document every answer in docs/product/HOMEKEEP_APP_PLAN.md.
 
 Cover:
 - what recent activity should show
@@ -129,14 +129,14 @@ Cover:
 Continue the Homekeep app UI design review for Settings and diagnostics.
 
 Read:
-- docs/DASHBOARD_UI_PLAN.md
-- docs/HOMEKEEP_VOICE_SYSTEM.md
-- docs/CALENDAR_CONTEXT.md
-- docs/MOOD_CONTEXT.md
+- docs/product/HOMEKEEP_APP_PLAN.md
+- docs/product/HOMEKEEP_VOICE_SYSTEM.md
+- docs/specs/CALENDAR_CONTEXT.md
+- docs/specs/MOOD_CONTEXT.md
 
 Do not implement code.
 Ask one question at a time.
-Document every answer in docs/DASHBOARD_UI_PLAN.md.
+Document every answer in docs/product/HOMEKEEP_APP_PLAN.md.
 
 Cover:
 - selected calendars
@@ -154,20 +154,20 @@ Cover:
 Translate the approved Homekeep app design into implementation instructions.
 
 Read:
-- docs/DASHBOARD_UI_PLAN.md
-- docs/HOMEKEEP_VOICE_SYSTEM.md
-- docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md
-- docs/DECISION_LOG.md
-- docs/HOME_ASSISTANT_CONTRACT.md
-- docs/SERVICE_SCHEMAS.md
-- docs/RECOMMENDATION_PAYLOADS.md
-- docs/SESSION_STATE_MACHINE.md
-- docs/BONUS_CHORE_LIFECYCLE.md
-- docs/IMPLEMENTATION_PROGRESS.md
+- docs/product/HOMEKEEP_APP_PLAN.md
+- docs/product/HOMEKEEP_VOICE_SYSTEM.md
+- docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md
+- docs/AI_DECISION_LOG.md
+- docs/architecture/HOME_ASSISTANT_CONTRACT.md
+- docs/specs/SERVICE_SCHEMAS.md
+- docs/specs/RECOMMENDATION_PAYLOADS.md
+- docs/specs/SESSION_STATE_MACHINE.md
+- docs/specs/BONUS_CHORE_LIFECYCLE.md
+- docs/AI_IMPLEMENTATION_PROGRESS.md
 
 Do not implement frontend code yet.
 
-Update docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md so it reflects every approved
+Update docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md so it reflects every approved
 workflow decision. Be critical:
 - identify missing backend support
 - identify Home Assistant API assumptions that must be verified
@@ -185,9 +185,9 @@ End with a proposed small first implementation phase.
 Verify the Home Assistant frontend approach for the Homekeep sidebar app.
 
 Read:
-- docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md
-- docs/DASHBOARD_UI_PLAN.md
-- docs/DECISION_LOG.md
+- docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md
+- docs/product/HOMEKEEP_APP_PLAN.md
+- docs/AI_DECISION_LOG.md
 - custom_components/homekeep/manifest.json
 - custom_components/homekeep/__init__.py
 
@@ -213,11 +213,11 @@ Document:
 Implement the first Homekeep Ready Now test slice.
 
 Before coding, read:
-- docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md
-- docs/DASHBOARD_UI_PLAN.md
-- docs/HOMEKEEP_VOICE_SYSTEM.md
-- docs/DECISION_LOG.md
-- docs/IMPLEMENTATION_PROGRESS.md
+- docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md
+- docs/product/HOMEKEEP_APP_PLAN.md
+- docs/product/HOMEKEEP_VOICE_SYSTEM.md
+- docs/AI_DECISION_LOG.md
+- docs/AI_IMPLEMENTATION_PROGRESS.md
 
 Scope:
 - sidebar app registration only
@@ -238,7 +238,7 @@ Scope:
   only where backend support already exists or can be safely stubbed
 
 Run focused checks.
-Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
+Update docs/AI_IMPLEMENTATION_PROGRESS.md before finishing.
 End with what changed, what was verified, tests run, and remaining risks.
 ```
 
@@ -248,11 +248,11 @@ End with what changed, what was verified, tests run, and remaining risks.
 Implement a fast mocked Homekeep Ready Now prototype.
 
 Before coding, read:
-- docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md
-- docs/DASHBOARD_UI_PLAN.md
-- docs/HOMEKEEP_VOICE_SYSTEM.md
-- docs/DECISION_LOG.md
-- docs/IMPLEMENTATION_PROGRESS.md
+- docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md
+- docs/product/HOMEKEEP_APP_PLAN.md
+- docs/product/HOMEKEEP_VOICE_SYSTEM.md
+- docs/AI_DECISION_LOG.md
+- docs/AI_IMPLEMENTATION_PROGRESS.md
 
 Scope:
 - Ready Now / Ready-Now prototype only
@@ -295,7 +295,7 @@ Build:
 - Done for now ending summary that auto-returns to Ready Now
 
 Clearly document what is mocked, what is nonfunctional, and what remains to wire
-to Homekeep services. Run focused checks. Update docs/IMPLEMENTATION_PROGRESS.md
+to Homekeep services. Run focused checks. Update docs/AI_IMPLEMENTATION_PROGRESS.md
 before finishing.
 ```
 
@@ -306,12 +306,12 @@ We were doing the human Homekeep app UI design review.
 
 Do not implement code.
 Ask one question at a time.
-Document every answer in docs/DASHBOARD_UI_PLAN.md.
+Document every answer in docs/product/HOMEKEEP_APP_PLAN.md.
 
 Read:
-- docs/DASHBOARD_UI_PLAN.md
-- docs/HOMEKEEP_VOICE_SYSTEM.md
-- docs/DASHBOARD_UI_CODEX_INSTRUCTIONS.md
+- docs/product/HOMEKEEP_APP_PLAN.md
+- docs/product/HOMEKEEP_VOICE_SYSTEM.md
+- docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md
 
 Current state:
 - Lovelace is out of scope.

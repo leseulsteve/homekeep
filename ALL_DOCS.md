@@ -121,9 +121,9 @@ When Steve asks to implement part of Homekeep, work in small bounded phases.
 Read the relevant planning docs before editing, but treat them as guidance, not
 executable truth.
 
-Before implementing, read `docs/IMPLEMENTATION_PROGRESS.md` and continue from
+Before implementing, read `docs/AI_IMPLEMENTATION_PROGRESS.md` and continue from
 the first incomplete phase unless Steve asks for a different phase. At the end
-of every implementation pass, update `docs/IMPLEMENTATION_PROGRESS.md` with the
+of every implementation pass, update `docs/AI_IMPLEMENTATION_PROGRESS.md` with the
 phase status, summary, tests/checks run, docs updated, important decisions, and
 next recommended prompt.
 
@@ -136,10 +136,10 @@ Codex must:
 - keep each implementation pass small enough to finish with focused tests
 - stay inside MVP scope unless Steve explicitly expands it
 - update docs when implementation reality differs from the plan
-- keep `docs/IMPLEMENTATION_PROGRESS.md` current so future sessions can resume
+- keep `docs/AI_IMPLEMENTATION_PROGRESS.md` current so future sessions can resume
   without chat history
-- for every new feature, update `docs/DECISION_LOG.md`, relevant spec docs,
-  tests, and `docs/IMPLEMENTATION_PROGRESS.md` before or alongside code so
+- for every new feature, update `docs/AI_DECISION_LOG.md`, relevant spec docs,
+  tests, and `docs/AI_IMPLEMENTATION_PROGRESS.md` before or alongside code so
   production behavior and planning docs do not drift
 - end each phase with what changed, what was verified, tests run, and remaining
   risks
@@ -223,69 +223,71 @@ Git rules:
 ## Planning Files
 
 - `PROJECT_BRIEF.md`: human product brief.
-- `docs/DECISION_LOG.md`: authoritative conflict resolver for implementation.
-- `docs/ARCHITECTURE.md`: integration architecture and module boundaries.
-- `docs/HOME_ASSISTANT_CONTRACT.md`: entities, services, events, To-do behavior.
-- `docs/ACTION_RESPONSES.md`: Home Assistant service response rules.
-- `docs/TODO_PROJECTIONS.md`: supported and rejected To-do mutations.
-- `docs/PARTICIPANT_ATTRIBUTION.md`: completion attribution rules.
-- `docs/BONUS_CHORE_LIFECYCLE.md`: one-more chore session lifecycle.
-- `docs/SESSION_STATE_MACHINE.md`: allowed session transitions.
-- `docs/DATA_MODEL.md`: stored objects and validation rules.
-- `docs/STORAGE_MIGRATIONS.md`: storage versions and migration rules.
-- `docs/COMPLETION_CREDIT.md`: variant credit and next due behavior.
-- `docs/RECOMMENDATION_ENGINE.md`: deterministic v1 scoring.
-- `docs/DISMISSAL_PENALTY.md`: dismissal score formula, decay, and cooldown.
-- `docs/SNOOZE_POLICY.md`: snooze bounds and recommendation behavior.
-- `docs/RECOMMENDATION_PAYLOADS.md`: Smart Chore List payload shape.
-- `docs/RECOMMENDATION_SNAPSHOTS.md`: recommendation snapshot lifecycle.
-- `docs/CONTEXT_FINGERPRINT.md`: exact recommendation context fingerprinting.
-- `docs/TARGET_TIME_WINDOW.md`: target time window parsing and normalization.
-- `docs/SCHEDULED_SUGGESTION_UX.md`: future-session proposal UX.
-- `docs/SESSION_HISTORY_LEARNING.md`: context buckets and history fit scoring.
-- `docs/MOOD_CONTEXT.md`: inferred mood/readiness context rules.
-- `docs/SERVICE_SCHEMAS.md`: draft Home Assistant service payloads.
-- `docs/TEST_PLAN.md`: unit and integration test plan.
-- `docs/SCAFFOLDING_TASKS.md`: file-by-file first implementation checklist.
-- `docs/DASHBOARD_UI_PLAN.md`: dashboard flow and service wiring.
-- `docs/CALENDAR_CONTEXT.md`: calendar freshness and invalidation rules.
-- `docs/ADAPTIVE_INTERVALS.md`: adaptive cadence bounds and update rules.
-- `docs/DERIVED_HEALTH.md`: health/staleness derivation and cache rules.
-- `docs/CONCURRENCY_AND_IDEMPOTENCY.md`: mutation locking and retry behavior.
-- `docs/IMPLEMENTATION_READINESS_REVIEW.md`: pre-scaffold risk review.
-- `docs/IMPLEMENTATION_PROGRESS.md`: phase status and resume ledger.
-- `docs/IMPLEMENTATION_PLAN.md`: build phases.
-- `docs/MVP_ACCEPTANCE_CRITERIA.md`: definition of done.
+- `docs/README.md`: documentation map and AI-document naming rules.
+- `docs/AI_DECISION_LOG.md`: authoritative conflict resolver for implementation.
+- `docs/architecture/ARCHITECTURE.md`: integration architecture and module boundaries.
+- `docs/architecture/HOME_ASSISTANT_CONTRACT.md`: entities, services, events, To-do behavior.
+- `docs/specs/ACTION_RESPONSES.md`: Home Assistant service response rules.
+- `docs/specs/TODO_PROJECTIONS.md`: supported and rejected To-do mutations.
+- `docs/specs/PARTICIPANT_ATTRIBUTION.md`: completion attribution rules.
+- `docs/specs/BONUS_CHORE_LIFECYCLE.md`: one-more chore session lifecycle.
+- `docs/specs/SESSION_STATE_MACHINE.md`: allowed session transitions.
+- `docs/architecture/DATA_MODEL.md`: stored objects and validation rules.
+- `docs/architecture/STORAGE_MIGRATIONS.md`: storage versions and migration rules.
+- `docs/specs/COMPLETION_CREDIT.md`: variant credit and next due behavior.
+- `docs/specs/RECOMMENDATION_ENGINE.md`: deterministic v1 scoring.
+- `docs/specs/DISMISSAL_PENALTY.md`: dismissal score formula, decay, and cooldown.
+- `docs/specs/SNOOZE_POLICY.md`: snooze bounds and recommendation behavior.
+- `docs/specs/RECOMMENDATION_PAYLOADS.md`: Smart Chore List payload shape.
+- `docs/specs/RECOMMENDATION_SNAPSHOTS.md`: recommendation snapshot lifecycle.
+- `docs/specs/CONTEXT_FINGERPRINT.md`: exact recommendation context fingerprinting.
+- `docs/specs/TARGET_TIME_WINDOW.md`: target time window parsing and normalization.
+- `docs/specs/SCHEDULED_SUGGESTION_UX.md`: future-session proposal UX.
+- `docs/specs/SESSION_HISTORY_LEARNING.md`: context buckets and history fit scoring.
+- `docs/specs/MOOD_CONTEXT.md`: inferred mood/readiness context rules.
+- `docs/specs/SERVICE_SCHEMAS.md`: draft Home Assistant service payloads.
+- `docs/implementation/TEST_PLAN.md`: unit and integration test plan.
+- `docs/implementation/AI_SCAFFOLDING_TASKS.md`: file-by-file first implementation checklist.
+- `docs/product/HOMEKEEP_APP_PLAN.md`: Homekeep sidebar app direction and workflow plan.
+- `docs/specs/CALENDAR_CONTEXT.md`: calendar freshness and invalidation rules.
+- `docs/specs/ADAPTIVE_INTERVALS.md`: adaptive cadence bounds and update rules.
+- `docs/specs/DERIVED_HEALTH.md`: health/staleness derivation and cache rules.
+- `docs/architecture/CONCURRENCY_AND_IDEMPOTENCY.md`: mutation locking and retry behavior.
+- `docs/implementation/IMPLEMENTATION_READINESS_REVIEW.md`: pre-scaffold risk review.
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`: phase status and resume ledger.
+- `docs/implementation/IMPLEMENTATION_PLAN.md`: build phases.
+- `docs/product/MVP_ACCEPTANCE_CRITERIA.md`: definition of done.
 
 ## Before Implementing
 
-Read `docs/DECISION_LOG.md` first. It is the conflict resolver when older docs
+Read `docs/AI_DECISION_LOG.md` first. It is the conflict resolver when older docs
 or chat-derived planning disagree. If implementation discovers a conflict,
-pause code changes for that decision, update `docs/DECISION_LOG.md` first with
+pause code changes for that decision, update `docs/AI_DECISION_LOG.md` first with
 the winning interpretation, then update the stale doc, then write code. Record
-the decision and affected docs in `docs/IMPLEMENTATION_PROGRESS.md`.
+the decision and affected docs in `docs/AI_IMPLEMENTATION_PROGRESS.md`.
 
 Then read the docs relevant to the current phase. For a broad scaffold pass,
 read:
 
 1. `PROJECT_BRIEF.md`
-2. `docs/DECISION_LOG.md`
-3. `docs/IMPLEMENTATION_PROGRESS.md`
-4. `docs/IMPLEMENTATION_PLAN.md`
-5. `docs/SCAFFOLDING_TASKS.md`
-6. `docs/MVP_ACCEPTANCE_CRITERIA.md`
-7. `docs/ARCHITECTURE.md`
-8. `docs/HOME_ASSISTANT_CONTRACT.md`
-9. `docs/SERVICE_SCHEMAS.md`
-10. `docs/DATA_MODEL.md`
-11. `docs/STORAGE_MIGRATIONS.md`
-12. `docs/RECOMMENDATION_PAYLOADS.md`
-13. `docs/CONTEXT_FINGERPRINT.md`
-14. `docs/TARGET_TIME_WINDOW.md`
-15. `docs/TEST_PLAN.md`
+2. `docs/README.md`
+3. `docs/AI_DECISION_LOG.md`
+4. `docs/AI_IMPLEMENTATION_PROGRESS.md`
+5. `docs/implementation/IMPLEMENTATION_PLAN.md`
+6. `docs/implementation/AI_SCAFFOLDING_TASKS.md`
+7. `docs/product/MVP_ACCEPTANCE_CRITERIA.md`
+8. `docs/architecture/ARCHITECTURE.md`
+9. `docs/architecture/HOME_ASSISTANT_CONTRACT.md`
+10. `docs/specs/SERVICE_SCHEMAS.md`
+11. `docs/architecture/DATA_MODEL.md`
+12. `docs/architecture/STORAGE_MIGRATIONS.md`
+13. `docs/specs/RECOMMENDATION_PAYLOADS.md`
+14. `docs/specs/CONTEXT_FINGERPRINT.md`
+15. `docs/specs/TARGET_TIME_WINDOW.md`
+16. `docs/implementation/TEST_PLAN.md`
 
-For focused implementation phases, read `docs/DECISION_LOG.md`,
-`docs/IMPLEMENTATION_PROGRESS.md`, and only the phase-specific docs needed for
+For focused implementation phases, read `docs/AI_DECISION_LOG.md`,
+`docs/AI_IMPLEMENTATION_PROGRESS.md`, and only the phase-specific docs needed for
 the files being changed.
 
 
@@ -517,10 +519,10 @@ The MVP should include:
 ## How To Build This Project
 
 Use these prompts one at a time. Codex must follow `AGENTS.md` Implementation
-Mode and update `docs/IMPLEMENTATION_PROGRESS.md` after every phase so the next
+Mode and update `docs/AI_IMPLEMENTATION_PROGRESS.md` after every phase so the next
 session can resume without chat history.
 
-Before implementation, Codex should read `docs/DECISION_LOG.md`. It records the
+Before implementation, Codex should read `docs/AI_DECISION_LOG.md`. It records the
 winning interpretation when older planning docs conflict.
 
 ### Phase 0 Prompt
@@ -531,10 +533,10 @@ Implement Homekeep Phase 0: Scaffold.
 Follow AGENTS.md Implementation Mode.
 
 Before coding:
-- read docs/IMPLEMENTATION_PROGRESS.md
-- read docs/IMPLEMENTATION_PLAN.md Phase 0
-- read docs/ARCHITECTURE.md
-- read docs/HOME_ASSISTANT_CONTRACT.md
+- read docs/AI_IMPLEMENTATION_PROGRESS.md
+- read docs/implementation/IMPLEMENTATION_PLAN.md Phase 0
+- read docs/architecture/ARCHITECTURE.md
+- read docs/architecture/HOME_ASSISTANT_CONTRACT.md
 - verify current Home Assistant custom integration, config flow, service
   registration, and storage APIs
 
@@ -549,7 +551,7 @@ Keep changes small and testable. Do not implement recommendation logic yet.
 Run focused syntax/tests if available.
 
 Before finishing:
-- update docs/IMPLEMENTATION_PROGRESS.md
+- update docs/AI_IMPLEMENTATION_PROGRESS.md
 - summarize what changed, what was verified, tests run, and next recommended
   prompt
 ```
@@ -559,13 +561,13 @@ Before finishing:
 ```text
 Implement Homekeep Phase 1: Models and storage.
 
-Follow AGENTS.md Implementation Mode. Resume from docs/IMPLEMENTATION_PROGRESS.md.
+Follow AGENTS.md Implementation Mode. Resume from docs/AI_IMPLEMENTATION_PROGRESS.md.
 
 Read:
-- docs/DATA_MODEL.md
-- docs/ADAPTIVE_INTERVALS.md
-- docs/DERIVED_HEALTH.md
-- docs/PARTICIPANT_ATTRIBUTION.md
+- docs/architecture/DATA_MODEL.md
+- docs/specs/ADAPTIVE_INTERVALS.md
+- docs/specs/DERIVED_HEALTH.md
+- docs/specs/PARTICIPANT_ATTRIBUTION.md
 
 Deliver:
 - typed models or dataclasses
@@ -573,7 +575,7 @@ Deliver:
 - storage migration hook
 - tests for invalid intervals, ChoreVariant validation, and storage round trip
 
-Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
+Update docs/AI_IMPLEMENTATION_PROGRESS.md before finishing.
 ```
 
 ### Phase 2 Prompt
@@ -581,12 +583,12 @@ Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
 ```text
 Implement Homekeep Phase 2: Derived health and adaptive intervals.
 
-Follow AGENTS.md Implementation Mode. Resume from docs/IMPLEMENTATION_PROGRESS.md.
+Follow AGENTS.md Implementation Mode. Resume from docs/AI_IMPLEMENTATION_PROGRESS.md.
 
 Read:
-- docs/DERIVED_HEALTH.md
-- docs/ADAPTIVE_INTERVALS.md
-- docs/TEST_PLAN.md
+- docs/specs/DERIVED_HEALTH.md
+- docs/specs/ADAPTIVE_INTERVALS.md
+- docs/implementation/TEST_PLAN.md
 
 Deliver:
 - derived Staleness, Home Health, Area Health, and Projected Impact functions
@@ -595,7 +597,7 @@ Deliver:
   skip/snooze/dismiss not training intervals
 
 Do not store health or staleness as authoritative durable state.
-Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
+Update docs/AI_IMPLEMENTATION_PROGRESS.md before finishing.
 ```
 
 ### Phase 3 Prompt
@@ -603,14 +605,14 @@ Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
 ```text
 Implement Homekeep Phase 3: Chore Session lifecycle.
 
-Follow AGENTS.md Implementation Mode. Resume from docs/IMPLEMENTATION_PROGRESS.md.
+Follow AGENTS.md Implementation Mode. Resume from docs/AI_IMPLEMENTATION_PROGRESS.md.
 
 Read:
-- docs/SESSION_STATE_MACHINE.md
-- docs/BONUS_CHORE_LIFECYCLE.md
-- docs/PARTICIPANT_ATTRIBUTION.md
-- docs/CONCURRENCY_AND_IDEMPOTENCY.md
-- docs/SERVICE_SCHEMAS.md
+- docs/specs/SESSION_STATE_MACHINE.md
+- docs/specs/BONUS_CHORE_LIFECYCLE.md
+- docs/specs/PARTICIPANT_ATTRIBUTION.md
+- docs/architecture/CONCURRENCY_AND_IDEMPOTENCY.md
+- docs/specs/SERVICE_SCHEMAS.md
 
 Deliver:
 - session start/pause/end
@@ -621,7 +623,7 @@ Deliver:
 - mutation lock and request_id idempotency where practical
 - tests for allowed/disallowed transitions and duplicate calls
 
-Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
+Update docs/AI_IMPLEMENTATION_PROGRESS.md before finishing.
 ```
 
 ### Phase 4 Prompt
@@ -629,13 +631,13 @@ Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
 ```text
 Implement Homekeep Phase 4: Recommendation Engine V1.
 
-Follow AGENTS.md Implementation Mode. Resume from docs/IMPLEMENTATION_PROGRESS.md.
+Follow AGENTS.md Implementation Mode. Resume from docs/AI_IMPLEMENTATION_PROGRESS.md.
 
 Read:
-- docs/RECOMMENDATION_ENGINE.md
-- docs/RECOMMENDATION_PAYLOADS.md
-- docs/RECOMMENDATION_SNAPSHOTS.md
-- docs/SESSION_HISTORY_LEARNING.md
+- docs/specs/RECOMMENDATION_ENGINE.md
+- docs/specs/RECOMMENDATION_PAYLOADS.md
+- docs/specs/RECOMMENDATION_SNAPSHOTS.md
+- docs/specs/SESSION_HISTORY_LEARNING.md
 
 Deliver:
 - deterministic normalized scoring
@@ -647,7 +649,7 @@ Deliver:
 - tests for payload shape, sparse history fallback, and expired snapshots
 
 Do not use an LLM.
-Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
+Update docs/AI_IMPLEMENTATION_PROGRESS.md before finishing.
 ```
 
 ### Phase 5 Prompt
@@ -655,13 +657,13 @@ Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
 ```text
 Implement Homekeep Phase 5: Home Assistant services and entities.
 
-Follow AGENTS.md Implementation Mode. Resume from docs/IMPLEMENTATION_PROGRESS.md.
+Follow AGENTS.md Implementation Mode. Resume from docs/AI_IMPLEMENTATION_PROGRESS.md.
 
 Read:
-- docs/HOME_ASSISTANT_CONTRACT.md
-- docs/SERVICE_SCHEMAS.md
-- docs/TODO_PROJECTIONS.md
-- docs/CONCURRENCY_AND_IDEMPOTENCY.md
+- docs/architecture/HOME_ASSISTANT_CONTRACT.md
+- docs/specs/SERVICE_SCHEMAS.md
+- docs/specs/TODO_PROJECTIONS.md
+- docs/architecture/CONCURRENCY_AND_IDEMPOTENCY.md
 
 Verify current Home Assistant service response and To-do entity APIs before
 coding.
@@ -675,7 +677,7 @@ Deliver:
 - tests for malformed payloads, unknown IDs, To-do mutation traps, and service
   idempotency
 
-Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
+Update docs/AI_IMPLEMENTATION_PROGRESS.md before finishing.
 ```
 
 ### Phase 6 Prompt
@@ -683,12 +685,12 @@ Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
 ```text
 Implement Homekeep Phase 6: Calendar Context.
 
-Follow AGENTS.md Implementation Mode. Resume from docs/IMPLEMENTATION_PROGRESS.md.
+Follow AGENTS.md Implementation Mode. Resume from docs/AI_IMPLEMENTATION_PROGRESS.md.
 
 Read:
-- docs/CALENDAR_CONTEXT.md
-- docs/HOME_ASSISTANT_CONTRACT.md
-- docs/RECOMMENDATION_ENGINE.md
+- docs/specs/CALENDAR_CONTEXT.md
+- docs/architecture/HOME_ASSISTANT_CONTRACT.md
+- docs/specs/RECOMMENDATION_ENGINE.md
 
 Verify current Home Assistant calendar entity APIs and event-fetching patterns.
 
@@ -702,7 +704,7 @@ Deliver:
 
 Do not store raw calendar details in long-lived history unless no safe
 alternative exists.
-Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
+Update docs/AI_IMPLEMENTATION_PROGRESS.md before finishing.
 ```
 
 ### Phase 7 Prompt
@@ -710,12 +712,12 @@ Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
 ```text
 Implement Homekeep Phase 7: Homekeep sidebar app MVP.
 
-Follow AGENTS.md Implementation Mode. Resume from docs/IMPLEMENTATION_PROGRESS.md.
+Follow AGENTS.md Implementation Mode. Resume from docs/AI_IMPLEMENTATION_PROGRESS.md.
 
 Read:
-- docs/DASHBOARD_UI_PLAN.md
-- docs/SERVICE_SCHEMAS.md
-- docs/TODO_PROJECTIONS.md
+- docs/product/HOMEKEEP_APP_PLAN.md
+- docs/specs/SERVICE_SCHEMAS.md
+- docs/specs/TODO_PROJECTIONS.md
 
 Deliver:
 - Home Assistant sidebar entry
@@ -728,7 +730,7 @@ Deliver:
 - Done for now / One more flow
 
 Use Home Assistant native controls, helpers, scripts, and entities for the MVP.
-Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
+Update docs/AI_IMPLEMENTATION_PROGRESS.md before finishing.
 ```
 
 ### Phase 8 Prompt
@@ -737,12 +739,12 @@ Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
 Implement Homekeep Phase 8: Hardening and release readiness.
 
 Follow AGENTS.md Implementation Mode and Deploy Workflow. Resume from
-docs/IMPLEMENTATION_PROGRESS.md.
+docs/AI_IMPLEMENTATION_PROGRESS.md.
 
 Read:
-- docs/TEST_PLAN.md
-- docs/MVP_ACCEPTANCE_CRITERIA.md
-- docs/IMPLEMENTATION_READINESS_REVIEW.md
+- docs/implementation/TEST_PLAN.md
+- docs/product/MVP_ACCEPTANCE_CRITERIA.md
+- docs/implementation/IMPLEMENTATION_READINESS_REVIEW.md
 - AGENTS.md Version Bump Testing and Deploy Workflow
 
 Deliver:
@@ -754,7 +756,7 @@ Deliver:
 - documentation updates for any implementation differences
 
 Do not deploy unless Steve explicitly asks for deploy/release.
-Update docs/IMPLEMENTATION_PROGRESS.md before finishing.
+Update docs/AI_IMPLEMENTATION_PROGRESS.md before finishing.
 ```
 
 ## Product Principle
@@ -777,8 +779,8 @@ Start here:
 
 - `PROJECT_BRIEF.md` for the human product brief.
 - `AGENTS.md` for Codex instructions.
-- `docs/IMPLEMENTATION_PLAN.md` for the build sequence.
-- `docs/MVP_ACCEPTANCE_CRITERIA.md` for the definition of done.
+- `docs/implementation/IMPLEMENTATION_PLAN.md` for the build sequence.
+- `docs/product/MVP_ACCEPTANCE_CRITERIA.md` for the definition of done.
 
 
 

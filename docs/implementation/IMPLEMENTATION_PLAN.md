@@ -66,7 +66,7 @@ depend on later snapshot freshness.
 - Implement complete, skip, snooze, dismiss, pause, and end.
 - Store bounded dismissal and snooze event timestamps on ChoreState.
 - Store `snoozed_until` and enforce the 5-to-1440-minute snooze bound in
-  `docs/SNOOZE_POLICY.md`.
+  `docs/specs/SNOOZE_POLICY.md`.
 - Validate `completed_by` against session participants for session completions.
 - Ensure only completion creates ChoreCompletion.
 - Add adaptive interval update on completion.
@@ -112,7 +112,7 @@ intervals.
   to materialized Chore Sessions.
 - Normalize target time windows before snapshot creation and fingerprinting.
 - Implement dismissal penalty with the formula, decay, cooldown, and staleness
-  override in `docs/DISMISSAL_PENALTY.md`.
+  override in `docs/specs/DISMISSAL_PENALTY.md`.
 - Exclude chores with future `snoozed_until` before normal recommendation
   scoring.
 - Add bounded Session-History Learning stats with deterministic context buckets

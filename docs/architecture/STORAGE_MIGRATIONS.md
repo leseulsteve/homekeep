@@ -78,7 +78,7 @@ Migration rules for every `ChoreState`:
 - remove `recent_snoozes`
 - keep `last_completed_at`, `adaptive_interval_days`, and `next_due_at`
 - clamp/repair `adaptive_interval_days` after migration using
-  `docs/ADAPTIVE_INTERVALS.md`
+  `docs/specs/ADAPTIVE_INTERVALS.md`
 
 Do not attempt to fabricate dismissal or snooze timestamps from the old integer
 counters. A count without timestamps cannot support decay or expiry. Dropping

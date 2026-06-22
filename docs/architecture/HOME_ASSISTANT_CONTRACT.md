@@ -89,7 +89,7 @@ Chore Sessions. There is no MVP `homekeep.start_chore_session` service.
 not create a Chore Session.
 Scheduled-Suggestion Mode returns saved proposals with `snapshot_id`,
 `target_time_window`, and `expires_at`; it must not return `session_id: null`.
-See `docs/SCHEDULED_SUGGESTION_UX.md`.
+See `docs/specs/SCHEDULED_SUGGESTION_UX.md`.
 
 After `homekeep.start_recommendation`, callers must use the materialized
 `SessionItem` list returned by that service for future `complete_chore` calls.
@@ -130,8 +130,8 @@ recommendations or created sessions.
 - Mutation services may use `SupportsResponse.OPTIONAL` for acknowledgement
   dictionaries.
 
-Returned dictionaries must match `docs/RECOMMENDATION_PAYLOADS.md` and
-`docs/SERVICE_SCHEMAS.md`. Verify the exact `SupportsResponse` import and
+Returned dictionaries must match `docs/specs/RECOMMENDATION_PAYLOADS.md` and
+`docs/specs/SERVICE_SCHEMAS.md`. Verify the exact `SupportsResponse` import and
 registration signature against the supported Home Assistant core version during
 implementation.
 

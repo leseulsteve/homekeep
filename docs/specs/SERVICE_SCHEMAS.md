@@ -4,7 +4,7 @@ These are draft service contracts for the first scaffold. Use Home Assistant
 schema validation and keep errors explicit.
 
 Services that produce data must use Home Assistant action response support.
-Follow `docs/ACTION_RESPONSES.md` for `SupportsResponse.ONLY` and
+Follow `docs/specs/ACTION_RESPONSES.md` for `SupportsResponse.ONLY` and
 `SupportsResponse.OPTIONAL` registration rules.
 
 ## Service Relationship
@@ -61,7 +61,7 @@ request_id: string | null
 ```
 
 `target_time_window` parsing and normalization must follow
-`docs/TARGET_TIME_WINDOW.md`. Scheduled-Suggestion Mode requires a non-null
+`docs/specs/TARGET_TIME_WINDOW.md`. Scheduled-Suggestion Mode requires a non-null
 target window. Ready-Now Mode may use null to mean "now".
 
 Default:
@@ -90,18 +90,18 @@ empty_state: EmptyState | null
 ```
 
 Recommendation dictionaries must use the shape in
-`docs/RECOMMENDATION_PAYLOADS.md`.
+`docs/specs/RECOMMENDATION_PAYLOADS.md`.
 
 This service never creates a Chore Session.
 
 If `mood` is `auto` or null and `infer_mood=true`, Homekeep may infer Mood
-Context using `docs/MOOD_CONTEXT.md`. Explicit mood, energy, and goal choices
+Context using `docs/specs/MOOD_CONTEXT.md`. Explicit mood, energy, and goal choices
 override inferred values.
 
 In Scheduled-Suggestion Mode, callers must treat the result as a saved proposal.
 They may call `homekeep.start_recommendation` later only while the snapshot is
 fresh. If the snapshot is expired or invalidated, regenerate first. See
-`docs/SCHEDULED_SUGGESTION_UX.md`.
+`docs/specs/SCHEDULED_SUGGESTION_UX.md`.
 
 ## `homekeep.start_recommendation`
 
@@ -352,7 +352,7 @@ Behavior:
 - Do not train `adaptive_interval_days`.
 - Do not add to `dismissal_penalty`.
 
-See `docs/SNOOZE_POLICY.md`.
+See `docs/specs/SNOOZE_POLICY.md`.
 
 ## `homekeep.dismiss_chore`
 
@@ -390,7 +390,7 @@ Behavior:
 
 - Append one bounded dismissal timestamp to `ChoreState.dismissal_events`.
 - Set `last_dismissed_at`.
-- Apply future recommendation penalty through `docs/DISMISSAL_PENALTY.md`.
+- Apply future recommendation penalty through `docs/specs/DISMISSAL_PENALTY.md`.
 - Update Session-History Learning using the session context bucket when
   `session_id` is provided.
 - Otherwise update Session-History Learning from the RecommendationSnapshot

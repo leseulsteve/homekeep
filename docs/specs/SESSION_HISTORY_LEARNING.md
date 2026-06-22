@@ -8,7 +8,7 @@ history into buckets too small to learn from.
 The v1 `context_bucket` must be deterministic and bounded.
 
 `context_bucket` is not `context_fingerprint`. Use `context_bucket` for broad
-learning lookup and `docs/CONTEXT_FINGERPRINT.md` for exact recommendation
+learning lookup and `docs/specs/CONTEXT_FINGERPRINT.md` for exact recommendation
 context provenance.
 
 Use these dimensions:
@@ -186,7 +186,7 @@ Bonus Chore accepted
 ```
 
 Dismissals update history stats for future fit scoring, but the deterministic
-score subtraction comes from `docs/DISMISSAL_PENALTY.md`. Snoozes must not be
+score subtraction comes from `docs/specs/DISMISSAL_PENALTY.md`. Snoozes must not be
 counted as dismissals for that penalty.
 
 Dismissal context source:

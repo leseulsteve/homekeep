@@ -51,7 +51,7 @@ Homekeep must recompute health from durable facts on the next read/startup.
 `ChoreState` should not store authoritative `staleness_score`.
 
 Staleness should derive from `ChoreState.next_due_at` when available. Completion
-variant credit determines `next_due_at`; see `docs/COMPLETION_CREDIT.md`.
+variant credit determines `next_due_at`; see `docs/specs/COMPLETION_CREDIT.md`.
 Existing `next_due_at` values are durable schedule facts and must not be
 retroactively recomputed from edited Chore Variant definitions.
 

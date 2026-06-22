@@ -167,7 +167,7 @@ thoughtful, not invasive.
 
 After the MVP prototype, consider evolving Mood Context into broader Readiness
 Context. The coherent post-prototype plan lives in
-`docs/MOOD_READINESS_FEATURE_PLAN.md`.
+`docs/product/MOOD_READINESS_FEATURE_PLAN.md`.
 
 Strong direction:
 

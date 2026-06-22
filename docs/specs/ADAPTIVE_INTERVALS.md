@@ -59,7 +59,7 @@ adaptive_interval_days = clamp(base_interval_days, min_interval_days, max_interv
 ## Variant Effects
 
 Chore Variants affect scheduling relief through `ChoreVariant.credit`. Use
-`docs/COMPLETION_CREDIT.md` as the source of truth for `next_due_at` and
+`docs/specs/COMPLETION_CREDIT.md` as the source of truth for `next_due_at` and
 Staleness behavior.
 
 Recommended MVP behavior:

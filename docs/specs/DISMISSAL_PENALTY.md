@@ -106,7 +106,7 @@ For MVP:
 - snoozes do not train adaptive intervals
 
 Snooze bounds and `snoozed_until` behavior are defined in
-`docs/SNOOZE_POLICY.md`.
+`docs/specs/SNOOZE_POLICY.md`.
 
 ## Service Behavior
 

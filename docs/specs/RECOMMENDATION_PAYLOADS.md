@@ -4,7 +4,7 @@ Smart Chore List output must use a stable payload shape. Do not leave
 recommendations as arbitrary dictionaries.
 
 `homekeep.generate_smart_chore_list` must return the Smart Chore List Result as
-a Home Assistant action response. See `docs/ACTION_RESPONSES.md`.
+a Home Assistant action response. See `docs/specs/ACTION_RESPONSES.md`.
 
 ## Recommendation
 
@@ -74,7 +74,7 @@ By default, `alternates` contains up to 3 recommendations. If the caller passes
 
 `mood_context` is included when Homekeep uses explicit or inferred Mood Context
 for defaults, wording, or recommendation shaping. It must follow
-`docs/MOOD_CONTEXT.md`.
+`docs/specs/MOOD_CONTEXT.md`.
 
 For Scheduled-Suggestion Mode, `target_time_window` must be set and `expires_at`
 must be shown by the UI so the user understands that the plan may need refresh
@@ -104,7 +104,7 @@ components:
 ```
 
 `dismissal_penalty` is the effective penalty after decay, caps, cooldown, and
-staleness override from `docs/DISMISSAL_PENALTY.md`. It is the value subtracted
+staleness override from `docs/specs/DISMISSAL_PENALTY.md`. It is the value subtracted
 from the recommendation base score, not the raw count of dismissal events.
 
 ## Materialization

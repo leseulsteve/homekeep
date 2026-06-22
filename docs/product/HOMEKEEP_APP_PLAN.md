@@ -57,7 +57,7 @@ Homekeep should use a structured voice system, not random strings. Prominent
 copy should be organized by message intent, adjusted to Mood Context, and drawn
 from copy families with clear tone rules and repetition control.
 
-See `docs/HOMEKEEP_VOICE_SYSTEM.md`.
+See `docs/product/HOMEKEEP_VOICE_SYSTEM.md`.
 
 ## Implementation Boundary
 

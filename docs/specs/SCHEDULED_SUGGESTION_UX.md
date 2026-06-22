@@ -32,7 +32,7 @@ returns:
 ```
 
 The service must parse and normalize `target_time_window` using
-`docs/TARGET_TIME_WINDOW.md`. The response should contain the normalized window,
+`docs/specs/TARGET_TIME_WINDOW.md`. The response should contain the normalized window,
 not the raw input text.
 
 Starting later:
@@ -115,7 +115,7 @@ empty_state: EmptyState | null
 ```
 
 `target_time_window` is the normalized local ISO window described in
-`docs/TARGET_TIME_WINDOW.md`.
+`docs/specs/TARGET_TIME_WINDOW.md`.
 
 ## Tests Required
 

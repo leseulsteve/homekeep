@@ -37,11 +37,11 @@ path for generated recommendations and newly created sessions.
 
 `homekeep.generate_smart_chore_list`
 : Must use `SupportsResponse.ONLY`. It returns the Smart Chore List Result from
-`docs/RECOMMENDATION_PAYLOADS.md`.
+`docs/specs/RECOMMENDATION_PAYLOADS.md`.
 
 `homekeep.start_recommendation`
 : Must use `SupportsResponse.ONLY`. It returns the created Chore Session
-summary as `StartRecommendationResult` from `docs/SERVICE_SCHEMAS.md`.
+summary as `StartRecommendationResult` from `docs/specs/SERVICE_SCHEMAS.md`.
 
 `homekeep.start_chore_bundle`
 : Must use `SupportsResponse.ONLY` if the compatibility alias is implemented.

@@ -218,7 +218,7 @@
 - generate service with include_alternates=false returns an empty alternates
   list
 - generate service is registered with response-only action response support
-- generate service response matches `docs/RECOMMENDATION_PAYLOADS.md`
+- generate service response matches `docs/specs/RECOMMENDATION_PAYLOADS.md`
 - start_recommendation is registered with response-only action response support
 - start_recommendation response includes `session_id` and
   `source_recommendation_snapshot_id`

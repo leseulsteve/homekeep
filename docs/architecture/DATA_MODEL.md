@@ -20,7 +20,7 @@ Current storage version is `3`. Version `1` was an early draft that used
 `recent_dismissals` and `recent_snoozes` integer fields on `ChoreState`.
 Version `2` added bounded dismissal/snooze timestamp fields. Version `3` adds
 bounded learned duration samples. Migration rules are documented in
-`docs/STORAGE_MIGRATIONS.md`.
+`docs/architecture/STORAGE_MIGRATIONS.md`.
 
 ## ChoreDefinition
 
@@ -63,7 +63,7 @@ Validation:
 - `credit` must be finite and positive
 - MVP recommended credit bounds are `0.1 <= credit <= 2.0`
 - `credit` is a scheduling-relief multiplier documented in
-  `docs/COMPLETION_CREDIT.md`
+  `docs/specs/COMPLETION_CREDIT.md`
 
 ## ChoreState
 
@@ -102,8 +102,8 @@ Dismissal and snooze event rules:
 - Store bounded event timestamps so scoring can decay penalties over time.
 - On storage load and event write, prune events older than 14 days and keep at
   most the newest 10 timestamps per event type.
-- Dismissal scoring uses `docs/DISMISSAL_PENALTY.md`.
-- Snooze validation and `snoozed_until` behavior use `docs/SNOOZE_POLICY.md`.
+- Dismissal scoring uses `docs/specs/DISMISSAL_PENALTY.md`.
+- Snooze validation and `snoozed_until` behavior use `docs/specs/SNOOZE_POLICY.md`.
 - Snoozes do not add to dismissal penalty in MVP.
 
 Duration learning rules:
@@ -174,7 +174,7 @@ status: active | paused | bonus_pending | bonus_active | completed | cancelled
 
 `context_fingerprint` is copied from the source RecommendationSnapshot when the
 session is materialized. It is not the same as `context_bucket`; see
-`docs/CONTEXT_FINGERPRINT.md`.
+`docs/specs/CONTEXT_FINGERPRINT.md`.
 
 `bonus_chore_expires_at` rules:
 
@@ -184,7 +184,7 @@ session is materialized. It is not the same as `context_bucket`; see
 - Once a Bonus Chore is accepted and status moves to `bonus_active`,
   `bonus_chore_expires_at` no longer blocks completing the accepted Bonus
   Chore.
-- Expiry behavior is defined in `docs/BONUS_CHORE_LIFECYCLE.md`.
+- Expiry behavior is defined in `docs/specs/BONUS_CHORE_LIFECYCLE.md`.
 
 ## Session Item
 
@@ -232,7 +232,7 @@ materialized_session_id: string | null
 
 `context_fingerprint` is required on RecommendationSnapshot and generated from
 the normalized recommendation context. It must follow
-`docs/CONTEXT_FINGERPRINT.md`.
+`docs/specs/CONTEXT_FINGERPRINT.md`.
 
 Lifecycle rules:
 
@@ -255,7 +255,7 @@ expires_at: datetime
 ```
 
 Mood Context is derived, short-lived recommendation context. It must not store
-raw private signals. See `docs/MOOD_CONTEXT.md`.
+raw private signals. See `docs/specs/MOOD_CONTEXT.md`.
 
 ## CalendarContextSnapshot
 
@@ -302,7 +302,7 @@ last_updated_at: datetime
 ```
 
 `context_bucket` must follow the v1 format documented in
-`docs/SESSION_HISTORY_LEARNING.md`. It is not an arbitrary string.
+`docs/specs/SESSION_HISTORY_LEARNING.md`. It is not an arbitrary string.
 
 `context_bucket` is a broad learning key and must not be substituted for
 `context_fingerprint`.
@@ -326,4 +326,4 @@ Idempotency record rules:
 - The store is capped at `1000` records after pruning expired records.
 - If the cap is still exceeded, remove oldest `created_at` records first.
 
-See `docs/CONCURRENCY_AND_IDEMPOTENCY.md`.
+See `docs/architecture/CONCURRENCY_AND_IDEMPOTENCY.md`.

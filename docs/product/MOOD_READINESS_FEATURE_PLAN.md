@@ -3,7 +3,7 @@
 ## Status
 
 This is a post-prototype feature plan. It does not replace the MVP Mood Context
-rules in `docs/MOOD_CONTEXT.md`.
+rules in `docs/specs/MOOD_CONTEXT.md`.
 
 MVP behavior remains:
 
