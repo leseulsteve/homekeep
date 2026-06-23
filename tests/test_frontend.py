@@ -77,6 +77,19 @@ class FrontendRegistrationTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(removed["path"], "homekeep")
         self.assertFalse(removed["warn_if_unknown"])
 
+    def test_panel_bundle_exposes_home_health_visual_tab(self) -> None:
+        panel_js = Path(homekeep_frontend.__file__).with_name(
+            "frontend"
+        ) / "homekeep-panel.js"
+        source = panel_js.read_text(encoding="utf-8")
+
+        self.assertIn('label: "Home Health"', source)
+        self.assertIn('data-tab="${tab.id}"', source)
+        self.assertIn('activeTab: "right-now"', source)
+        self.assertIn("renderHomeHealth()", source)
+        self.assertIn("Helped lately", source)
+        self.assertIn("Could help next", source)
+
     def _home_assistant_modules(
         self, fake_frontend: types.ModuleType, fake_http: types.ModuleType | None
     ) -> dict[str, types.ModuleType]:

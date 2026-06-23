@@ -379,6 +379,66 @@ Known live-test boundary:
 - Full dashboard planning is still incomplete for Home Health, Plan, Add Chore,
   Activity, Settings, diagnostics, navigation, and stale-state recovery.
 
+## Gate 3C: Third Sidebar Visual Candidate
+
+Use this gate for the closest-to-production mocked component available on
+2026-06-23. It covers the Right Now component plus the first dedicated Home
+Health visual surface. It does not validate backend Home Health wiring, direct
+Area Health actions, Home Assistant Area configuration handling, stale-state
+recovery, Plan, Add Task, Activity, Settings, or diagnostics.
+
+Pre-test setup:
+
+- [ ] Install/update the private Home Assistant test instance to the Live Test 3
+  candidate commit
+- [ ] Restart Home Assistant
+- [ ] Open the Homekeep sidebar panel
+- [ ] Confirm the panel is still non-iframe
+- [ ] Confirm only synthetic household data appears
+- [ ] Confirm Right Now remains the default opening surface
+
+Panel navigation:
+
+- [ ] Confirm `Right Now` and `Home Health` are visible as panel-level tabs
+- [ ] Confirm the `Home Health` tab opens the Home Health surface
+- [ ] Confirm the `Right Now` tab returns to the recommendation flow
+- [ ] Confirm the tabs do not crowd the greeting, context chips, or suggested
+  Task Bundle on mobile
+- [ ] Confirm the active tab state is visually clear in dark theme
+
+Home Health visual review:
+
+- [ ] Confirm the header shows a whole-home number, `Home Health` label, and
+  friendly status copy
+- [ ] Confirm the visual treatment feels like household context, not a grade on
+  the user
+- [ ] Confirm Area cards show Area name, health number, status, and available
+  lift
+- [ ] Confirm `Helped lately` and `Could help next` are visibly separate on
+  each Area card
+- [ ] Confirm the copy treats health decline as normal drift, not failure
+- [ ] Confirm the page uses synthetic Areas and Tasks only
+- [ ] Confirm mobile cards stack cleanly without clipped labels, overlap, or
+  awkward scan order
+- [ ] Confirm desktop layout feels substantial without turning into an admin
+  dashboard
+
+Record findings:
+
+```text
+Keep for service wiring:
+- ...
+
+Change before service wiring:
+- ...
+
+Can wait until later app planning:
+- ...
+
+Open question for Steve:
+- ...
+```
+
 Gate 3 live result on 2026-06-21:
 
 - HACS-installed Homekeep loaded bundled synthetic Chores.
@@ -673,17 +733,18 @@ Result note:
 
 - [ ] Home Assistant package-backed tests or approved live synthetic candidate
   results
-- [x] Version bump decision: `0.0.4`
+- [x] Version bump decision: `0.0.5`
 - [x] Release notes for private HACS publish:
-  - publish the second mocked Right Now live-test candidate
-  - add Home Assistant dark-theme visual refinements, transparent layering, and
-    tighter typography
-  - add visible default Chores, removed-row restore, full-reset Keeps treatment,
-    and the projected-benefit primary action
-  - add mocked active-session refinements, inline completed rows, bounded
-    optional Chores, and progressive completion celebration
-  - add adaptive recommendation durations based on learned work time,
-    Mood/Readiness, Capacity, and recent session momentum
-  - include basic Home Health visibility/navigation in the Live Test 2 review
+  - publish the third mocked sidebar visual candidate
+  - add panel-level `Right Now` and `Home Health` tabs while keeping Right Now
+    as the default opening surface
+  - add the first mocked Home Health visual surface with a whole-home header,
+    synthetic Area Health cards, and separated `Helped lately` / `Could help
+    next` copy
+  - add mocked `While you're there` compatible Tasks inside suggested Task
+    Bundles
+  - add bounded post-completion Momentum Tasks for stronger-fit contexts
+  - keep the sidebar app synthetic and not service-wired for this private
+    visual test
 - [x] Mock adequacy review updated for the release diff
 - [x] Explicit Steve approval for this private publish action

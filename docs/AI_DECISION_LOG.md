@@ -230,6 +230,42 @@ implementation pass.
   Recommendation Engine principles with stricter bounds: small duration,
   stronger mood/time fit, no current-flow repeats, useful health/staleness
   impact, and no unbounded chaining.
+- Optional continuation after a completed planned bundle may include one
+  momentum Task that is larger than the default small continuation tasks when
+  current Mood/Capacity, time fit, and completed-session history suggest the
+  user may want to keep going. This is a post-completion offer, not part of the
+  original bundle promise.
+- Momentum Tasks must remain bounded, clearly optional, and framed as taking
+  advantage of momentum rather than pressure to do more. Low or quiet contexts
+  should not receive bigger momentum Tasks by default.
+- Momentum Tasks should feel a little special, not routine. Homekeep should not
+  make every completed bundle ask for more.
+- The emotional contract is that the suggested bundle completes cleanly. Any
+  post-completion Momentum Task is a new optional offer, not a shifted finish
+  line or a hidden requirement.
+- While You're There Tasks are pre-included compatible Tasks inside a suggested
+  Task Bundle. They are visible from the start of the bundle and can be started
+  before the core bundle is complete, because the user is already in the
+  relevant Area or context.
+- While You're There Tasks should be small, fit the same Area, route, setup, or
+  device context as the core bundle, and be explainable as convenient care to do
+  while the user is there.
+- While You're There Tasks are not required for Bundle Keeps. Removing one
+  should not make the core bundle feel broken or punitive.
+- The Recommendation Engine should choose While You're There Tasks by first
+  filtering to compatible same-Area, same-route, same-setup, or same-device
+  candidates, then scoring for small duration, current Mood/Capacity fit, useful
+  Home Health/Area Health/Staleness/comfort value, and lack of recent removal,
+  skip, dismissal, or dislike in the same context.
+- While You're There selection should cap at one Task. If no candidate clearly
+  fits, omit the role rather than weakening the bundle.
+- Future recommendation payloads should distinguish item roles explicitly, such
+  as `core`, `while_there`, and `momentum`, instead of overloading
+  `optional`.
+- Role explanations should stay simple: `core` means the main lift,
+  `while_there` means it fits because the user is already there, and `momentum`
+  means the bundle is complete and this is available only if the user wants to
+  keep going.
 - Shuffle should vary within a stable family of good fits rather than producing
   random or contradictory suggestions.
 - User correction signals such as removal, skip, dismiss, and snooze should
@@ -243,6 +279,12 @@ implementation pass.
   routines, and prior human work.
 - Right Now completion and ending states should emphasize what the human added
   to the home, not only what tasks were completed.
+- The mocked sidebar app may expose a `Home Health` tab for private visual
+  testing before service wiring. This tab must use synthetic data, keep Right
+  Now as the default opening surface, and avoid implying that the full Home
+  Health behavior surface is complete.
+- The first Home Health visual surface should separate `Helped lately` from
+  `Could help next` so natural Area Health drift does not erase visible care.
 
 ## Product North Star
 

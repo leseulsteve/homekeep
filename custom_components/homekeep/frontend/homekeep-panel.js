@@ -90,6 +90,109 @@ const BUNDLES = [
   },
 ];
 
+const HOME_HEALTH = {
+  score: 74,
+  status: "Steady with a few useful places to help",
+  note: "The home is mostly steady. Kitchen and Laundry have the clearest lift available right now.",
+  areas: [
+    {
+      name: "Kitchen",
+      health: 48,
+      trend: "Could use care",
+      helped: ["Dishes stayed moving", "Counters were reset recently"],
+      next: "A short counter and compost pass would help most.",
+      impact: 24,
+    },
+    {
+      name: "Bathroom",
+      health: 57,
+      trend: "Steady, drifting down",
+      helped: ["Fresh towel helped", "Sink stayed usable"],
+      next: "A quiet sink refresh keeps this area easy.",
+      impact: 17,
+    },
+    {
+      name: "Entryway",
+      health: 52,
+      trend: "Visible lift available",
+      helped: ["Shoes were straightened", "Landing shelf stayed lighter"],
+      next: "The rug and shelf are the best small lift.",
+      impact: 16,
+    },
+    {
+      name: "Laundry",
+      health: 43,
+      trend: "Overdue care",
+      helped: ["Washer cycle carried some care", "Dry towels are ready to fold"],
+      next: "Starting a small load gives this area momentum.",
+      impact: 26,
+    },
+  ],
+};
+
+const WHILE_THERE_CANDIDATES = [
+  {
+    id: "wipe-stove-front",
+    name: "Wipe stove front",
+    area: "Kitchen",
+    minutes: 3,
+    keeps: 4,
+    keepLine: "uses the same kitchen pass while you are there",
+    healthImpact: 8,
+    staleness: 6,
+    fits: ["focused", "ready", "auto"],
+    contexts: ["same-area", "same-setup"],
+  },
+  {
+    id: "straighten-entry-shoes",
+    name: "Straighten entry shoes",
+    area: "Entryway",
+    minutes: 2,
+    keeps: 3,
+    keepLine: "fits the same doorway moment",
+    healthImpact: 6,
+    staleness: 5,
+    fits: ["low", "restless", "auto"],
+    contexts: ["same-area", "same-route"],
+  },
+  {
+    id: "wipe-bathroom-mirror",
+    name: "Wipe bathroom mirror",
+    area: "Bathroom",
+    minutes: 3,
+    keeps: 4,
+    keepLine: "adds one small finish while you are there",
+    healthImpact: 7,
+    staleness: 4,
+    fits: ["quiet", "focused", "auto"],
+    contexts: ["same-area", "same-setup"],
+  },
+  {
+    id: "empty-dryer-lint",
+    name: "Empty dryer lint",
+    area: "Laundry",
+    minutes: 2,
+    keeps: 3,
+    keepLine: "fits naturally beside the laundry pass",
+    healthImpact: 6,
+    staleness: 6,
+    fits: ["low", "focused", "ready"],
+    contexts: ["same-area", "same-device"],
+  },
+  {
+    id: "fold-living-room-blanket",
+    name: "Fold living room blanket",
+    area: "Living room",
+    minutes: 2,
+    keeps: 3,
+    keepLine: "settles the same room while you are there",
+    healthImpact: 5,
+    staleness: 4,
+    fits: ["low", "quiet", "auto"],
+    contexts: ["same-area"],
+  },
+];
+
 const TIME_AUTO = "Auto";
 
 function inferCapacityFromMood(mood) {
@@ -197,6 +300,30 @@ const OPTIONAL_CHORE_CANDIDATES = [
     healthImpact: 6,
     staleness: 6,
     fits: ["low", "focused", "ready"],
+  },
+  {
+    id: "vacuum-entry-path",
+    name: "Vacuum the entry path",
+    area: "Entryway",
+    minutes: 9,
+    keeps: 8,
+    keepLine: "uses the momentum from the visible entryway lift",
+    healthImpact: 10,
+    staleness: 8,
+    fits: ["focused", "restless", "ready"],
+    momentum: true,
+  },
+  {
+    id: "fold-small-laundry-basket",
+    name: "Fold a small laundry basket",
+    area: "Laundry",
+    minutes: 12,
+    keeps: 10,
+    keepLine: "turns the laundry momentum into a fuller finish",
+    healthImpact: 11,
+    staleness: 9,
+    fits: ["focused", "ready"],
+    momentum: true,
   },
 ];
 
@@ -332,6 +459,35 @@ function bundleRecommendationScore(context, bundle) {
   return userFit * 0.62 + homeNeed * 0.28 + careNudge + diversity;
 }
 
+function scoreWhileThereTask(candidate, context, bundle, coreIds, bundleAreas, rejectedIds, removedIds) {
+  if (coreIds.has(candidate.id)) return -Infinity;
+  if (rejectedIds.has(candidate.id) && !removedIds.has(candidate.id)) return -Infinity;
+  if (!bundleAreas.has(candidate.area)) return -Infinity;
+  if (candidate.minutes > 5) return -Infinity;
+  if (["low", "quiet"].includes(context.mood) && candidate.minutes > 3) return -Infinity;
+  let score = candidate.healthImpact + candidate.staleness;
+  if (candidate.minutes <= 2) score += 4;
+  else if (candidate.minutes <= 4) score += 2;
+  if (candidate.fits.includes(context.mood) || candidate.fits.includes("auto")) score += 4;
+  if (candidate.area === bundle.impact.areaName) score += 4;
+  if (context.area !== "Auto" && candidate.area === context.area) score += 3;
+  if (candidate.contexts.includes("same-device") && bundle.context.goal === "overdue care") score += 3;
+  if (candidate.contexts.includes("same-setup") && ["focused", "ready"].includes(context.mood)) score += 2;
+  return score;
+}
+
+function pickWhileThereTask(bundle, context, rejectedIds = new Set(), removedIds = new Set()) {
+  const coreIds = new Set(bundle.chores.map((chore) => chore.id));
+  const bundleAreas = new Set(bundle.chores.map((chore) => chore.area));
+  const best = WHILE_THERE_CANDIDATES
+    .map((candidate) => ({ candidate, score: scoreWhileThereTask(candidate, context, bundle, coreIds, bundleAreas, rejectedIds, removedIds) }))
+    .filter((entry) => Number.isFinite(entry.score))
+    .sort((a, b) => b.score - a.score || a.candidate.minutes - b.candidate.minutes || a.candidate.name.localeCompare(b.candidate.name))[0];
+  if (!best) return null;
+  const { healthImpact, staleness, fits, contexts, ...task } = best.candidate;
+  return { ...task, whileThere: true };
+}
+
 function displayContextValue(value) {
   return value === "Auto" ? "Best fit" : value;
 }
@@ -353,6 +509,7 @@ function scoreOptionalChore(candidate, context, sessionArea) {
   let score = candidate.healthImpact + candidate.staleness;
   if (candidate.minutes <= 3) score += 4;
   else if (candidate.minutes <= 5) score += 2;
+  else if (candidate.momentum && ["focused", "restless", "ready"].includes(context.mood)) score += 3;
   if (["low", "quiet"].includes(context.mood) && candidate.minutes <= 4) score += 4;
   if (["focused", "ready"].includes(context.mood) && candidate.healthImpact >= 7) score += 3;
   if (context.mood === "restless" && candidate.area !== sessionArea) score += 2;
@@ -360,6 +517,10 @@ function scoreOptionalChore(candidate, context, sessionArea) {
   if (context.area !== "Auto" && candidate.area === context.area) score += 4;
   if (context.area === "Auto" && candidate.area === sessionArea) score += 2;
   return score;
+}
+
+function momentumEligible(context) {
+  return ["focused", "restless", "ready"].includes(context.mood) || context.capacity === "strong" || context.capacity === "mobile";
 }
 
 function publicOptionalChore(candidate) {
@@ -379,6 +540,7 @@ class HomekeepPanel extends HTMLElement {
       selector: null,
       noSuggestion: false,
       removed: [],
+      rejectedWhileThere: [],
       session: null,
       activeItemId: null,
       paused: false,
@@ -386,6 +548,7 @@ class HomekeepPanel extends HTMLElement {
       optionalOffered: false,
       finalSummary: null,
       completionFlash: null,
+      activeTab: "right-now",
       context: {
         ...BUNDLES[0].context,
         time: TIME_AUTO,
@@ -426,7 +589,9 @@ class HomekeepPanel extends HTMLElement {
   }
 
   get bundle() {
-    return BUNDLES[this.state.selected];
+    const bundle = BUNDLES[this.state.selected];
+    const whileThereTask = pickWhileThereTask(bundle, this.state.context, new Set(this.state.rejectedWhileThere), new Set(this.state.removed));
+    return whileThereTask ? { ...bundle, chores: [...bundle.chores, whileThereTask] } : bundle;
   }
 
   getChipOptions(key) {
@@ -524,7 +689,11 @@ class HomekeepPanel extends HTMLElement {
 
   removeChore(choreId) {
     if (this.state.removed.includes(choreId)) return;
+    const removedChore = this.bundle.chores.find((chore) => chore.id === choreId);
     this.state.removed = [...this.state.removed, choreId];
+    if (removedChore?.whileThere && !this.state.rejectedWhileThere.includes(choreId)) {
+      this.state.rejectedWhileThere = [...this.state.rejectedWhileThere, choreId];
+    }
     this.render();
   }
 
@@ -646,8 +815,9 @@ class HomekeepPanel extends HTMLElement {
       ...this.state.session.chores.filter((chore) => chore.status === "skipped").map((chore) => chore.id),
     ]);
     const sessionArea = this.bundle.impact.areaName;
+    const allowMomentum = momentumEligible(this.state.context);
     const optionalChores = OPTIONAL_CHORE_CANDIDATES
-      .filter((chore) => chore.minutes <= 5 && !excluded.has(chore.id))
+      .filter((chore) => !excluded.has(chore.id) && (chore.minutes <= 5 || (allowMomentum && chore.momentum && chore.minutes <= 12)))
       .map((chore) => ({ chore, score: scoreOptionalChore(chore, this.state.context, sessionArea) }))
       .sort((a, b) => b.score - a.score || a.chore.minutes - b.chore.minutes || a.chore.name.localeCompare(b.chore.name))
       .slice(0, 3)
@@ -690,7 +860,72 @@ class HomekeepPanel extends HTMLElement {
   renderMain() {
     if (this.state.view === "session") return this.renderSession();
     if (this.state.view === "summary") return this.renderSummary();
-    return this.renderReady();
+    if (this.state.activeTab === "home-health") return `${this.renderTabs()}${this.renderHomeHealth()}`;
+    return `${this.renderTabs()}${this.renderReady()}`;
+  }
+
+  renderTabs() {
+    const tabs = [
+      { id: "right-now", label: "Right Now", icon: "mdi:home-heart" },
+      { id: "home-health", label: "Home Health", icon: "mdi:heart-pulse" },
+    ];
+    return `
+      <nav class="tabs" aria-label="Homekeep sections">
+        ${tabs.map((tab) => `
+          <button class="${this.state.activeTab === tab.id ? "active" : ""}" data-tab="${tab.id}" aria-current="${this.state.activeTab === tab.id ? "page" : "false"}">
+            <ha-icon icon="${tab.icon}"></ha-icon>
+            <span>${tab.label}</span>
+          </button>
+        `).join("")}
+      </nav>
+    `;
+  }
+
+  renderHomeHealth() {
+    return `
+      <section class="health-hero">
+        <div class="health-score">
+          <span>${HOME_HEALTH.score}</span>
+          <small>Home Health</small>
+        </div>
+        <div>
+          <p class="eyebrow">Visual test</p>
+          <h1>${HOME_HEALTH.status}</h1>
+          <p class="support">${HOME_HEALTH.note}</p>
+        </div>
+      </section>
+      <section class="health-list" aria-label="Area health">
+        ${HOME_HEALTH.areas.map((area) => this.renderAreaHealth(area)).join("")}
+      </section>
+    `;
+  }
+
+  renderAreaHealth(area) {
+    return `
+      <article class="area-card">
+        <div class="area-head">
+          <div>
+            <h2>${area.name}</h2>
+            <p>${area.trend}</p>
+          </div>
+          <div class="area-meter" aria-label="${area.name} health ${area.health}">
+            <span>${area.health}</span>
+            <small>${area.impact} lift available</small>
+          </div>
+        </div>
+        <div class="health-bar" aria-hidden="true"><span style="width: ${area.health}%"></span></div>
+        <div class="area-columns">
+          <div>
+            <span class="area-kicker">Helped lately</span>
+            ${area.helped.map((item) => `<p>${item}</p>`).join("")}
+          </div>
+          <div>
+            <span class="area-kicker">Could help next</span>
+            <p>${area.next}</p>
+          </div>
+        </div>
+      </article>
+    `;
   }
 
   renderReady() {
@@ -771,21 +1006,23 @@ class HomekeepPanel extends HTMLElement {
   renderBundleDetails(chores, areaNames) {
     const showArea = areaNames.length > 1;
     const removed = new Set(this.state.removed);
-    const bonusAvailable = removed.size === 0;
+    const coreRemoved = chores.some((chore) => !chore.whileThere && removed.has(chore.id));
+    const bonusAvailable = !coreRemoved;
     const includedCount = chores.length - removed.size;
     return `
       <div class="details">
         <div class="keeps-line ${bonusAvailable ? "" : "lost"}">
           <span>${bonusAvailable ? `${this.bundle.bonusKeeps} bundle Keeps` : `Bundle Keeps not active`}</span>
-          <span>${includedCount} of ${chores.length} included · ${bonusAvailable ? "The home gives a little back." : "Restore removed Tasks to bring the bundle back together."}</span>
+          <span>${includedCount} of ${chores.length} included · ${bonusAvailable ? "The home gives a little back." : "Restore core Tasks to bring the bundle back together."}</span>
         </div>
         ${chores.map((chore) => {
           const isRemoved = removed.has(chore.id);
           return `
-          <article class="chore-row ${isRemoved ? "removed" : ""}">
+          <article class="chore-row ${isRemoved ? "removed" : ""} ${chore.whileThere ? "while-there" : ""}">
             <div class="chore-choice">
-              <ha-icon icon="${isRemoved ? "mdi:minus-circle-outline" : "mdi:check-circle-outline"}"></ha-icon>
+              <ha-icon icon="${isRemoved ? "mdi:minus-circle-outline" : chore.whileThere ? "mdi:map-marker-check-outline" : "mdi:check-circle-outline"}"></ha-icon>
               <div>
+                ${chore.whileThere ? `<span class="row-kicker">While you're there</span>` : ""}
                 <strong>${chore.name}</strong>
                 <span>${isRemoved ? "Removed" : `${chore.minutes} min · ${chore.keeps} Keeps${showArea ? ` · ${chore.area}` : ""}`}</span>
                 <small>${isRemoved ? "This will stay out of the session." : chore.keepLine}</small>
@@ -882,10 +1119,11 @@ class HomekeepPanel extends HTMLElement {
   }
 
   renderOptionalDivider() {
+    const hasMomentumTask = this.state.session?.chores.some((chore) => chore.optional && chore.momentum);
     return `
       <div class="optional-divider">
-        <span>A few more that fit</span>
-        <small>Picked for small effort, current fit, and useful home lift.</small>
+        <span>${hasMomentumTask ? "Momentum fits one bigger task" : "A few more that fit"}</span>
+        <small>${hasMomentumTask ? "The bundle is done. This is only here if you want to use the momentum." : "Picked for small effort, current fit, and useful home lift."}</small>
       </div>
     `;
   }
@@ -973,6 +1211,10 @@ class HomekeepPanel extends HTMLElement {
         main { max-width: 860px; margin: 0 auto; padding: clamp(22px, 5vw, 48px) 16px 32px; box-sizing: border-box; }
         button { font: inherit; }
         .hero, .session-top, .summary { text-align: center; padding: 26px 0 18px; }
+        .tabs { display: flex; justify-content: center; gap: 8px; margin: 0 auto 18px; padding: 4px; width: fit-content; max-width: 100%; border-radius: 999px; background: rgba(255,255,255,0.048); border: 1px solid var(--hk-border-soft); }
+        .tabs button { min-height: 38px; display: inline-flex; align-items: center; gap: 7px; border: 0; border-radius: 999px; padding: 0 13px; color: var(--hk-muted); background: transparent; cursor: pointer; font: inherit; font-weight: 760; }
+        .tabs button.active { color: var(--hk-text); background: var(--hk-accent-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hk-accent) 30%, transparent); }
+        .tabs ha-icon { width: 18px; --mdc-icon-size: 18px; color: var(--hk-accent); }
         .eyebrow { margin: 0 0 10px; color: var(--hk-muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0; font-weight: 700; }
         h1 { margin: 0 auto; max-width: 760px; font-size: clamp(2rem, 6vw, 4rem); line-height: 1.04; font-weight: 760; letter-spacing: 0; }
         h2 { margin: 0; font-size: 1.32rem; line-height: 1.16; letter-spacing: 0; font-weight: 760; }
@@ -1016,6 +1258,24 @@ class HomekeepPanel extends HTMLElement {
         .selector button { border-radius: 8px; text-align: left; background: transparent; color: var(--hk-text); line-height: 1.25; padding-block: 8px; }
         .selector .selected { background: var(--hk-accent-soft); border-color: color-mix(in srgb, var(--hk-accent) 42%, transparent); }
         .suggestion, .session-list, .ending { margin-top: 18px; padding: 22px; border: 1px solid var(--hk-border); border-radius: 8px; background: var(--hk-card); box-shadow: 0 22px 70px rgba(0, 0, 0, 0.22); backdrop-filter: blur(22px); }
+        .health-hero { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: center; padding: 24px 0 18px; }
+        .health-hero h1 { margin: 0; text-align: left; font-size: clamp(2rem, 5vw, 3.55rem); }
+        .health-score { width: 128px; height: 128px; border-radius: 50%; display: grid; place-content: center; text-align: center; background: color-mix(in srgb, var(--hk-accent) 18%, transparent); border: 1px solid color-mix(in srgb, var(--hk-accent) 42%, transparent); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24); }
+        .health-score span { font-size: 2.65rem; line-height: 1; font-weight: 820; }
+        .health-score small, .area-meter small { color: var(--hk-muted); font-weight: 740; }
+        .health-list { display: grid; gap: 12px; margin-top: 8px; }
+        .area-card { padding: 16px; border: 1px solid var(--hk-border); border-radius: 8px; background: var(--hk-card); box-shadow: 0 18px 54px rgba(0, 0, 0, 0.18); backdrop-filter: blur(22px); }
+        .area-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: start; }
+        .area-head p { margin-top: 5px; color: var(--hk-muted); }
+        .area-meter { min-width: 108px; padding: 9px 11px; border-radius: 8px; background: rgba(255,255,255,0.055); border: 1px solid var(--hk-border-soft); text-align: right; }
+        .area-meter span { display: block; font-size: 1.55rem; line-height: 1; font-weight: 820; }
+        .health-bar { height: 8px; overflow: hidden; margin: 14px 0; border-radius: 999px; background: rgba(255,255,255,0.065); }
+        .health-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--hk-warm), var(--hk-accent)); }
+        .area-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .area-columns > div { padding: 11px; border-radius: 8px; background: rgba(255,255,255,0.042); border: 1px solid var(--hk-border-soft); }
+        .area-kicker { display: block; margin-bottom: 6px; color: color-mix(in srgb, var(--hk-accent) 78%, var(--hk-muted)); font-size: 0.78rem; font-weight: 800; }
+        .area-columns p { color: var(--hk-muted); font-size: 0.9rem; }
+        .area-columns p + p { margin-top: 4px; }
         .suggestion.refining { filter: blur(0.45px); opacity: 0.82; }
         .suggestion-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: start; }
         .suggestion-head p, .support, .session-progress, .ending p { color: var(--hk-muted); margin-top: 6px; }
@@ -1036,6 +1296,8 @@ class HomekeepPanel extends HTMLElement {
         .chore-row.removed { opacity: 0.72; background: var(--hk-row-soft); border-style: dashed; }
         .chore-row.removed strong { text-decoration: line-through; color: var(--hk-muted); }
         .chore-row.removed .chore-choice ha-icon { color: var(--hk-muted); }
+        .chore-row.while-there { background: color-mix(in srgb, var(--hk-row) 82%, var(--hk-accent) 10%); border-style: dashed; }
+        .row-kicker { display: inline-block; margin: 0 0 3px; color: color-mix(in srgb, var(--hk-accent) 76%, var(--hk-muted)); font-size: 0.76rem; line-height: 1.15; font-weight: 780; }
         .keeps-line.lost { background: rgba(214, 181, 109, 0.075); color: #ddc483; border-color: rgba(214, 181, 109, 0.18); }
         .chore-row span, .chore-row small, .session-chore p { display: block; color: var(--hk-muted); margin-top: 4px; line-height: 1.36; }
         .chore-row small { font-size: 0.82rem; }
@@ -1079,7 +1341,14 @@ class HomekeepPanel extends HTMLElement {
         @media (max-width: 620px) {
           main { padding-left: 12px; padding-right: 12px; }
           .hero, .session-top, .summary { padding-top: 18px; }
+          .tabs { margin-bottom: 12px; }
+          .tabs button { padding: 0 10px; }
           h1 { font-size: clamp(1.85rem, 9vw, 2.7rem); }
+          .health-hero { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 14px; padding-top: 16px; }
+          .health-hero h1 { text-align: center; font-size: clamp(1.8rem, 8vw, 2.5rem); }
+          .health-score { width: 112px; height: 112px; }
+          .area-head, .area-columns { grid-template-columns: 1fr; }
+          .area-meter { text-align: left; }
           .chips { margin-top: 18px; gap: 6px; }
           .suggestion, .session-list, .ending { margin-top: 14px; padding: 14px; }
           .suggestion-head { grid-template-columns: 1fr; }
@@ -1104,6 +1373,12 @@ class HomekeepPanel extends HTMLElement {
     const target = event.target.closest("button");
     if (!target) return;
     const action = target.dataset.action;
+    if (target.dataset.tab) {
+      this.state.activeTab = target.dataset.tab;
+      this.state.selector = null;
+      this.render();
+      return;
+    }
     if (target.dataset.chip) {
       this.state.selector = this.state.selector === target.dataset.chip ? null : target.dataset.chip;
       this.render();

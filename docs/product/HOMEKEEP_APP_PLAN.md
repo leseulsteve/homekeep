@@ -805,6 +805,31 @@ Suggested Task Session display:
 - In the suggested bundle card, show Bundle Keeps before the visible Task list.
   This care-together signal is part of the offer and should be understood before
   the user scans the individual Tasks.
+- Suggested Task Bundles may include a small pre-included `While you're there`
+  compatible Task when the Recommendation Engine can explain why it fits the
+  same Area, route, setup, or device context as the core bundle.
+- A `While you're there` Task should be visible from the start of the suggested
+  bundle. If the user starts the bundle, it becomes part of the active Task
+  Session and can be started before the rest of the bundle is complete, because
+  the user is already in that Area or context.
+- A `While you're there` Task is different from post-completion optional Tasks:
+  it appears before the session starts as an opportunistic compatible Task,
+  while optional continuation Tasks appear only after the planned bundle is
+  complete.
+- Removing a `While you're there` Task should not deactivate Bundle Keeps.
+  Bundle Keeps belong to the coherent core bundle, not the opportunistic add-on.
+- Visually, `While you're there` should read as smart inclusion, not extra
+  homework. It can be slightly lighter than core Tasks, but it should still be
+  part of the visible bundle list and active session.
+- Choose `While you're there` Tasks with the same Recommendation Engine values
+  as the rest of Homekeep: hard compatibility first, then useful care value and
+  fit. The candidate should share the Area, route, setup, or device context;
+  stay tiny; fit Mood/Capacity; help Home Health, Area Health, Staleness, or
+  comfort; and avoid recently removed, skipped, dismissed, or disliked Tasks.
+- Show at most one `While you're there` Task in a bundle. When no candidate is
+  clearly compatible, show none.
+- Future recommendation payloads should expose item roles such as `core`,
+  `while_there`, and `momentum` so the UI does not overload `optional`.
 - Area display should be conditional. If all Tasks in the bundle share the
   same Home Assistant Area, show that area at the bundle level only. If the
   bundle spans multiple Home Assistant Areas, show the relevant area on each
@@ -1187,6 +1212,24 @@ Completed-bundle continuation:
   principles as the main suggestion, but with stricter bounds: small duration,
   mood/time fit, no recent skip/remove/dismiss/snooze, useful Home Health or
   Area Health impact, and no chaining forever.
+- After the planned bundle is complete, optional continuation may include one
+  larger momentum Task when the current Mood/Capacity, time fit, and session
+  completion history suggest the user may want to keep going. This should feel
+  like `you have momentum if you want it`, not like the app moved the finish
+  line.
+- The planned bundle must feel complete before a Momentum Task appears. The
+  completion celebration should land first; the Momentum Task is a new optional
+  offer after that win.
+- Momentum Tasks should not appear after every bundle. They should feel a little
+  special and should require a real fit signal, such as enough time, stronger
+  Mood/Capacity, or history showing the user often accepts fuller continuation.
+- Keep Momentum Tasks bounded. As a first implementation default, offer at most
+  one and keep it around `10-15` minutes unless Steve explicitly expands this.
+- Bigger momentum Tasks are post-completion offers only. They are different
+  from `While you're there` Tasks, which are pre-included and visible from the
+  start because they fit the same Area/context.
+- Low or quiet contexts should continue to prefer small optional continuation
+  Tasks and should not receive bigger momentum Tasks by default.
 - Optional Tasks can bias toward useful overdue Tasks when they fit the
   current context, especially small tasks with high Projected Impact.
 - Overdue bias must preserve the light optional feeling. Do not offer large
@@ -1947,6 +1990,20 @@ the test:
 - Keep the top-right projected-benefit action button as-is for this pass.
 - Full Home Health behavior remains planned but unvalidated until a later
   dedicated Home Health review/test.
+
+Live Test 3 decision: include a mocked `Home Health` tab inside the Homekeep
+panel so the dedicated Home Health surface can start visual review.
+
+This is a visual-test candidate, not service wiring. Right Now remains the
+default opening surface. The Home Health tab may use synthetic area data and
+should focus on validating navigation, whole-home header treatment, Area Health
+cards, supportive copy, and the separation between `Helped lately` and `Could
+help next`.
+
+Live Test 3 does not validate direct Area Health actions, Home Assistant Area
+configuration handling, hidden/unmanaged Area behavior, freshness/stale states,
+service calls, diagnostics, Plan, Add Task, Activity, Settings, or the final
+Home Health backend contract.
 
 Decision: Area cards below `70` should use `Care for this area` as the primary
 action label.

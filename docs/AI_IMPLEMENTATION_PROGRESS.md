@@ -321,6 +321,10 @@ Tests/checks run:
 - `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
 - `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
 - `git diff --check`
+- Fixed-string privacy/secret scan across changed files for tokens,
+  credentials, cookies, webhooks, private endpoints, Wi-Fi details, and private
+  entity ids. Hits were existing guardrail/checklist text or design-token
+  wording only.
 
 Docs updated:
 - `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
@@ -3051,6 +3055,146 @@ Important decisions:
 Known gaps / next prompt:
 - Continue preserving internal/API compatibility names until a deliberate
   migration plan covers aliases, storage compatibility, services, and tests.
+
+### 2026-06-23 - Add While You're There compatible Tasks to bundles
+
+Status: completed locally
+
+Implemented:
+- Replaced hard-coded `While you're there` Tasks with a small candidate selector
+  that pre-includes at most one compatible Task per mocked Right Now Task
+  Bundle.
+- The mock selector filters for same Area/context compatibility, tiny duration,
+  Mood/Capacity fit, useful health/staleness value, and recent removal
+  avoidance.
+- Rendered compatible Tasks as subtle included Tasks visible from the start of
+  the suggested bundle rather than post-completion optional continuation Tasks.
+- Included compatible Tasks in the active Task Session when the bundle starts,
+  so they can be started before the core bundle is complete.
+- Added mocked post-completion momentum Task candidates that can be larger than
+  the default optional continuation Tasks when Mood/Capacity suggests the user
+  may want to keep going.
+- Kept low/quiet contexts biased toward small optional continuation Tasks.
+- Kept compatible add-ons removable before session start.
+- Made Bundle Keeps depend only on core Tasks, so removing a `While you're
+  there` Task does not deactivate Bundle Keeps.
+- Documented the distinction between pre-start compatible add-ons and
+  post-completion optional Tasks.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/AI_DECISION_LOG.md docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+- Targeted `rg` scan for `While you're there`, `while you are there`,
+  `whileThere`, and `momentum` across the changed frontend and planning docs.
+- Targeted `rg` scan for `WHILE_THERE_CANDIDATES`, `scoreWhileThereTask`,
+  `pickWhileThereTask`, `rejectedWhileThere`, compatibility-context terms, and
+  generated `whileThere: true` usage.
+
+Docs updated:
+- `docs/AI_DECISION_LOG.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- `While you're there` Tasks are pre-included opportunistic compatible Tasks
+  inside a suggested Task Bundle.
+- They should be small and explainable by same Area, route, setup, or device
+  context.
+- They are not required for Bundle Keeps and should not make the core bundle
+  feel punitive if removed.
+- Post-completion momentum Tasks are a separate concept: they may be larger,
+  appear only after the planned bundle is complete, and must be framed as an
+  optional way to use momentum rather than a new finish line.
+- The planned bundle must complete cleanly before Momentum Tasks appear; the app
+  should not move the finish line after the user succeeds.
+- Momentum Tasks should feel special and bounded, not like every bundle always
+  asks for more.
+- Future recommendation payloads should distinguish `core`, `while_there`, and
+  `momentum` roles instead of overloading `optional`.
+- While You're There selection should be hard-compatibility first, then scoring;
+  omit it when no candidate clearly fits.
+
+Known gaps / next prompt:
+- Backend Recommendation Engine payloads do not yet have a dedicated
+  `while_you_are_there` role; add that deliberately when moving this from mock
+  UI behavior to durable recommendation payloads.
+
+### 2026-06-23 - Live Test 3 Home Health visual entry
+
+Status: completed locally
+
+Implemented:
+- Added a panel-level `Right Now` / `Home Health` tab treatment to the mocked
+  Homekeep sidebar app.
+- Kept Right Now as the default opening surface.
+- Added a mocked synthetic Home Health visual surface with a whole-home header,
+  supportive status copy, and Area Health cards.
+- Area cards separate `Helped lately` from `Could help next` so contribution
+  stays visible even while health naturally drifts down.
+- Kept the Home Health surface visual-only and synthetic for private live-test
+  review; no Homekeep services are called from the sidebar app yet.
+- Added a Gate 3C private live-test checklist for today's closest-to-production
+  mocked sidebar candidate.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_frontend -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js tests/test_frontend.py docs/AI_DECISION_LOG.md docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/AI_DECISION_LOG.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Tests updated:
+- `tests/test_frontend.py`
+
+Important decisions:
+- Live Test 3 may visually test Home Health from inside the panel through a
+  dedicated tab.
+- This does not validate backend Home Health wiring, Area action flows, Area
+  configuration behavior, stale-state recovery, or the broader dashboard.
+- Home Health visual copy should stay supportive and contextual, not grade-like.
+
+Known gaps / next prompt:
+- Run Gate 3C in the private Home Assistant instance and record visual findings
+  before wiring Homekeep services into the sidebar app.
+
+### 2026-06-23 - Version 0.0.5 private Live Test 3 publish prep
+
+Status: completed locally
+
+Implemented:
+- Bumped the Homekeep integration manifest version from `0.0.4` to `0.0.5`.
+- Updated the private live-test checklist release notes for the Live Test 3
+  sidebar visual candidate.
+- Updated the mock adequacy review for the `0.0.5` private HACS publish scope.
+
+Tests/checks run:
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest discover -s tests -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `git diff --check`
+
+Docs updated:
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/live-test/MOCK_ADEQUACY_REVIEW.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Publish `0.0.5` as a private HACS/live-test candidate only. It does not claim
+  public release readiness.
+- No tag will be created because the repository still has no established tag
+  convention for these private HACS candidates.
+- No deploy script exists in the workspace; this publish remains a commit and
+  push to `main` for HACS update.
+
+Known gaps / next prompt:
+- Push the `0.0.5` candidate to `main`, update Homekeep from HACS in the
+  private Home Assistant instance, restart Home Assistant, and run Gate 3C.
 
 ## Resume Instructions
 

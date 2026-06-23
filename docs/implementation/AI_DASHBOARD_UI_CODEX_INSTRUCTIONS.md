@@ -77,14 +77,18 @@ The current approved design work covers enough to prototype and test:
 - Homekeep Voice System
 
 It does not mean the whole dashboard is planned. The current implementation is
-ready for a live-feel test of the mocked Ready Now slice only.
+ready for a live-feel test of the mocked Ready Now slice plus a mocked Home
+Health entry for visual review only.
 
 Implementation boundary:
 
-- Implement only the Ready Now test slice first.
+- Implement only the Ready Now test slice and the explicitly requested mocked
+  Home Health visual entry.
 - A fast mocked Ready Now prototype is acceptable before real service wiring.
-- Do not implement Home Health and Areas beyond what Ready Now needs to display
-  Projected Impact or a small context hint.
+- Do not implement Home Health and Areas beyond mocked visual navigation,
+  synthetic area cards, Projected Impact, or a small context hint.
+- Keep Right Now as the default opening surface. Home Health should be reachable
+  from panel-level navigation and should not crowd the recommendation flow.
 - Do not implement Plan / Scheduled Tasks.
 - Do not implement Add Task.
 - Do not implement Activity.
@@ -279,7 +283,7 @@ as:
 - `Set this up`
 - `Let's use this`
 - `Pick this one`
-- `Use this bundle`
+- `Start this bundle`
 
 ## Task Bundle Titles
 
@@ -313,7 +317,7 @@ Bundle details live inside the suggestion.
 
 Bundle details must:
 
-- keep the user antaskd on Ready Now
+- keep the user anchored on Ready Now
 - show only the selected suggested bundle
 - not show alternate suggestions underneath
 - fold Projected Impact into the primary projected-benefit action
@@ -326,6 +330,22 @@ Bundle details must:
   list so the offer is visible before scanning individual Tasks
 - include an included-count indicator near the Bundle Keeps after removal, such
   as `2 of 3 included`
+- include at most one pre-included `While you're there` compatible Task in a
+  suggested bundle when there is a clear same-Area, same-route, same-setup, or
+  same-device reason it fits
+- choose the mocked `While you're there` Task from candidates instead of
+  hard-coding one on every bundle: filter for compatibility, cap duration at a
+  tiny size, score Mood/Capacity fit and useful health/staleness/comfort value,
+  and avoid recently removed compatible Tasks in the current page session
+- omit `While you're there` when no candidate clearly fits
+- render a `While you're there` Task as a subtle included Task visible from the
+  start, not as a separate card and not as a post-completion optional Task
+- when the bundle starts, the `While you're there` Task enters the active Task
+  Session with the other included Tasks and can be started before the core
+  bundle is complete
+- make `While you're there` feel like smart inclusion, not extra homework
+- removing a `While you're there` Task should not deactivate Bundle Keeps
+- plan future payload roles as `core`, `while_there`, and `momentum`
 - conditionally show Home Assistant Area
 
 Area display rule:
@@ -551,12 +571,25 @@ After the final planned Task is completed:
 
 Optional Task behavior:
 
-- use `2-3` small Tasks in the first mock
+- use `2-3` optional Tasks in the first mock, small by default
 - generate the mocked optional Tasks from Recommendation Engine-like scoring,
   not from a fixed always-visible list
 - score optional Tasks with stricter bounds than the main suggestion: small
   duration, mood/time fit, current Area/Home Health usefulness, Staleness or
   Projected Impact, and session-history exclusions
+- allow one larger post-completion momentum Task only when Mood/Capacity, time
+  fit, and session completion suggest the user may want to keep going
+- do not offer larger momentum Tasks by default for low or quiet contexts
+- frame a larger momentum Task as optional momentum, not as the new finish line
+- let the planned bundle completion land first; the Momentum Task appears after
+  the win, not before the bundle feels complete
+- offer at most one larger Momentum Task in MVP, generally around `10-15`
+  minutes unless the product plan changes
+- do not offer Momentum Tasks after every completed bundle; require a real fit
+  signal
+- keep larger momentum Tasks distinct from `While you're there` Tasks:
+  momentum appears only after planned completion, while `While you're there`
+  is pre-included and visible from the start
 - render optional Tasks as normal actionable session rows with Start, Complete,
   and Skip
 - label the first optional Task as `Optional next`
