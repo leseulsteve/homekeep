@@ -243,6 +243,42 @@ def learned_duration_minutes(chore: "ChoreDefinition", state: "ChoreState") -> i
     return ordered[len(ordered) // 2]
 
 
+def recommendation_duration_minutes(
+    chore: "ChoreDefinition",
+    state: "ChoreState",
+    *,
+    mood: Optional[str] = None,
+    capacity: Optional[str] = None,
+    completed_in_session: int = 0,
+) -> int:
+    """Return an adaptive recommendation duration for the current context.
+
+    The user-entered estimate is a fallback/base suggestion. Real learned
+    duration is preferred, then lightly adapted to current readiness and recent
+    session momentum.
+    """
+
+    base = learned_duration_minutes(chore, state)
+    readiness = capacity or mood or "auto"
+    multiplier = 1.0
+    if readiness in {"low", "quiet", "tired", "overwhelmed"}:
+        multiplier = 0.75
+    elif readiness in {"focused", "calm", "normal", "steady"}:
+        multiplier = 1.0
+    elif readiness in {"ready", "energized", "high", "strong"}:
+        multiplier = 1.15
+    elif readiness in {"restless", "mobile"}:
+        multiplier = 0.9
+
+    if completed_in_session >= 3:
+        multiplier = min(multiplier, 0.8)
+    elif completed_in_session >= 2:
+        multiplier = min(multiplier, 0.9)
+
+    adjusted = round(base * multiplier)
+    return max(1, min(MAX_LEARNED_DURATION_MINUTES, adjusted))
+
+
 @dataclass(frozen=True)
 class ChoreVariant:
     """A completion variant for a Chore."""

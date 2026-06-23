@@ -9,7 +9,7 @@ Homekeep is pre-`1.0`. A version bump is not ready to publish unless the
 changed behavior is covered by realistic local mocks or by an approved live
 candidate workflow.
 
-For the `0.0.3` startup-fix implementation pass, mock coverage is adequate for
+For the `0.0.4` Live Test 2 implementation pass, mock coverage is adequate for
 a private HACS publish and developer readiness checkpoint, but not yet adequate
 for a public production release.
 
@@ -83,9 +83,9 @@ Home Assistant package-backed tests:
 
 Frontend/dashboard:
 
-- The former dashboard examples have been removed.
-- The sidebar app direction still needs frontend-specific mocks once the
-  Home Assistant extension approach is chosen.
+- The sidebar app has frontend registration and reload/unload coverage.
+- The Live Test 2 Right Now surface is still a mocked local UI state; service
+  wiring and full Home Health behavior are not covered by frontend tests yet.
 
 Dynamic entity behavior:
 
@@ -102,7 +102,7 @@ Calendar:
 ## Release Readiness Decision
 
 Mock coverage is adequate for continuing MVP implementation and for a
-private `0.0.3` HACS publish, provided the version bump does not claim live
+private `0.0.4` HACS publish, provided the version bump does not claim live
 Home Assistant production readiness.
 
 Mock coverage is not yet adequate for a public pre-`1.0` release without one

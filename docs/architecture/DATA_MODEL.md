@@ -108,7 +108,9 @@ Dismissal and snooze event rules:
 
 Duration learning rules:
 
-- `estimated_minutes` on `ChoreDefinition` remains the user-entered fallback.
+- `estimated_minutes` on `ChoreDefinition` remains the user-entered fallback
+  and starting suggestion. It is not authoritative truth after Homekeep has
+  timing evidence.
 - `duration_samples_minutes` stores at most the newest 10 valid real session
   item durations.
 - Valid learned duration samples are integer minutes from `1` to `240`.
@@ -116,8 +118,17 @@ Duration learning rules:
   `started_at` before `completed_at`.
 - Skips, snoozes, dismissals, swaps, cancellations, direct non-session
   completions, and invalid/non-positive timing do not train duration.
-- Recommendation time fit and materialized session display use the median
-  learned duration when samples exist, otherwise `estimated_minutes`.
+- Recommendation time fit uses the learned median when samples exist, otherwise
+  `estimated_minutes`, then may lightly adapt that duration to Mood/Readiness,
+  inferred Capacity, and current-session momentum.
+- Low/quiet readiness can shorten the recommended pass. Ready/strong readiness
+  can allow a fuller pass. If the user has already completed several Chores in
+  the current session, added/optional Chores should assume lower remaining
+  capacity unless the user explicitly keeps choosing more.
+- Materialized session display may use the learned base duration until the
+  session context is available for derived adjustment.
+- Future migrations may split duration samples by Chore Variant and readiness
+  bucket. Until then, context-adjusted duration is derived and disposable.
 
 Storage migration note:
 

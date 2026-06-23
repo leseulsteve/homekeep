@@ -73,7 +73,7 @@ The current approved design work covers enough to prototype and test:
 - Smart Chore List presentation
 - suggested Chore Bundle selection
 - active Chore Session behavior
-- Done for now / Bonus Chore ending flow
+- inline optional Chores after planned session completion
 - Homekeep Voice System
 
 It does not mean the whole dashboard is planned. The current implementation is
@@ -126,29 +126,30 @@ Fast mock prototype scope:
 - Bundle confirmation must transition into a full mocked active session.
 - Visually show only one active Chore Session at a time.
 - Chore Start and Complete must update local mock UI state.
-- Completed Chores must collapse into a small mocked summary.
+- Completed Chores must stay visible as near-normal Chore rows with a soft
+  congratulatory done state.
 - The mocked session must include the active Chore timer state.
 - The mocked session must include a quick completion effect.
-- `Done for now` must show a mocked final summary and return to Ready Now.
-- `One more` must reveal a mocked Bonus Chore in the ending flow.
-- Revealing the mocked Bonus Chore and accepting it must be separate actions.
-- The mocked Bonus Chore must include the random/redraw button visually, even
-  if it is disabled or no-op.
-- Bonus Chore backend eligibility/redraw behavior does not need to be wired yet.
+- Completing the final planned Chore must add a short list of optional Chores
+  directly into the active session list.
+- The old `Done for now` / `One more` choice pair must not appear immediately
+  after the planned Chores are completed.
+- The optional Chores can use mocked synthetic data; backend eligibility/redraw
+  behavior does not need to be wired yet.
 - The main shuffle button must swap to another mocked Chore Bundle in the first
   mock prototype.
 - Shuffle should visually exercise the fuzzy/refining state, even with mocked
   data.
 - Context chip changes must update the mocked suggestion after the
   fuzzy/refining state, using plausible synthetic variants.
-- Include `4-5` mocked Chore Bundle variants covering different time, energy,
-  mood, and area contexts.
+- Include `4-5` mocked Chore Bundle variants covering different time, inferred
+  Capacity, mood, and area contexts.
 - Always use realistic synthetic household mocks, never placeholders such as
   `Area 1`, `Task 1`, or lorem ipsum.
 - Use mostly single-area mocked bundles, plus one multi-area bundle to test
   mixed-area display behavior.
 - Include varied mocked bundle durations: one short `5 min`, a couple of
-  `10-15 min`, and one fuller `20 min` option.
+  `10-15 min`, and one fuller `20-25 min` option.
 - Include realistic synthetic areas such as `Kitchen`, `Entryway`, `Bathroom`,
   `Laundry`, and `Living room`.
 - Include realistic synthetic chores such as `Clear dishes`, `Wipe counters`,
@@ -164,10 +165,59 @@ It must:
 
 - use a hybrid layout
 - show a substantial Mood Context greeting first
+- generate the Right Now greeting from top-level readiness context, not from the
+  selected Chore Bundle title
+- keep the greeting stable through shuffle unless time or mood changes
+  meaningfully
 - auto-generate the best suggested Chore Session on open
 - use inferred/default context when the user has not chosen values
-- show context as compact colored chips with icons
+- show context as compact colored chips with icons and the current value; avoid
+  visible labels when the icon is self-explanatory, but keep accessible labels
+  and tooltips
+- keep internal `Auto` values, but render them as `Best fit` in the Time and
+  Area chips/selectors
+- visually distinguish inferred/default chip values from explicit user-selected
+  chip values without adding visible labels
+- keep the visible filter row lean and ordered as Time, Mood, Area, then
+  shuffle; this keeps Mood visually central without adding another label
+- default Time to automatic availability when the user has not chosen a
+  duration; do not expose an explicit `all the time` option
+- make Mood Context/readiness drive bundle length when Time is automatic:
+  `low`/`quiet` bias shorter, `focused`/`restless` bias mid-sized useful
+  resets, and `ready` can bias fuller bundles
+- do not show Energy as a top-level Right Now chip for Live Test 2; keep
+  Capacity internal and infer it from Mood Context as
+  `auto -> auto`, `low/quiet -> low`, `focused -> steady`,
+  `restless -> mobile`, and `ready -> strong`
+- score Capacity against effort, movement, setup friction, duration, and
+  interruption tolerance; `low` should stay short and contained, `mobile` can
+  include movement/light carrying, and `strong` can include fuller physical care
+- do not show Goal as a top-level Right Now chip for Live Test 2; keep Goal
+  internal and infer it from Mood Context as `auto -> visible lift`,
+  `low -> quick wins`, `quiet -> fresh start`, `focused -> overdue care`,
+  `restless -> visible lift`, and `ready -> overdue care`
+- show Area as automatic by default, not as a user-selected Area
+- treat a specific user-selected Area as an explicit recommendation filter that
+  strongly constrains the recommendation
+- add a compact fit explanation line in the suggested bundle card, such as
+  `Picked for a quiet 10-minute reset in the Bathroom`
+- when Area is explicit, make the fit line acknowledge the user choice, such as
+  `Kept to Bathroom because you picked it.`
+- let shuffle respect the visible filters; when Mood is `auto`, shuffle may
+  vary hidden Goal/fit slightly, but explicit Time/Area choices must remain
+  intact
+- title the shuffle control as `Try another fit`
+- use removed physical Chores as short-lived feedback: if a heavier/longer
+  Chore is removed before session start, soften inferred Capacity for the next
+  shuffle
+- include a filter-specific no-suggestion state when explicit filters overconstrain
+  the result, such as `Nothing fits Bathroom with this mood right now.`
+- during live review, check whether `Best fit` for Time and Area is understood
+  and whether mobile vertical density remains comfortable
 - let each chip open a small inline selector
+- center chip icons inside a distinct icon-slot background, with spacing
+  adjusted for that layout; do not force this treatment onto action buttons
+  where the simpler icon reads better
 - wait briefly after chip changes before refreshing, so multiple changes can
   settle together
 - keep the current suggestion visible while refining
@@ -199,14 +249,13 @@ The suggested Chore Bundle shows its core Chores by default.
 
 Default display must include:
 
-- stable invite line
 - evocative Chore Bundle title
 - compact bundle count and estimated total time
 - scoped health context when it explains the recommendation
 - short reason
 - included Chores
 - removed Chores, if any, with removed styling and restore
-- bundle bonus/Keeps footer
+- full-reset Keeps footer
 - compact projected-benefit action
 
 Do not hide the core Chores behind an expand/details control. A Chore Bundle is
@@ -268,15 +317,23 @@ Bundle details must:
 - show only the selected suggested bundle
 - not show alternate suggestions underneath
 - fold Projected Impact into the primary projected-benefit action
+- place the projected-benefit/start action in the suggestion card header,
+  aligned to the top-right of the title/reason block on wider screens, so it
+  does not move below a variable-height Chore list
 - show each Chore with estimated time
 - show Keeps per Chore
-- show bundle-level bonus Keeps, such as `+4 Keeps bonus`, in a quiet footer
+- show full-reset Keeps, such as `4 Keeps for the full reset`, before the Chore
+  list so the offer is visible before scanning individual Chores
+- include an included-count indicator near the full-reset Keeps after removal, such
+  as `2 of 3 included`
 - conditionally show Home Assistant Area
 
 Area display rule:
 
-- if all Chores share one Home Assistant Area, combine area and health change in
-  one scoped metadata chip
+- if all Chores share one Home Assistant Area, combine area and health gain in
+  one scoped metadata chip, such as `Kitchen 24`
+- do not use before/after notation such as `57 -> 74` in the Right Now metadata
+  chip, and do not prefix the gain with `+`; the gain is always positive
 - if the bundle spans multiple areas, show each Chore row's area
 
 ## Pre-Start Editing
@@ -287,14 +344,15 @@ Do:
 
 - make remove secondary
 - use icons with accessible labels
-- remove instantly with undo
+- remove instantly with row-level restore
 - keep removed Chores visible with removed styling
 - provide row-level restore
 - recalculate time and Projected Impact after removal
-- show lost bundle bonus or projected-benefit treatment when applicable
+- show full-reset Keeps or projected-benefit no-longer-active treatment when
+  applicable, without negative numbers
 - keep the original recommendation recoverable through shuffle or visible
   context changes
-- offer optional context-specific preference learning in the undo toast
+- do not show an undo toast when row-level restore is already visible
 
 Do not:
 
@@ -303,17 +361,16 @@ Do not:
 - automatically train recommendation learning from removal
 - allow edits that break service/session validity
 
-Undo toast:
+Row-level restore:
 
-- auto-dismisses after a short time
-- remains visible long enough for Undo
-- does not block bundle confirmation
-- may include a context-specific preference action when honest and clear
+- remains visible as long as the removed Chore remains in the suggested bundle
+- should be visually secondary but easy to find
+- should not be duplicated by a temporary undo toast
 
 Example preference actions:
 
 - `Suggest this less in short sessions`
-- `Suggest this less when energy is low`
+- `Suggest this less when Capacity is low`
 - `Suggest this less for evening resets`
 - `Suggest this less in this area`
 
@@ -327,12 +384,12 @@ should be simple, encouraging, lightly gamified, and non-punitive.
 Use a combination of numbers and friendly labels:
 
 ```text
-Kitchen +24 · Big kitchen boost
+Kitchen 24 · Big kitchen boost
 ```
 
-Keeps are Homekeep's lightweight positive reward currency.
-They should be framed as a small sign of love the home gives back when it is
-cared for, not as productivity points or a scoreboard.
+Keeps are Homekeep's lightweight signal of care returned by the home.
+They should be framed as gratitude from the home, not a score on the user,
+money, a wage, or a productivity measure.
 Keeps should always be framed as coming from the home as a whole, not from
 individual Home Assistant Areas.
 
@@ -340,21 +397,59 @@ Keeps rules:
 
 - show Keeps per Chore when suggesting a bundle
 - show Keeps per Chore in active sessions
-- award Keeps for each completed Chore
-- award bundle bonus Keeps when the confirmed bundle is completed
-- award extra intact-bundle bonus when the originally suggested bundle is
-  completed with no pre-start removals
+- award Keeps for care completed, not for speed, optimization, streaks, or
+  performance
+- show full-reset Keeps as harmony for a coherent suggested bundle, not as a
+  pressure reward for obeying the app
+- allow optional Chores to add Keeps, but never create a reward chain
+- do not prefix positive Keeps, health gain, impact gain, or other always-positive
+  reward/gain values with `+`
 - do not subtract Keeps for removing, skipping, snoozing, ending, or stopping
-- showing a lost bundle bonus during pre-start removal is allowed, but it must
-  communicate an unclaimed opportunity, not a penalty or subtraction from earned
-  Keeps
+- showing full-reset Keeps changes during pre-start removal is allowed, but it must
+  communicate an inactive/unclaimed opportunity, not a negative number, penalty,
+  or subtraction from received Keeps
 - do not show a persistent running Keeps total in MVP
 - keep Keeps math explainable in one line
+- use Keeps more as care texture than as a currency; do not add spend, bank,
+  shop, redeem, upgrade, or exchange-rate mechanics
 - keep Keeps feedback restrained; avoid arcade-like celebration
+- celebrate the completed suggested bundle more clearly than an individual
+  Chore, because it is the main recommendation loop completing
+- when optional Chores are completed after the suggested bundle, make each
+  additional completion feel gradually warmer while staying calm and
+  non-scoreboard-like
 - use Keeps sparingly in prose
-- avoid transactional overuse of `earned`
+- avoid transactional language such as `earn`, `earned`, `spend`, `bank`, or
+  `redeem`
 - prefer quiet reciprocal language, such as `The home gives a little back`
 - avoid coin, trophy, badge-heavy, or scoreboard-like visual metaphors
+- use Keeps to help tiny Chores feel like they count
+- let Home Health say where care helps and Keeps say care happened; do not make
+  them compete
+
+## Recommendation Engine Fit Rules For The Mock
+
+The mocked Right Now suggestions should behave like Recommendation Engine
+output, even before service wiring:
+
+- filter hard constraints before scoring
+- keep home need and user fit separate internally
+- allow a bounded care nudge toward useful Home Health/Staleness work
+- prefer smaller Chore Variants over rejecting useful care when the user context
+  is light
+- exclude Chores just removed, skipped, dismissed, snoozed, or completed in the
+  current flow
+- make optional Chores stricter than the planned bundle: smaller, better-fit,
+  bounded, and non-chaining
+- explain one human reason rather than exposing score math
+- avoid repetitive bundles and incoherent mixed-area bundles
+- keep shuffle stable within a family of good fits, not random
+- learn conservatively from correction signals; soften or retime before
+  suppressing useful care
+- treat user-entered Chore length as a starting estimate; learned active-session
+  duration and current readiness should shape displayed/scored duration
+- use adaptive duration to resize care with tiny/light variants or shorter
+  passes when the user context is light
 
 ## Active Chore Session Requirements
 
@@ -366,8 +461,7 @@ The active session must:
 - show all selected Chores
 - gently highlight the best first Chore
 - allow the user to start or complete Chores in any order
-- update the suggested next Chore after completions, skips, snoozes, or manual
-  starts
+- update the suggested next Chore after completions, skips, or manual starts
 - keep the highlight helpful, not commanding
 - feel more dynamic and rewarding than the selection screen
 
@@ -379,9 +473,16 @@ Prominent Chore-level actions:
 Secondary/overflow actions:
 
 - Skip
-- Snooze
+
+Skip must remain available for both pending and started/ongoing Chores inside
+an active Chore Session. If the user skips the ongoing Chore, stop that Chore's
+timer, mark it skipped rather than completed, and move the suggested-next
+highlight to the next pending Chore when one exists.
 
 Pause belongs to the timer/chrono control, not as a separate main action.
+Do not offer Snooze on active-session Chores. Snooze is a recommendation or
+planning-level "later" action, not a control for a Chore the user already
+accepted into an active session.
 
 ## Timer Requirements
 
@@ -412,49 +513,70 @@ Do:
 Do not:
 
 - interrupt with a full summary after every Chore
-- leave completed Chores as full checked-off rows
+- hide completed Chores behind an expand/collapse control
 
-Completed Chores collapse into a small completed summary.
+Completed Chores stay inline in the active session list.
 
-The completed summary:
+The completed row treatment:
 
-- is collapsed by default
-- shows a count
-- expands to show completed Chore names and Keeps received
+- preserves the Chore name, Area, duration, and Keeps line
+- removes Start/Complete/Skip actions
+- adds a quiet congratulatory signal such as `Nice, done`
+- uses a soft done badge or check treatment without turning the row into a
+  separate summary component
 
-## Done For Now And Bonus Chore
+## Optional Chores After Planned Completion
 
 After the final planned Chore is completed:
 
-- keep the user in the active session ending state
-- show `Done for now`
-- show `One more`
+- keep the user in the active Chore Session
+- append a short list of new optional Chores directly to the session list
+- keep completed planned Chores visible above the optional Chores
+- show a subtle session progress line, such as `2 of 3 planned done · optional
+  care available`
+- add a persistent inline milestone row when the suggested reset is complete,
+  such as `Suggested reset complete · The home feels lighter`
+- visually separate the optional list with a compact inline divider
+- include a tiny `why these?` explanation for optional Chores, such as `Picked
+  for small effort, current fit, and useful home lift`
 - do not automatically exit the user from the flow
-- make `Done for now` feel successful
-- make `One more` inviting without pressure
+- keep an exit action available once optional Chores appear so optional really
+  means optional
+- make stopping feel already successful, not like rejecting more work
+- shift the idle support text after planned completion toward `Stop here, or
+  pick one more small thing`
+- make optional Chores inviting without pressure
+- show a clear completion flash when the suggested bundle is done before the
+  optional Chores appear
 
-`One more` behavior:
+Optional Chore behavior:
 
-- tapping `One more` immediately reveals the Bonus Chore and Keeps
-- revealing and accepting are separate actions
-- no separate `No thanks`; `Done for now` remains the stop action
-- revealed Bonus Chore has a compact randomize/redraw button
-- Bonus Chore redraw uses the same fuzzy/refining state as main shuffle
-- Bonus Chore redraw is future behavior and may need backend support
-
-Bonus Chore redraw should:
-
+- use `2-3` small Chores in the first mock
+- generate the mocked optional Chores from Recommendation Engine-like scoring,
+  not from a fixed always-visible list
+- score optional Chores with stricter bounds than the main suggestion: small
+  duration, mood/time fit, current Area/Home Health usefulness, Staleness or
+  Projected Impact, and session-history exclusions
+- render optional Chores as normal actionable session rows with Start, Complete,
+  and Skip
+- label the first optional Chore as `Optional next`
+- label the skip action on optional Chores as `Not now`
+- use progressively warmer completion feedback as optional Chores are completed
+- do not require a separate reveal or accept action before optional Chores
+  become visible
 - bias toward useful overdue Chores when they fit context
 - prefer small overdue tasks with high Projected Impact
-- preserve the light `one more` feeling
+- preserve the light optional feeling
 - avoid large overdue Chores unless a tiny/light variant exists
 - avoid Chores just removed, skipped, snoozed, or dismissed
+- keep optional generation bounded; do not chain new optional lists after the
+  first inline optional list is shown
 - avoid guilt-based overdue language
 
 ## Final Summary
 
-Tapping `Done for now` shows a short final celebration/summary before returning
-to Ready Now.
+When the user exits the completed session, show a short final
+celebration/summary before returning to Ready Now.
 
 The summary:
 
@@ -463,7 +585,7 @@ The summary:
 - is not a report card
 - includes completed Chores
 - includes Keeps received
-- includes bundle bonus if received
+- includes full-reset Keeps if received
 - includes friendly Home/Area impact where available
 - auto-returns to Ready Now after a short moment
 - has no share/log/details option in MVP
@@ -478,7 +600,7 @@ Detailed history belongs later in Activity.
 - Do not let UI state become durable source of truth.
 - Do not make the app feel like an admin console.
 - Do not make recommendations feel like obligations.
-- Do not overbuild Bonus Chore redraw until backend support is verified.
+- Do not overbuild optional Chore redraw until backend support is verified.
 - Do not implement frontend APIs from memory; verify Home Assistant behavior.
 - Do not implement later workflows that still lack Steve-approved decisions.
 

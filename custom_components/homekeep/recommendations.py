@@ -12,8 +12,8 @@ from .history import context_bucket, history_fit_score
 from .models import (
     ChoreDefinition,
     ChoreState,
-    learned_duration_minutes,
     prune_event_timestamps,
+    recommendation_duration_minutes,
 )
 from .sessions import SessionEngine
 from .storage import HomekeepStore
@@ -133,6 +133,7 @@ class RecommendationEngine:
                 calendar_context=calendar_context,
                 bucket=bucket,
                 user_id=user_id,
+                mood=mood,
             )
             for chore in enabled_chores.values()
         ]
@@ -306,9 +307,15 @@ class RecommendationEngine:
         calendar_context: Optional[dict[str, Any]],
         bucket: str,
         user_id: Optional[str],
+        mood: Optional[str],
     ) -> dict[str, Any]:
         state = self.store.states.get(chore.id) or ChoreState.new_for_chore(chore)
-        estimated_minutes = learned_duration_minutes(chore, state)
+        estimated_minutes = recommendation_duration_minutes(
+            chore,
+            state,
+            mood=mood,
+            capacity=energy_level,
+        )
         stale = clamp_score(priority_staleness(chore, state, now))
         impact = projected_impact(chore, state, now)
         time_fit = _time_fit(estimated_minutes, time_budget_minutes)

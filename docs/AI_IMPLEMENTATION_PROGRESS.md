@@ -11,12 +11,12 @@ current_phase: 8
 current_phase_name: Hardening and release readiness
 last_updated: 2026-06-22
 last_codex_summary: >
-  The second mocked Right Now live-test candidate is locally ready for Steve's
-  private Home Assistant review. It applies the dark-theme visual pass,
-  transparent layering, typography cleanup, visible included Chores, removed
-  Chore restore, projected-benefit primary action, and bonus-loss treatment.
-  Use Gate 3B in docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md for the next
-  live review. Homekeep services are still not wired to the sidebar app.
+  Right Now now treats a Chore's user-entered duration as a starting estimate,
+  not fixed truth. Recommendation payload durations prefer learned completion
+  samples, then adapt lightly to Mood/Readiness, Capacity, and session momentum.
+  The second mocked Right Now live-test candidate remains locally ready for
+  Steve's private Home Assistant review; use Gate 3B in
+  docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md.
 ```
 
 ## Phase Checklist
@@ -58,6 +58,122 @@ Known gaps / next prompt:
 - ...
 ```
 
+### 2026-06-22 - Version 0.0.4 private Live Test 2 publish prep
+
+Status: completed locally, ready to push
+
+Implemented:
+- Bumped the Homekeep integration manifest version from `0.0.3` to `0.0.4`.
+- Updated the private live-test checklist release notes for the Live Test 2
+  candidate.
+- Updated the mock adequacy review for the `0.0.4` private HACS publish scope.
+
+Tests/checks run:
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest discover -s tests -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `git diff --check`
+
+Docs updated:
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/live-test/MOCK_ADEQUACY_REVIEW.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Publish `0.0.4` as a private HACS/live-test candidate only. It does not claim
+  public production readiness.
+- No tag will be created because the repository still has no established tag
+  convention.
+
+Known gaps / next prompt:
+- Push the `0.0.4` candidate to `main`, update Homekeep from HACS in the
+  private Home Assistant test instance, restart Home Assistant, and run Gate 3B.
+
+### 2026-06-22 - Live Test 2 readiness refresh
+
+Status: completed locally, pending install into private Home Assistant test instance
+
+Implemented:
+- Rechecked the Gate 3B Live Test 2 runbook after the adaptive-duration pass.
+- Added a Live Test 2 checkpoint to verify that displayed duration feels
+  adaptive to Mood/Readiness and recent session momentum rather than rigidly
+  tied to the user-entered Chore estimate.
+- Confirmed Gate 3B still covers the Right Now component, mocked active-session
+  loop, optional Chores, and basic Home Health visibility/navigation.
+
+Tests/checks run:
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest discover -s tests -v`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `git diff --check`
+- Targeted privacy scan for obvious secret/private-detail terms in changed code,
+  docs, and tests; results were expected synthetic calendar/testing references.
+
+Docs updated:
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Live Test 2 remains a mocked Right Now review plus basic Home Health
+  visibility/navigation; it still does not validate sidebar service wiring,
+  full Home Health behavior, Plan, Add Chore, Activity, Settings, diagnostics,
+  stale-state recovery, or full navigation.
+
+Known gaps / next prompt:
+- Install or update the private Home Assistant test instance to the current
+  candidate, restart Home Assistant, then run Gate 3B from
+  `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`.
+- If using HACS from GitHub, commit and push the current candidate first so the
+  private instance can install the exact reviewed code.
+
+### 2026-06-22 - Adaptive recommendation durations
+
+Status: completed locally
+
+Implemented:
+- Added a derived recommendation-duration helper that starts from learned
+  completion duration when available and otherwise falls back to the Chore's
+  entered estimate.
+- Adapted recommendation item `estimated_minutes` for Mood/Readiness, Capacity,
+  and recent session momentum so bundles can get smaller or fuller without
+  mutating the stored Chore definition.
+- Kept active work duration samples as the only training signal; skips,
+  removals, snoozes, dismissals, and invalid timing remain excluded.
+- Added recommendation tests for low Mood shortening learned duration and high
+  readiness expanding it.
+
+Tests/checks run:
+- `python3 -m unittest tests.test_recommendations.RecommendationEngineTest.test_recommendations_use_learned_duration_samples -v`
+- `python3 -m unittest tests.test_recommendations.RecommendationEngineTest.test_recommendations_shorten_learned_duration_for_low_mood -v`
+- `python3 -m unittest tests.test_recommendations.RecommendationEngineTest.test_recommendations_can_expand_learned_duration_for_high_readiness -v`
+- `python3 -m unittest tests.test_recommendations -v`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `python3 -m unittest tests.test_models tests.test_sessions -v`
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `git diff --check`
+
+Docs updated:
+- `docs/AI_DECISION_LOG.md`
+- `docs/architecture/DATA_MODEL.md`
+- `docs/specs/RECOMMENDATION_ENGINE.md`
+- `docs/specs/SERVICE_SCHEMAS.md`
+- `docs/implementation/TEST_PLAN.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- User-entered Chore length is a fallback/base suggestion, not an authoritative
+  recommendation duration.
+- Current adaptation is derived and disposable; future storage can add
+  Chore Variant or readiness-bucket samples without changing the source of
+  truth.
+
+Known gaps / next prompt:
+- Live Test 2 should verify whether adaptive duration copy feels respectful and
+  whether low-readiness recommendations actually feel lighter in the mocked UI.
+
 ### 2026-06-22 - Second Right Now live-test candidate
 
 Status: completed locally, pending private Home Assistant live review
@@ -68,8 +184,8 @@ Implemented:
   borders, and less pale white/green treatment.
 - Tightened typography and line-height rhythm across Right Now, active session,
   ending, Bonus Chore, toast, timer, and summary states.
-- Kept randomize with the context chips, kept the invite line stable during the
-  page session, and kept internal labels out of the visible Right Now surface.
+- Kept randomize with the context chips and kept internal labels out of the
+  visible Right Now surface.
 - Made suggested Chores visible by default, quieter as selected/included rather
   than completed, and restorable in place after removal.
 - Folded Projected Impact into the primary projected-benefit action and moved
@@ -100,6 +216,1045 @@ Known gaps / next prompt:
   Health, Plan, Add Chore, Activity, Settings, diagnostics, full navigation, or
   stale-state recovery.
 
+### 2026-06-22 - Remove duplicate removal undo toast
+
+Status: completed locally
+
+Implemented:
+- Removed the pre-start Chore removal undo toast from the mocked Right Now
+  panel.
+- Kept row-level restore as the single visible recovery path for removed
+  Chores.
+- Updated product and Codex implementation docs so removal reversibility is
+  handled in place instead of duplicated in a toast.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Do not show a temporary undo toast when the removed Chore remains visible with
+  row-level restore.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Remove active-session Chore snooze
+
+Status: completed locally
+
+Implemented:
+- Removed the Snooze button from active-session Chore rows in the mocked
+  Homekeep panel.
+- Updated app plan and Codex UI guidance so active-session Chores support
+  start/complete, skip, pause, and end, but not snooze.
+- Kept snooze as a recommendation/planning-level "later" concept rather than an
+  in-session Chore control.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+- `rg -n "Snooze" custom_components/homekeep/frontend/homekeep-panel.js`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Snooze is not needed on active-session Chores because the user has already
+  accepted the Chore Session; use Skip, Pause, or End instead.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Allow skipping a started Chore
+
+Status: completed locally
+
+Implemented:
+- Wired the active-session Skip button in the mocked Homekeep panel.
+- Added skipped session-item state so skipped Chores leave the active list,
+  do not award Keeps, and appear in a quiet skipped summary.
+- Made Skip work for started/ongoing Chores by stopping the timer, clearing the
+  active item, and moving the suggested-next highlight to the next pending
+  Chore when available.
+- Updated product and Codex UI guidance so started Chores can still be skipped.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+- Targeted `rg` scan for skip wiring and started-Chore guidance.
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Skip is the in-session escape hatch even after a Chore starts; snooze remains
+  outside the active-session Chore controls.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Keep completed Chores inline
+
+Status: completed locally
+
+Implemented:
+- Removed the active-session completed Chore expand/collapse summary from the
+  mocked Homekeep panel.
+- Completed Chores now remain visible in their original session order as
+  near-normal Chore rows with Area, duration, Keeps, a `Nice, done` signal, and
+  a soft check badge.
+- Removed completed-row active controls while keeping the completed item visible
+  as part of the session history.
+- Updated product and Codex UI guidance so completed Chores stay inline rather
+  than hiding behind an expander.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+- Targeted `rg` scan for old completed-summary/expander wording and code.
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Completed Chores should stay almost as-is in the active session, with a soft
+  congratulatory done state instead of an expandable summary.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Inline optional Chores after planned completion
+
+Status: completed locally
+
+Implemented:
+- Replaced the mocked active-session `Done for now` / `One more` ending choice
+  with an inline optional Chore continuation.
+- Completing the final planned Chore now appends three small optional Chores
+  directly into the active session list under an `A few more that fit` divider.
+- Optional Chores render as normal session rows with Start, Complete, and Skip;
+  the first optional row is marked `Optional next`.
+- Removed the old mocked Bonus Chore reveal/accept UI and frontend state.
+- Updated product and Codex UI guidance so Live Test 2 reviews the inline
+  optional list instead of the old ending button pair.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+- Targeted `rg` scan confirmed the old frontend `Done for now` / `One more` /
+  Bonus Chore reveal strings are gone.
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Optional Chores appear only when the last planned Chore is completed, not
+  when the user skips out of the planned bundle.
+- The optional list is bounded in the mock and does not chain indefinitely.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Progressive completion celebration
+
+Status: completed locally
+
+Implemented:
+- Added completion flash levels to the mocked active session: regular Chore,
+  completed suggested bundle, and progressively warmer optional Chore
+  completions.
+- The final planned Chore now shows a clearer bundle-complete message before
+  optional Chores appear.
+- Optional Chore completion feedback now ramps gently across the added optional
+  list without adding plus signs, scores, or noisy arcade treatment.
+- Updated product and Codex UI guidance so the suggested bundle completion is
+  celebrated more clearly, and optional completions get gradually warmer.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+- Targeted `rg` scan for progressive celebration copy and styling.
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Completing the suggested bundle deserves a stronger celebration than a single
+  Chore.
+- Optional Chore completions should get warmer as the user keeps going, while
+  staying calm and non-scoreboard-like.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Recommendation-like optional Chore generation for Live Test 2
+
+Status: completed locally
+
+Implemented:
+- Replaced the fixed optional Chore append list with a larger mocked candidate
+  pool and local Recommendation Engine-like scoring.
+- Optional Chores now score for small duration, mood/readiness fit, explicit or
+  inferred Area fit, synthetic Home Health/Area Health usefulness, and
+  Staleness-like usefulness.
+- Optional Chores exclude Chores already in the current session, removed
+  pre-start, or skipped in-session, and remain capped to one bounded inline
+  list.
+- Updated product, Codex UI guidance, and the Live Test 2 checklist so optional
+  Chores are reviewed as stricter Recommendation Engine-like output.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+- Targeted `rg` scan for optional-generation rules and stale Live Test 2 ending
+  checks.
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- For Live Test 2, optional Chores are still synthetic and local, but they
+  should feel generated from the same Recommendation Engine principles as the
+  main suggestion, with stricter bounds.
+- Optional generation must stay bounded and must not chain forever.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Active-session optional continuation refinements
+
+Status: completed locally
+
+Implemented:
+- Added a subtle active-session progress line showing planned and optional
+  progress.
+- Added a persistent inline milestone row when the suggested reset is complete.
+- Kept optional Chores visually quieter than planned rows and added a compact
+  explanation for why they appeared.
+- Kept an exit action visible once optional Chores appear so optional remains
+  genuinely optional.
+- Changed optional Chore skip copy to `Not now`.
+- Shifted idle support copy after planned completion to a calmer continuation
+  prompt.
+- Kept the final summary reachable even when optional Chores make the list
+  longer.
+- Updated product, Codex UI guidance, and Live Test 2 checklist with the full
+  accepted active-session recommendation set.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+- Targeted `rg` scan for the new progress line, milestone row, optional
+  explanation, exit action, and `Not now` copy.
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Active sessions should make planned completion visible as a milestone, while
+  keeping optional continuation bounded, explained, and easy to leave.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Suggested Chore Engine rules and mock scoring
+
+Status: completed locally
+
+Implemented:
+- Updated the mocked Right Now bundle picker to use hard rejection before
+  scoring.
+- Split mocked bundle scoring into Home need, user fit, bounded care nudge, and
+  diversity/stability factors.
+- Kept explicit Time and Area constraints stronger than high Home need.
+- Kept optional Chore generation aligned with the stricter Recommendation
+  Engine-like rules already used for Live Test 2.
+- Added canonical Recommendation Engine guidance for two-stage selection,
+  separate Home need/user fit, bounded nudging, Chore Variants, current-flow
+  exclusions, optional continuation bounds, diversity, shuffle stability, and
+  conservative learning.
+- Updated the decision log, product plan, Codex UI guidance, and Live Test 2
+  checklist so future service wiring follows the same engine shape.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/specs/RECOMMENDATION_ENGINE.md docs/AI_DECISION_LOG.md docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+- Targeted `rg` scan for two-stage scoring, hard constraints, bounded care
+  nudge, Chore Variant preference, shuffle stability, and mocked scoring code.
+
+Docs updated:
+- `docs/AI_DECISION_LOG.md`
+- `docs/specs/RECOMMENDATION_ENGINE.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- The suggested Chore engine should be gently opinionated through a capped,
+  explainable care nudge, not random, punitive, or purely easiest-first.
+- Optional Chores share the same principles as the main suggestion but with
+  stricter bounds and no unbounded chaining.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+- Real service wiring still needs backend Recommendation Engine implementation
+  that matches this documented shape.
+
+### 2026-06-22 - Keeps gratitude model
+
+Status: completed locally
+
+Implemented:
+- Reframed Keeps as care returned by the home, not points, money, wages,
+  currency, or user performance scoring.
+- Changed visible mocked bundle wording from `Keeps bonus` to
+  `Keeps for the full reset` and changed inactive copy to `Full-reset Keeps not
+  active`.
+- Updated product, voice, Codex UI guidance, Live Test 2 checklist, and the
+  decision log with rules for Keeps as gratitude, full-reset harmony, tiny-Chore
+  acknowledgement, no reward chains, no plus signs, and quiet reflection
+  instead of leaderboards.
+- Replaced active planning language that implied lost/earned/bundle-bonus Keeps
+  with received/full-reset Keeps language.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/AI_DECISION_LOG.md docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/product/HOMEKEEP_VOICE_SYSTEM.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+- Targeted `rg` scan for full-reset Keeps language, care-returned framing, and
+  stale `+ Keeps` / `Keeps bonus` wording.
+
+Docs updated:
+- `docs/AI_DECISION_LOG.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Keeps are gratitude/care texture from the home, not a spendable or
+  leaderboard-like currency.
+- Full-reset Keeps represent harmony in the suggested bundle, and optional
+  Chores must not create a Keeps reward chain.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Positive gain values without plus signs
+
+Status: completed locally
+
+Implemented:
+- Removed plus signs from visible Keeps values in the Right Now, active
+  session, Bonus Chore, completion flash, completed summary, and final summary
+  surfaces.
+- Updated active implementation and product guidance so positive Keeps, health
+  gain, impact gain, and other always-positive reward/gain values are shown
+  without a `+` prefix.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+- Targeted `rg` scan for old always-positive plus-sign examples in the Right
+  Now UI and Live Test 2 guidance.
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Always-positive reward/gain values should read as positive by context rather
+  than carrying a plus sign.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Live Test 2 final scope decisions
+
+Status: completed locally
+
+Implemented:
+- Recorded that `Best fit` is final for automatic Time and Area in this pass.
+- Recorded that the top-right projected-benefit action button stays as-is for
+  Live Test 2.
+- Expanded Live Test 2 scope to include basic Home Health visibility/navigation
+  alongside Right Now and the mocked active-session loop.
+- Updated the live-test checklist and product plan so future work does not
+  treat Live Test 2 as Right Now-only.
+
+Tests/checks run:
+- `rg -n "Live Test 2 should focus only|Right Now-only|does not validate the full Home Health view|Home Health implementation remains planned but unvalidated until a later" docs/product/HOMEKEEP_APP_PLAN.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+- `git diff --check -- docs/product/HOMEKEEP_APP_PLAN.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Live Test 2 should verify that Home Health is reachable and does not crowd
+  Right Now, but it still does not validate Plan, Add Chore, Activity, Settings,
+  diagnostics, service wiring, or the full Home Health behavior surface.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Selected Right Now pre-live polish
+
+Status: completed locally
+
+Implemented:
+- Rendered internal `Auto` values as `Best fit` for Time and Area while keeping
+  the internal value unchanged.
+- Added subtle inferred/default versus explicit chip styling.
+- Made explicit-Area fit copy acknowledge the user's choice.
+- Added included-count text near the bundle bonus after removal.
+- Added a filter-specific no-suggestion message for overconstrained explicit
+  filters.
+- Changed the shuffle tooltip/accessibility label to `Try another fit`.
+- Tightened mobile vertical density around the hero, chips, suggestion card,
+  metadata, bonus line, and Chore rows.
+- Updated product, implementation, and live-test guidance for these selected
+  pre-Live-Test-2 changes.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Keep the visible control set lean and make Homekeep's inferred choices
+  understandable without adding Energy or Goal back to the top row.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Bundle bonus moved before Chore list
+
+Status: completed locally
+
+Implemented:
+- Moved the bundle bonus/inactive-bonus line above the visible suggested Chore
+  list.
+- Preserved the inactive bonus treatment when Chores are removed before session
+  start.
+- Updated product, implementation, and live-test guidance.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Bundle bonus is part of the offer and should be visible before the user
+  scans individual Chores.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Primary action moved to card header
+
+Status: completed locally
+
+Implemented:
+- Moved the projected-benefit/start action from below the Chore list into the
+  suggested bundle card header.
+- Aligned the action to the top-right of the title/reason block on wider
+  screens and stacked it cleanly on mobile.
+- Removed the dependency between primary action placement and variable Chore
+  list height.
+- Updated product, implementation, and live-test guidance.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- The primary recommendation action belongs in a stable card-header position,
+  not after content whose height changes with bundle composition.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Health metadata chip gain format
+
+Status: completed locally
+
+Implemented:
+- Changed the Right Now health metadata chip from before/after notation to a
+  scoped positive gain format, such as `Kitchen 24`.
+- Kept the gain unprefixed because the chip always represents positive
+  projected benefit.
+- Updated active implementation guidance, product guidance, and the live-test
+  checklist to avoid reintroducing `57 -> 74`-style notation in Right Now.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+- `rg -n "healthLine|48 -> 72|74 -> 77|Kitchen 48 -> 72|Home 74 -> 77" custom_components/homekeep/frontend/homekeep-panel.js docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/product/HOMEKEEP_APP_PLAN.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Right Now should show the projected health gain compactly, not expose
+  before/after health math in the metadata chip.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Filter relationship pass
+
+Status: completed locally
+
+Implemented:
+- Kept the visible Right Now filter set to Time, Mood, Area, and shuffle, with
+  Mood centered in the row.
+- Added a compact fit explanation line to the suggested bundle card.
+- Made explicit Area a stronger recommendation constraint.
+- Updated shuffle so it respects visible filters; Mood `auto` can still vary
+  hidden Goal/fit slightly.
+- Used removed heavier/longer Chores as short-lived feedback that softens
+  inferred Capacity on the next shuffle.
+- Documented and checklisted the filter relationships, including the need to
+  test whether `Auto` is clear for Time and Area.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Mood remains the primary visible readiness control. Time bounds length, Area
+  constrains place, and hidden Capacity/Goal should follow Mood unless future
+  review proves users need more visible controls.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Conservative Mood inference rules
+
+Status: completed locally
+
+Implemented:
+- Updated `docs/specs/MOOD_CONTEXT.md` from the older emotion-style enum to
+  the current readiness-context enum: `auto`, `low`, `quiet`, `focused`,
+  `restless`, and `ready`.
+- Documented conservative inference: default to `auto`, infer `low` only from
+  clear constraints, infer `quiet` from late/quiet-hour contexts, infer
+  `focused` from an open window with one clear high-need target, keep
+  `restless` mostly explicit, and infer `ready` only from free block plus
+  fuller-bundle completion history.
+- Added safe practical signal categories: time/calendar pressure, recent
+  behavior, current session context, Home Assistant context, and user
+  correction.
+- Clarified that Mood is readiness context, not a psychological claim, and user
+  correction overrides inference for the moment.
+
+Tests/checks run:
+- `rg -n "unknown|calm|tired|overwhelmed|energized|low energy|explicit energy|Mood: Auto \\| Calm" docs/specs/MOOD_CONTEXT.md`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- docs/specs/MOOD_CONTEXT.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/specs/MOOD_CONTEXT.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Mood inference must remain lightweight, conservative, practical, and
+  user-correctable. It must never diagnose or claim the user's emotional state.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Goal hidden and inferred from Mood
+
+Status: completed locally
+
+Implemented:
+- Removed Goal from the visible Right Now context chips.
+- Added internal Mood-to-Goal inference:
+  `auto -> visible lift`, `low -> quick wins`, `quiet -> fresh start`,
+  `focused -> overdue care`, `restless -> visible lift`, and
+  `ready -> overdue care`.
+- Updated Mood changes to infer both hidden Capacity and hidden Goal before
+  rescoring the mocked recommendation.
+- Updated active implementation guidance, product guidance, and the live-test
+  checklist so Live Test 2 expects Time, Mood, Area, and shuffle as the visible
+  Right Now controls.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Goal remains used internally to shape recommendation intent, but Mood is now
+  the user-facing control that selects the default intent.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Capacity model replaces internal Energy
+
+Status: completed locally
+
+Implemented:
+- Renamed the mocked internal recommendation field from `energy` to `capacity`.
+- Renamed helper/scoring code from Energy wording to Capacity wording.
+- Kept Mood-to-Capacity inference as the core relation:
+  `auto -> auto`, `low/quiet -> low`, `focused -> steady`,
+  `restless -> mobile`, and `ready -> strong`.
+- Documented Capacity as the hidden physical-fit model evaluated against
+  effort, movement, setup friction, duration, and interruption tolerance.
+- Replaced user-facing and active planning examples that still framed the
+  concept as Energy.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/specs/RECOMMENDATION_ENGINE.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/specs/RECOMMENDATION_ENGINE.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Capacity is now the preferred internal term. Energy should not return as a
+  visible Right Now chip unless a later design review finds a real need for it.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Energy hidden and inferred from Mood
+
+Status: completed locally
+
+Implemented:
+- Removed Energy from the visible Right Now context chips.
+- Kept energy/capacity as an internal recommendation signal inferred from Mood:
+  `auto -> auto`, `low/quiet -> low`, `focused -> steady`,
+  `restless -> mobile`, and `ready -> strong`.
+- Updated mock bundle scoring so inferred energy still affects fit.
+- Updated no-suggestion copy, implementation instructions, the live-test
+  checklist, product guidance, and Recommendation Engine spec language to make
+  Mood the visible readiness control for Live Test 2.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/specs/RECOMMENDATION_ENGINE.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/specs/RECOMMENDATION_ENGINE.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Energy remains used by the app as an inferred capacity signal, but it should
+  not ask the user for another top-level chip while Mood already expresses
+  readiness.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Mood vocabulary and automatic time
+
+Status: completed locally
+
+Implemented:
+- Replaced the Mood chip options with `auto`, `low`, `quiet`, `focused`,
+  `restless`, and `ready`.
+- Removed the explicit `all the time` time option from the UI.
+- Made Time default to `Auto`, preserving it through shuffle unless the user
+  explicitly chooses a duration.
+- Updated automatic time scoring so mood/readiness drives bundle length when
+  Time is inferred.
+- Updated active implementation guidance and the live-test checklist so future
+  work treats broad availability as an inferred/calendar-driven default rather
+  than a user-selected chip option.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Time should usually be inferred from availability/context; Mood Context is
+  the stronger user-facing driver for how small or ambitious the bundle feels.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Context chip visible labels removed
+
+Status: completed locally
+
+Implemented:
+- Removed visible `Time`, `Energy`, `Mood`, `Goal`, and `Area` labels from
+  Right Now context chips.
+- Kept chip labels as `aria-label` and `title` text so icon-only labels remain
+  accessible and understandable on hover.
+- Documented the global chip pattern in implementation and live-test docs.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- For self-explanatory context chips, visible text should be icon plus current
+  value only. The internal label stays available through accessible names and
+  tooltips.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Shuffle chip optical sizing
+
+Status: completed locally
+
+Implemented:
+- Kept the shuffle/randomize control with the context chips, but reduced its
+  inner icon-slot and glyph size so the horizontal shuffle icon reads centered
+  inside the round button.
+- Preserved the 40px circular button size for touch comfort.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Round icon-only buttons can keep their touch target while tuning the glyph
+  independently for optical balance.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Mood-aware time options
+
+Status: completed locally
+
+Implemented:
+- Made the Right Now Time selector derive its options from current
+  mood/readiness context instead of a static list.
+- Added the expansive `I've got all the time. Let's do that.` selector option,
+  displayed compactly as `all the time` in the chip.
+- Updated mock recommendation scoring so `all the time` favors fuller bundles
+  while still respecting explicit filters such as Area.
+- Replaced fragile colon-split chip option handling with separate chip key and
+  value data attributes.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Treat `all the time` as a readiness/willingness signal, not a literal
+  duration or scheduled-session mode.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Non-punitive inactive bonus wording
+
+Status: completed locally
+
+Implemented:
+- Changed the removed-Chore bundle bonus footer from a negative Keeps-style
+  value to `Bundle bonus not active`.
+- Updated product, implementation, and live-test docs to forbid negative-number
+  treatment for unclaimed bundle bonuses after pre-start removal.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Pre-start removal can make a bundle bonus inactive, but it must not look like
+  a penalty, negative score, or lost earned Keeps.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Right Now automatic Area context
+
+Status: completed locally
+
+Implemented:
+- Changed the mocked Right Now Area chip default to `Auto` so it does not look
+  like Homekeep preselected a user-chosen Area.
+- Kept Recommendation Engine Area choice represented in the suggestion metadata,
+  while treating a specific Area chip selection as an explicit filter.
+- Documented the default automatic Area behavior in product and Codex
+  implementation docs.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Right Now defaults to automatic Area selection. User-selected Areas are
+  explicit filters.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Remove recommendation invite line
+
+Status: completed locally
+
+Implemented:
+- Removed the separate recommendation/card invite line from the mocked Right Now
+  suggestion card.
+- Deleted the unused invite-copy generation code.
+- Updated product, implementation, and live-test docs so the suggested bundle
+  card leads directly with the Chore Bundle title after the page greeting and
+  context chips.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- The page-level greeting sets tone; the suggestion card should not add a
+  second invitation line above its title.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Chip icon-slot styling
+
+Status: completed locally
+
+Implemented:
+- Added centered icon-slot backing treatment for icons inside context chips.
+- Adjusted chip spacing so icon+text controls account for the icon background.
+- Kept the projected-benefit action button's simpler right-side icon treatment.
+- Documented the icon-slot rule in product and implementation docs.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Mixed icon+text chips should use a distinct centered icon slot instead of
+  loose inline icons. Do not force that treatment onto action buttons when the
+  simpler icon reads better.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Right Now greeting lifecycle
+
+Status: completed locally
+
+Implemented:
+- Decoupled the mocked Right Now greeting from the selected Chore Bundle.
+- Added mood/readiness-aware greeting families generated once on load.
+- Regenerated the greeting only when time, energy, mood, or goal changes, while
+  keeping it stable across shuffle and ordinary recommendation swaps.
+- Updated product, implementation, and live-test docs for the greeting
+  lifecycle.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- The page-level Right Now greeting is mood/readiness aware and stable across
+  shuffle; the Chore Bundle card carries recommendation-specific details.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Right Now care bias principle
+
+Status: completed locally
+
+Implemented:
+- Documented the Right Now product tension between the home's needs and the
+  user's current readiness.
+- Added Recommendation Engine guidance for a gentle, bounded care bias toward
+  stale/high-impact Chores when they still fit user constraints.
+- Updated voice guidance so Homekeep may nudge toward home care without guilt,
+  pressure, or hidden manipulation.
+
+Tests/checks run:
+- `git diff --check -- docs/product/HOMEKEEP_APP_PLAN.md docs/specs/RECOMMENDATION_ENGINE.md docs/product/HOMEKEEP_VOICE_SYSTEM.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/specs/RECOMMENDATION_ENGINE.md`
+- `docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Homekeep can have a small agenda to help the home get cared for, but it must
+  be transparent, explainable, bounded, and easy for the user to correct.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
+### 2026-06-22 - Care bias operating rules
+
+Status: completed locally
+
+Implemented:
+- Promoted the Right Now tension recommendations into ten important operating
+  rules for product and recommendation behavior.
+- Added `Homekeep is gently opinionated, never coercive` as the short design
+  principle for this topic.
+- Documented stretch-not-shove, light variants, visible nudges, escape hatches,
+  non-punitive language, user correction, and successful stopping as core
+  constraints.
+
+Tests/checks run:
+- `git diff --check -- docs/product/HOMEKEEP_APP_PLAN.md docs/specs/RECOMMENDATION_ENGINE.md docs/product/HOMEKEEP_VOICE_SYSTEM.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/specs/RECOMMENDATION_ENGINE.md`
+- `docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Care bias is an important design and scoring principle, not a casual copy
+  preference.
+
+Known gaps / next prompt:
+- Re-run Gate 3B after installing the updated candidate.
+
 ### 2026-06-22 - Live Test 2 checklist from recommendations
 
 Status: completed
@@ -107,8 +1262,9 @@ Status: completed
 Implemented:
 - Accepted Codex recommendations as provisional defaults for remaining
   pre-Live-Test-2 Home Health questions.
-- Documented that the full Home Health view remains a top-level app destination,
-  but Live Test 2 should focus only on the mocked Right Now component.
+- Documented that the full Home Health view remains a top-level app destination.
+  This Right Now-only scope was superseded by the later Live Test 2 final scope
+  decision that includes basic Home Health visibility/navigation.
 - Added Gate 3B as a concrete second Right Now live-test checklist.
 
 Tests/checks run:

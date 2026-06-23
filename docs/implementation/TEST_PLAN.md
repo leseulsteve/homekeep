@@ -108,6 +108,13 @@
   non-null `session_item_id`
 - session item completion records bounded learned duration samples when real
   active timing is available
+- recommendation duration treats the user-entered Chore estimate as fallback,
+  uses learned duration as the base when samples exist, and adapts to
+  Mood/Readiness or inferred Capacity
+- low/quiet readiness shortens learned recommendation duration, while
+  ready/strong readiness can allow a fuller pass
+- skipped, snoozed, dismissed, removed, cancelled, direct non-session, paused,
+  and invalid timing does not train duration
 - cached RecommendationItem `session_item_id` is null and never used for
   completion
 - start Chore Bundle rejects expired recommendation snapshot
@@ -224,7 +231,7 @@
   `source_recommendation_snapshot_id`
 - start_recommendation response includes concrete materialized session item IDs
 - start_recommendation response uses learned Chore duration when timing samples
-  exist
+  exist, with recommendation generation adapting duration to readiness context
 - action response payloads are JSON-serializable dictionaries
 - service errors raise exceptions instead of returning error dictionaries
 

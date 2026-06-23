@@ -101,31 +101,62 @@ that the full Homekeep app is planned or service-wired.
 - [ ] Confirm synthetic data only appears; no private household details,
   calendar text, addresses, device identifiers, or personal schedules
 - [ ] Confirm context chips open inline selectors
-- [ ] Change time, energy, mood, goal, and area chips and confirm the mocked
+- [ ] Confirm context chips show icon plus current value without redundant
+  visible labels, while remaining understandable on hover/accessibility label
+- [ ] Confirm internal `Auto` values render as `Best fit` for Time and Area
+- [ ] Confirm inferred/default chip values are visually quieter than explicit
+  user-selected chip values
+- [ ] Confirm the visible filter row is Time, Mood, Area, then shuffle, with
+  Mood visually centered
+- [ ] Confirm Time can remain `Best fit`, no explicit `all the time` option
+  appears, and mood/readiness changes can shift the suggested bundle length
+- [ ] Confirm Energy is not shown as a top-level chip in Right Now
+- [ ] Confirm Goal is not shown as a top-level chip in Right Now
+- [ ] Change time, mood, and area chips and confirm the mocked
   suggestion refines after a short fuzzy state
+- [ ] Confirm the fit line explains the choice, such as `Picked for a quiet
+  10-minute reset in the Bathroom`
+- [ ] Select an explicit Area and confirm the fit line says it was kept because
+  the user picked it
+- [ ] Confirm explicit Area strongly constrains shuffle/recommendation results
+- [ ] Confirm overconstrained explicit filters can show a specific empty state,
+  such as `Nothing fits Bathroom with this mood right now.`
+- [ ] Remove a heavier/longer Chore, shuffle, and confirm the next suggestion
+  feels softer or less physically ambitious
+- [ ] Check whether `Best fit` for Time and Area is clear enough without extra
+  copy
 - [ ] Confirm the shuffle button swaps to another mocked Chore Bundle
+- [ ] Confirm the shuffle button tooltip/accessibility label says `Try another
+  fit`
 - [ ] Confirm randomize/shuffle lives with the filter/context chips, not inside
   the suggested bundle card
 - [ ] Confirm the suggested Chore Bundle shows included Chores by default,
   without an expand/details control
+- [ ] Confirm full-reset Keeps appear before the visible Chore list
 - [ ] Confirm the compact metadata explains bundle count, duration, and scoped
   Area/Home Health impact
 - [ ] Confirm Projected Impact is folded into the primary action button with
   projected benefit on the left and an action icon on the right
 - [ ] Remove a Chore and confirm it stays visible with removed styling, row-level
-  restore, and visible lost bundle bonus/projected-benefit treatment
+  restore, and visible full-reset Keeps/projected-benefit no-longer-active treatment
 - [ ] Choose the suggested reset and confirm the active Chore Session appears
 - [ ] Start a Chore and confirm the timer appears only while a Chore is ongoing
-- [ ] Complete Chores and confirm completed Chores collapse into a summary
+- [ ] Complete Chores and confirm completed Chores stay inline, almost as-is,
+  with a soft congratulatory done state
 - [ ] Confirm the quick completion effect is noticeable but not noisy
-- [ ] Complete all planned Chores and confirm both `Done for now` and `One more`
-  are visible
-- [ ] Tap `One more` and confirm the Bonus Chore is revealed without accepting
-  it automatically
-- [ ] Confirm the Bonus Chore redraw button is visible but not treated as wired
-  backend behavior
-- [ ] Tap `Done for now` and confirm the final summary appears, then returns to
-  Ready Now
+- [ ] Complete the suggested bundle and confirm the bundle-complete celebration
+  is clearer than a single-Chore completion
+- [ ] Confirm a short optional Chore list appears inline after the final planned
+  Chore is completed, instead of `Done for now` / `One more` buttons
+- [ ] Confirm optional Chores feel generated from Recommendation Engine-like
+  rules: small, useful, mood/time fit, no skipped/removed repeats, and useful
+  Home Health/Area Health impact
+- [ ] Confirm the optional Chore list is bounded and does not chain into more
+  optional lists after completion
+- [ ] Confirm optional Chore completion feedback gets gradually warmer without
+  becoming noisy or scoreboard-like
+- [ ] Exit the completed session and confirm the final summary appears, then
+  returns to Ready Now
 - [ ] Record visual, copy, layout, or flow changes needed before service wiring
 
 ### Gate 3A Design And Visual Review
@@ -137,9 +168,9 @@ Review in this order:
 
 - [ ] First impression: Homekeep feels like a calm Home Assistant sidebar app,
   not a Lovelace dashboard, marketing page, or admin console
-- [ ] Visual hierarchy: greeting, context chips, invite line, bundle title,
-  reason, metadata, included Chores, and primary projected-benefit action read
-  in the intended order
+- [ ] Visual hierarchy: greeting, context chips, bundle title, reason, metadata,
+  included Chores, and primary projected-benefit action read in the intended
+  order
 - [ ] Mobile layout: text does not collide, controls are thumb-friendly, and
   the main action remains obvious without scrolling through a grid
 - [ ] Desktop layout: the app uses space well without becoming card-heavy or
@@ -155,10 +186,10 @@ Review in this order:
 - [ ] Chore Bundle display: visible Chores, removed state, time, Keeps,
   Projected Impact action, and area/health context are understandable at a
   glance
-- [ ] Active session visuals: the ongoing Chore, timer, completed summary, Done
-  for now, and One more states feel distinct from the planning state
-- [ ] Bonus Chore visuals: One more reveal feels optional and inviting, not like
-  an obligation or productivity streak
+- [ ] Active session visuals: the ongoing Chore, timer, inline completed rows,
+  and inline optional Chores feel distinct from the planning state
+- [ ] Optional Chore visuals: optional continuation feels inviting, bounded, and
+  not like an obligation or productivity streak
 - [ ] Privacy check: screenshots or notes do not include private household
   details, private calendar text, addresses, device identifiers, or personal
   schedules
@@ -185,17 +216,19 @@ Next-build rule:
   the mocked sidebar prototype first.
 - Do not wire Homekeep services into the sidebar app until the Ready Now visual
   feel, copy tone, and core flow are acceptable for the private live review.
-- Do not infer approval for Home Health, Plan, Add Chore, Activity, Settings,
-  diagnostics, full navigation, or stale-state recovery from this review.
+- Do not infer approval for Plan, Add Chore, Activity, Settings, diagnostics,
+  full navigation beyond Home Health entry, service wiring, or stale-state
+  recovery from this review.
 
 ## Gate 3B: Second Right Now Live-Test Checklist
 
 Use this gate after building the second mocked Right Now candidate from
 `docs/implementation/AI_DASHBOARD_UI_STEVE_PROMPTS.md` Prompt 11.
 
-This gate is only for the Right Now component and its mocked active-session
-loop. It does not validate the full Home Health view, Plan, Add Chore, Activity,
-Settings, diagnostics, full navigation, service wiring, or stale-state recovery.
+This gate covers the Right Now component, its mocked active-session loop, and
+basic Home Health visibility/navigation. It does not validate Plan, Add Chore,
+Activity, Settings, diagnostics, full navigation beyond Home Health entry,
+service wiring, stale-state recovery, or the full Home Health behavior surface.
 
 Pre-test setup:
 
@@ -205,6 +238,9 @@ Pre-test setup:
 - [ ] Open the Homekeep sidebar panel
 - [ ] Confirm the app is still a non-iframe sidebar panel
 - [ ] Confirm only synthetic household data appears
+- [ ] Confirm `Best fit` is the final visible label for automatic Time and Area
+  in this pass
+- [ ] Keep the top-right projected-benefit action button as-is for this pass
 - [ ] Confirm no private calendar text, room routines, addresses, device
   identifiers, personal schedules, credentials, or tokens appear
 
@@ -220,6 +256,8 @@ Global visual-system checks:
   dashboard cards
 - [ ] Mobile: no text collisions, cramped controls, clipped labels, or awkward
   scan order
+- [ ] Mobile: vertical density still feels comfortable after the header action,
+  full-reset Keeps-above-list layout, and visible Chore rows
 - [ ] Desktop: the experience uses space calmly without becoming sparse or
   card-heavy
 
@@ -227,45 +265,69 @@ Right Now header and controls:
 
 - [ ] No visible `Ready Now` internal title
 - [ ] Greeting does not repeat the Chore Bundle name
+- [ ] Greeting stays stable when only randomize/shuffle changes the suggestion
+- [ ] Greeting can change when time or mood changes
 - [ ] Context chips are visible, compact, and editable
 - [ ] Randomize/shuffle lives with the context chips
 - [ ] Randomize/shuffle changes the suggested bundle
-- [ ] Changing time, energy, mood, goal, or area refines the suggestion
-- [ ] The recommendation invite line stays stable during shuffle/filter changes
-- [ ] The recommendation invite line can vary after page reload
-- [ ] Invite copy is lightly contextual but not tied to area names, bundle names,
-  or recommendation details
+- [ ] Changing time, mood, or area refines the suggestion
+- [ ] There is no separate invite line above the suggested bundle title
 
 Suggested bundle card:
 
 - [ ] No visible `Suggested Chore Bundle` redundant label
-- [ ] The card reads in order: invite, title, reason, metadata, included Chores,
-  bonus/loss footer, projected-benefit action
+- [ ] The card reads in order: title/reason with header action, fit line,
+  metadata, full-reset Keeps/inactive full-reset Keeps line, included Chores
 - [ ] Reason text answers `why this now?` without repeating title, area, or
   impact metadata
+- [ ] Reason and fit copy explain one human reason rather than exposing scoring
+  math
+- [ ] Suggested bundle feels balanced between home need and user fit, not only
+  easiest chores or only overdue chores
+- [ ] Suggested bundle avoids repetitive Chores unless repetition is clearly the
+  point of the reset
+- [ ] Shuffle varies within a stable family of good fits, not random or
+  contradictory suggestions
 - [ ] Metadata includes bundle count and duration, such as `3 chores · 15 min`
+- [ ] Duration feels adaptive to Mood/Readiness and recent session momentum; the
+  user-entered Chore length does not feel like rigid truth
 - [ ] Area/Home Health context appears only when it explains the recommendation
-- [ ] Area and health-change metadata are combined into one scoped chip, such as
-  `Kitchen 48 -> 72` or `Home 74 -> 77`
+- [ ] Area and health-gain metadata are combined into one scoped chip, such as
+  `Kitchen 24` or `Home 3`, without before/after notation or a plus sign
 - [ ] Projected Impact is folded into the compact primary action button
+- [ ] Primary action sits in the card header/top-right area, not below the
+  variable-height Chore list
 - [ ] Primary action shows projected benefit on the left and action icon on the
   right
 - [ ] Primary action has an accessible action label
 - [ ] The visual treatment does not make Home Health feel like a grade
 
+Home Health visibility and navigation:
+
+- [ ] Confirm there is a visible way to reach Home Health from the Homekeep app
+- [ ] Confirm Home Health opens from that navigation path
+- [ ] Confirm returning from Home Health to Right Now is obvious
+- [ ] Confirm Home Health visibility does not crowd or weaken the Right Now
+  recommendation flow
+- [ ] Confirm Home Health copy and numbers feel supportive, not like a grade on
+  the user
+
 Included and removed Chores:
 
 - [ ] Chores are visible by default; there is no expand/details control to see
   the core bundle contents
+- [ ] Full-reset Keeps appear before the Chore rows
+- [ ] Removing a Chore shows an included-count indicator near full-reset Keeps, such as
+  `2 of 3 included`
 - [ ] Suggested Chores are visibly included/selected by default, not completed
 - [ ] Included indicators are quieter than completion indicators
 - [ ] Removing a Chore keeps it visible in place with removed styling
 - [ ] Removed Chore state is clear but not punitive
 - [ ] Removed Chores have row-level restore
 - [ ] Removing a Chore updates bundle duration/selection behavior
-- [ ] Removing a Chore shows lost bundle bonus or lost projected benefit when
-  applicable
-- [ ] Restoring a Chore restores the bonus/projected-benefit treatment when
+- [ ] Removing a Chore shows full-reset Keeps or projected benefit as no longer
+  active when applicable, without a negative number
+- [ ] Restoring a Chore restores the full-reset Keeps/projected-benefit treatment when
   applicable
 
 Active session and ending loop:
@@ -275,12 +337,23 @@ Active session and ending loop:
 - [ ] Starting a Chore starts the timer
 - [ ] Timer appears only while a Chore is ongoing
 - [ ] Completing a Chore gives restrained feedback
-- [ ] Completed Chores collapse into a compact summary
-- [ ] `Done for now` feels complete and positive
-- [ ] `One more` feels optional, not pressuring
-- [ ] Bonus Chore reveal does not auto-accept the Bonus Chore
-- [ ] Bonus Chore redraw control is visible but clearly not wired as backend
-  behavior if it remains mocked
+- [ ] Completed Chores stay inline, almost as-is, with a soft done state
+- [ ] Session progress line is visible and clarifies planned vs optional
+  progress
+- [ ] Completing the suggested bundle shows a clearer celebration before
+  optional Chores appear
+- [ ] Suggested bundle completion leaves an inline milestone row, not only a
+  temporary flash
+- [ ] Optional Chores are generated from Recommendation Engine-like rules with
+  stricter bounds: small, mood/time fit, no skipped/removed repeats, useful
+  Home Health/Area Health impact, and no chaining
+- [ ] Optional Chores have a compact `why these?` line that explains fit without
+  showing scoring math
+- [ ] Optional Chores feel optional, not pressuring
+- [ ] The exit action remains visible once optional Chores appear
+- [ ] Optional Chores use softer `Not now` copy instead of formal `Skip`
+- [ ] Optional Chore completion feedback gets gradually warmer without becoming
+  noisy or scoreboard-like
 - [ ] Final summary appears briefly and returns to Right Now
 
 Record findings:
@@ -511,7 +584,7 @@ sidebar app once the frontend extension approach is implemented.
 - [ ] Homekeep appears as a Home Assistant sidebar entry
 - [ ] Homekeep app opens without iframe embedding
 - [ ] Ready-Now launcher opens
-- [ ] Time, energy, goal, and mood controls work
+- [ ] Time, mood, and area controls work
 - [x] Generate button calls the intended Homekeep service
 - [x] Recommendation display updates from Homekeep entities/projections
 - [x] Start button materializes a recommendation
@@ -600,10 +673,17 @@ Result note:
 
 - [ ] Home Assistant package-backed tests or approved live synthetic candidate
   results
-- [x] Version bump decision: `0.0.3`
+- [x] Version bump decision: `0.0.4`
 - [x] Release notes for private HACS publish:
-  - fix Homekeep startup failure from missing `ATTR_VISIBILITY` service schema
-    import
-  - add a focused schema construction test for service registration constants
+  - publish the second mocked Right Now live-test candidate
+  - add Home Assistant dark-theme visual refinements, transparent layering, and
+    tighter typography
+  - add visible default Chores, removed-row restore, full-reset Keeps treatment,
+    and the projected-benefit primary action
+  - add mocked active-session refinements, inline completed rows, bounded
+    optional Chores, and progressive completion celebration
+  - add adaptive recommendation durations based on learned work time,
+    Mood/Readiness, Capacity, and recent session momentum
+  - include basic Home Health visibility/navigation in the Live Test 2 review
 - [x] Mock adequacy review updated for the release diff
 - [x] Explicit Steve approval for this private publish action

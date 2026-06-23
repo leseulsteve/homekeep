@@ -2,29 +2,29 @@
 
 ## Goal
 
-Homekeep should sometimes infer the user's likely mood or readiness so it can
+Homekeep should sometimes infer the user's likely readiness context so it can
 make planning and chore suggestions feel kinder and better timed.
 
 Mood Context is practical, lightweight, local-first, and user-correctable. It is
-not a mental health assessment.
+not a mental health assessment and must not claim to know how the user feels.
 
 ## MVP Mood Values
 
 Use a small bounded enum:
 
 ```text
-unknown
-calm
+auto
+low
+quiet
 focused
-tired
-overwhelmed
-energized
+restless
+ready
 ```
 
 Every inferred Mood Context must include:
 
 ```yaml
-mood: unknown | calm | focused | tired | overwhelmed | energized
+mood: auto | low | quiet | focused | restless | ready
 confidence: low | medium | high
 source: explicit | inferred | fallback
 reason: string
@@ -43,14 +43,19 @@ Reason: busy calendar window and you often choose quick wins at this time.
 Allowed MVP signals:
 
 - explicit user-selected mood
-- selected energy level
-- selected goal
-- time budget
+- selected or inferred Capacity
+- inferred Goal
+- time/calendar pressure such as tight window, late evening, or free block
 - time of day using Home Assistant local time
-- recent accepted, skipped, snoozed, dismissed, and completed chores
-- recent Bonus Chore acceptance
-- derived Calendar Context such as busy window, guests soon, travel, or recovery
-- Home Assistant presence or area context when already configured
+- recent behavior such as skipped or removed heavier chores, accepted quick
+  resets, and completed fuller bundles
+- current session context such as just finished something, paused often, or
+  abandoned a session
+- recent completion of fuller Chore Bundles
+- derived Calendar Context such as open window, busy window, quiet hours,
+  guests soon, travel, or recovery
+- Home Assistant context such as time of day, presence, or configured quiet
+  hours
 
 Disallowed MVP signals:
 
@@ -67,27 +72,41 @@ Mood inference must be conservative.
 Suggested MVP rules:
 
 ```text
-explicit user mood -> use it with high confidence
-low energy + short time budget -> tired, medium confidence
-many skips/snoozes/dismissals in recent sessions -> overwhelmed, medium confidence
-Bonus Chore accepted recently -> energized, medium confidence
-quiet energy selected -> calm, medium confidence
-busy calendar window soon -> overwhelmed, low or medium confidence
-no signal -> unknown, low confidence
+explicit user mood -> use it with high confidence for the current context
+user correction such as selecting low, quiet, focused, restless, or ready ->
+  override inference for the moment
+no signal -> auto, low confidence
+clear constraints such as tight time, repeated recent removal of physical
+  chores, or short-window context -> low, medium confidence
+late evening or configured quiet hours -> quiet, medium confidence
+normal open window with one clear high-need target -> focused, low or medium
+  confidence
+restless -> usually explicit only for MVP; infer only with strong future
+  evidence
+free block plus past completion of fuller bundles in similar contexts -> ready,
+  medium confidence
+paused often or abandoned a current session -> lower ambition, usually low or
+  auto depending on confidence
+just finished something successfully -> allow a slightly more ready default only
+  when recent history supports it
 ```
 
 When confidence is low, Mood Context should influence wording and defaults, not
 strongly alter ranking.
 
+Do not infer `low` because Homekeep thinks the user "seems tired." Do not infer
+`ready` from vibes or a positive-sounding context alone. Mood is readiness
+context, not diagnosis.
+
 ## Recommendation Behavior
 
 Mood Context may influence:
 
-- default energy level when the user does not choose one
-- default goal
+- inferred Capacity when the user does not explicitly correct it
+- inferred Goal
 - recommended session length
 - number of recommendations shown
-- choice between quick wins, low-energy chores, and visible-impact chores
+- choice between quick wins, low-capacity chores, and visible-impact chores
 - explanation wording
 - whether Homekeep asks fewer questions
 
@@ -96,28 +115,28 @@ Mood Context must not:
 - hide urgent stale chores by itself
 - create punitive scoring
 - override explicit user choices
-- make claims like "you are anxious" or "you are depressed"
+- make claims like "you are tired", "you are anxious", or "you are depressed"
 
 ## Suggested Mapping
 
 ```text
-tired:
-  prefer low-energy chores, tiny variants, short sessions
+auto:
+  use normal scoring and keep inference easy to correct
 
-overwhelmed:
-  prefer one best next step, quick wins, visible progress, fewer choices
+low:
+  prefer quick wins, low Capacity, tiny variants, short sessions
+
+quiet:
+  prefer steady contained chores, low stimulation, and gentle copy
 
 focused:
-  prefer bundles that fit the time budget
+  prefer one clear high-need target or a useful mid-sized reset
 
-energized:
-  allow normal/deep variants and optional Bonus Chore
+restless:
+  prefer visible lift, movement-friendly chores, and contained multi-room resets
 
-calm:
-  prefer quiet chores and steady maintenance
-
-unknown:
-  use normal scoring
+ready:
+  allow fuller bundles when calendar and history fit support it
 ```
 
 ## Storage
@@ -151,7 +170,7 @@ Homekeep app should let the user override the inferred mood quickly.
 Recommended controls:
 
 ```text
-Mood: Auto | Calm | Focused | Tired | Overwhelmed | Energized
+Mood: Auto | Low | Quiet | Focused | Restless | Ready
 ```
 
 When Homekeep infers mood, show it gently:
@@ -181,12 +200,14 @@ derived Home Assistant context, opt-in wearable signals, and user correction.
 
 Implementation must test:
 
-- explicit mood overrides inferred mood
-- no signals returns `unknown` with low confidence
-- low energy and short time budget infer `tired`
-- repeated skips/snoozes/dismissals can infer `overwhelmed`
-- recent Bonus Chore acceptance can infer `energized`
-- inferred mood does not override explicit energy or goal
+- explicit mood overrides inferred mood for the current context
+- no signals returns `auto` with low confidence
+- clear constraints can infer `low`
+- late evening or configured quiet hours can infer `quiet`
+- normal open window with one clear high-need target can infer `focused`
+- `restless` is mostly explicit in MVP
+- free block plus past fuller-bundle completion can infer `ready`
+- inferred mood does not override explicit user correction
 - inferred mood does not hide urgent stale chores
 - Mood Context expires after 60 minutes
 - raw calendar descriptions are not stored in Mood Context

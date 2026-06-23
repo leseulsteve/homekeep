@@ -177,7 +177,10 @@ these IDs for subsequent session item mutations. Do not use cached
 are null before materialization.
 
 `estimated_minutes` uses learned Chore duration when bounded timing samples
-exist, otherwise the Chore definition's user-entered estimate.
+exist, otherwise the Chore definition's user-entered estimate. Smart Chore List
+generation may adapt the recommendation estimate to Mood/Readiness, inferred
+Capacity, and current-session momentum; the stored user estimate remains only a
+fallback suggestion.
 
 After the session is created, later snapshot expiry must not invalidate the
 active session.

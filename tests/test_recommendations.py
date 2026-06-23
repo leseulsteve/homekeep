@@ -270,6 +270,70 @@ class RecommendationEngineTest(unittest.TestCase):
 
         self.assertEqual(compost_item["estimated_minutes"], 10)
 
+    def test_recommendations_shorten_learned_duration_for_low_mood(self) -> None:
+        self.store.states["empty_compost"] = ChoreState(
+            chore_id="empty_compost",
+            last_completed_at=self.store.states["empty_compost"].last_completed_at,
+            adaptive_interval_days=self.store.states[
+                "empty_compost"
+            ].adaptive_interval_days,
+            next_due_at=self.store.states["empty_compost"].next_due_at,
+            duration_samples_minutes=[9, 11, 10],
+        )
+
+        result = self.engine.generate_smart_chore_list(
+            now=self.now,
+            time_budget_minutes=10,
+            mood="low",
+            include_alternates=True,
+        )
+        compost_item = next(
+            item
+            for rec in [
+                result["best_bundle"],
+                result["best_single_chore"],
+                result["easiest_chore"],
+                *result["alternates"],
+            ]
+            if rec
+            for item in rec["chore_items"]
+            if item["chore_id"] == "empty_compost"
+        )
+
+        self.assertEqual(compost_item["estimated_minutes"], 8)
+
+    def test_recommendations_can_expand_learned_duration_for_high_readiness(self) -> None:
+        self.store.states["empty_compost"] = ChoreState(
+            chore_id="empty_compost",
+            last_completed_at=self.store.states["empty_compost"].last_completed_at,
+            adaptive_interval_days=self.store.states[
+                "empty_compost"
+            ].adaptive_interval_days,
+            next_due_at=self.store.states["empty_compost"].next_due_at,
+            duration_samples_minutes=[9, 11, 10],
+        )
+
+        result = self.engine.generate_smart_chore_list(
+            now=self.now,
+            time_budget_minutes=15,
+            energy_level="high",
+            include_alternates=True,
+        )
+        compost_item = next(
+            item
+            for rec in [
+                result["best_bundle"],
+                result["best_single_chore"],
+                result["easiest_chore"],
+                *result["alternates"],
+            ]
+            if rec
+            for item in rec["chore_items"]
+            if item["chore_id"] == "empty_compost"
+        )
+
+        self.assertEqual(compost_item["estimated_minutes"], 12)
+
     def test_calendar_context_string_guesses_include_french_chore_terms(self) -> None:
         calendar_context = {
             "has_guests_soon": True,

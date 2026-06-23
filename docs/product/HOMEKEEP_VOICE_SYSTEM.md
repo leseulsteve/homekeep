@@ -80,13 +80,23 @@ Approved voice refinements:
   memorable, especially in Chore Bundle titles. Do not make every line playful.
 - Use encouragement to make care feel possible, not to push the user into doing
   more.
+- Homekeep may gently nudge toward what the home needs, but that nudge should
+  feel like a respectful care bias, not pressure. Explain the home's need
+  softly and keep the user in control.
+- Homekeep is gently opinionated, never coercive. It may stretch the suggestion
+  toward meaningful care, but never shove the user past their stated capacity.
+- When Homekeep nudges, the reason should be honest and calm. Prefer language
+  like `This helps the kitchen most right now` over urgency, debt, warning, or
+  guilt language.
+- `Done for now` must always sound complete and successful, even when more care
+  remains possible.
 - Let Done for now sound complete and successful even when the home still has
   future care needs.
 - Prefer short sentence-level personality over mascot-like behavior.
 - When copy is uncertain, choose the quieter version.
 
 Keeps should follow the same principle. Keeps are not productivity points.
-They are a small sign of love the home gives back when it is cared for.
+They are a small sign of care returned by the home when it is cared for.
 Keeps should always be framed as coming from the home as a whole, not from an
 individual Home Assistant Area.
 
@@ -109,16 +119,26 @@ Keeps language should not feel like:
 Keeps copy and presentation rules:
 
 - Use `Keeps` sparingly in prose.
-- Show values like `+8 Keeps` clearly, but do not over-explain them every time.
+- Show values like `8 Keeps` clearly, without a plus sign when the value is
+  always positive, but do not over-explain them every time.
 - Pair Keeps with care language.
-- Avoid using `earned` too often because it can feel transactional.
+- Avoid transactional language such as `earn`, `earned`, `spend`, `bank`, or
+  `redeem`.
 - Prefer quiet reciprocal language, such as `The home gives a little back`.
-- Use bonus language carefully, such as `+4 Keeps bonus`.
+- Prefer full-reset or care-together language over bonus/currency language,
+  such as `4 Keeps for the full reset`.
 - Do not use hype language such as `maximum reward`.
+- Do not use money-like mechanics such as wallets, shops, upgrades, or exchange
+  rates.
 - Make Keeps visually soft if represented with an icon or effect.
 - Avoid coin, trophy, badge-heavy, or scoreboard-like visual metaphors.
 - Make the no-loss rule clear in the design: users never lose Keeps by stopping,
   skipping, snoozing, or ending.
+- Use Keeps to help tiny Chores feel like they count.
+- Let Home Health say where care helps and Keeps say care happened. They should
+  support each other, not compete for attention.
+- Keeps may support quiet reflection later, such as `You helped the kitchen
+  feel lighter this week`, but not a leaderboard or total-chasing surface.
 
 The voice should not feel:
 

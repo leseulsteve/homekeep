@@ -81,9 +81,19 @@ implementation pass.
   absolute delta of at least 10 points. It does not fire during startup/cache
   rebuild.
 - Chore duration learning uses bounded real session timing samples. Homekeep
-  keeps the user-entered `estimated_minutes` as the fallback/base estimate and
-  uses the learned median for recommendation time fit and materialized session
-  display when samples exist.
+  keeps the user-entered `estimated_minutes` as the fallback/base suggestion,
+  not authoritative truth.
+- Recommendation duration uses the learned median as the base when samples
+  exist, then adapts it lightly to current Mood/Readiness, inferred Capacity,
+  and recent session momentum. Low/quiet contexts should bias shorter; ready or
+  strong contexts may allow a fuller duration; already-completed session work
+  should cap added ambition.
+- Duration learning trains only from actual active work intervals. Reading,
+  deciding, paused time, skips, removals, snoozes, dismissals, and invalid
+  timing must not train duration.
+- Future storage may split learned duration samples by Chore Variant and
+  readiness/context bucket; until then, context adjustment is derived and
+  disposable.
 
 ## Completion Credit
 
@@ -94,6 +104,25 @@ implementation pass.
 - Normal and deep completions train `adaptive_interval_days`.
 - Staleness derives from `next_due_at` when available.
 
+## Keeps
+
+- Keeps are a lightweight signal of care returned by the home, not productivity
+  points, money, wages, or a score on the user.
+- Keeps come from the home as a whole, not from individual Home Assistant Areas.
+- Keeps are tied to care completion, not speed, streaks, rankings, optimization,
+  or performance.
+- Full-reset Keeps represent harmony in a coherent suggested bundle, not a
+  pressure reward for obeying the app.
+- Optional Chores can add Keeps, but optional continuation must not create a
+  reward chain.
+- User-facing Keeps values that are always positive should not use a `+` prefix.
+- Avoid `earn`, `earned`, `spend`, `bank`, `redeem`, shop, wallet, upgrade,
+  exchange-rate, coin, trophy, badge-heavy, and leaderboard metaphors.
+- Keeps can help tiny Chores feel like they count. Home Health explains where
+  care helps; Keeps acknowledge that care happened.
+- Keeps may support quiet care reflection later, but not leaderboards, rankings,
+  shopping, upgrades, or total-chasing surfaces.
+
 ## Adaptive Intervals
 
 - `adaptive_interval_days` is clamped on every write to the Chore definition's
@@ -101,6 +130,30 @@ implementation pass.
 - Only real normal/deep completions train adaptive intervals.
 - Snoozes, skips, dismissals, swaps, and cancellations do not train adaptive
   intervals.
+
+## Recommendation Engine
+
+- Recommendation selection uses a two-stage pipeline: hard constraints first,
+  scoring second. Hard constraints such as explicit time, explicit Area,
+  hidden/unmanaged Areas, future snoozes, invalid metadata, and active-session
+  exclusions cannot be overridden by a high score.
+- Recommendation scoring keeps Home need and user fit conceptually separate.
+  Home need comes from Staleness, Home/Area Health, Projected Impact, and
+  relevant Calendar Context. User fit comes from time, inferred Capacity, Mood
+  Context, explicit Area, and bounded Session-History Learning.
+- Homekeep may apply a bounded care nudge toward useful Home need, but the
+  nudge must be capped, explainable, and unable to override explicit user
+  constraints.
+- When useful care is too large for the moment, prefer a smaller Chore Variant
+  before rejecting the care opportunity.
+- Optional continuation Chores after a completed planned bundle use the same
+  Recommendation Engine principles with stricter bounds: small duration,
+  stronger mood/time fit, no current-flow repeats, useful health/staleness
+  impact, and no unbounded chaining.
+- Shuffle should vary within a stable family of good fits rather than producing
+  random or contradictory suggestions.
+- User correction signals such as removal, skip, dismiss, and snooze should
+  soften, resize, defer, or retime suggestions before suppressing useful care.
 
 ## Snooze And Dismissal
 
