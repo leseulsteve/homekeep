@@ -3631,6 +3631,35 @@ Known gaps / next prompt:
 - Run visual QA on the Home Assistant panel for the Home Care surface and live
   session list ordering, then push the next no-version-bump live-test update.
 
+### 2026-06-23 - Home Care card label reduction
+
+Status: completed locally
+
+Implemented:
+- Removed repeated `Helped lately` and `Could help next` labels from every Home
+  Care Area card.
+- Kept the information self-explanatory through recent-care chips, concrete
+  next-care copy, and accessible labels.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_frontend -v`
+- `git diff --check`
+
+Docs updated:
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Tests updated:
+- `tests/test_frontend.py`
+
+Important decisions:
+- Repeated column labels should be avoided on repeated cards when the content
+  itself can carry the meaning.
+
+Known gaps / next prompt:
+- Re-run Home Care visual QA on mobile and desktop to confirm the cards scan
+  cleanly without repeated labels.
+
 ## Resume Instructions
 
 When resuming implementation:

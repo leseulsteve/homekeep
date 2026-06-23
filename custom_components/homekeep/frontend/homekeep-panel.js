@@ -1126,15 +1126,13 @@ class HomekeepPanel extends HTMLElement {
           </div>
         </div>
         <div class="area-columns">
-          <div>
-            <span class="area-kicker">Helped lately</span>
+          <div aria-label="Recent care in ${area.name}">
             <div class="area-chip-row helped">
               ${area.helped.map((item) => `<span class="meta-chip icon-chip soft"><ha-icon icon="mdi:sparkles"></ha-icon><strong>${item}</strong></span>`).join("")}
             </div>
           </div>
-          <div>
-            <span class="area-kicker">Could help next</span>
-            <p>${area.next}</p>
+          <div aria-label="Next care for ${area.name}">
+            <p class="area-next">${area.next}</p>
             <div class="area-actions" aria-label="${area.name} help options">
               <button class="secondary area-help" data-action="area-help" data-help-mode="short" data-area="${area.name}" aria-label="Ask for short help in ${area.name}">
                 <ha-icon icon="mdi:timer-sand"></ha-icon>
@@ -1508,9 +1506,9 @@ class HomekeepPanel extends HTMLElement {
         .area-chip-row.helped { margin-top: 0; }
         .area-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .area-columns > div { padding: 11px; border-radius: 8px; background: rgba(255,255,255,0.042); border: 1px solid var(--hk-border-soft); }
-        .area-kicker { display: block; margin-bottom: 6px; color: color-mix(in srgb, var(--hk-accent) 78%, var(--hk-muted)); font-size: 0.78rem; font-weight: 800; }
         .area-columns p { color: var(--hk-muted); font-size: 0.9rem; }
         .area-columns p + p { margin-top: 4px; }
+        .area-next { color: var(--hk-text); font-weight: 680; }
         .area-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .area-help { display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 0 11px; }
         .area-help ha-icon { width: 18px; --mdc-icon-size: 18px; color: var(--hk-accent); }
