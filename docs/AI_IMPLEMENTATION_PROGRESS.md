@@ -3193,8 +3193,9 @@ Important decisions:
   push to `main` for HACS update.
 
 Known gaps / next prompt:
-- Push the `0.0.5` candidate to `main`, update Homekeep from HACS in the
-  private Home Assistant instance, restart Home Assistant, and run Gate 3C.
+- Commit `50242e4` was pushed to `main` for the private HACS candidate.
+- Update Homekeep from HACS in the private Home Assistant instance, restart
+  Home Assistant, and run Gate 3C.
 
 ## Resume Instructions
 
