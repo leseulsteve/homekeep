@@ -3592,6 +3592,45 @@ Known gaps / next prompt:
 - Rebuild/push the remote live-test candidate again after these final UI polish
   fixes.
 
+### 2026-06-23 - Live Test 3 care wording and session ordering polish
+
+Status: completed locally
+
+Implemented:
+- Changed the visible Home Health tab/surface language toward `Home Care` and
+  care-oriented stats to avoid medical-feeling language and pulse icons.
+- Replaced less reliable/medical-looking Material Design icons with simpler
+  care/home icons.
+- Moved Home Care stats to the surface header instead of showing confusing
+  per-Area stat chips.
+- Sorted active Task Session rows so open/new Tasks, including offered extra
+  Tasks, appear before completed Tasks.
+- Removed bottom-of-list session controls; finish/done controls now appear in
+  the stable header action area where they are visible.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_frontend -v`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest discover -s tests -v`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `git diff --check`
+
+Docs updated:
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Tests updated:
+- `tests/test_frontend.py`
+
+Important decisions:
+- Visible UI copy should prefer care/home wording over medical-feeling health
+  language when showing the mocked sidebar surface.
+- Task Session lists should keep actionable work at the top and move completed
+  work down.
+
+Known gaps / next prompt:
+- Run visual QA on the Home Assistant panel for the Home Care surface and live
+  session list ordering, then push the next no-version-bump live-test update.
+
 ## Resume Instructions
 
 When resuming implementation:

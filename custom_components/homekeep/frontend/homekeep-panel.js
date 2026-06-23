@@ -91,10 +91,15 @@ const BUNDLES = [
 ];
 
 const HOME_HEALTH = {
-  label: "Home Health",
-  trend: "Lifted a bit over the last 7 days",
+  label: "Home Care",
+  trend: "Care moved through the home this week",
   status: "Steady with a few useful places to help",
   note: "The home is mostly steady, and it still has a little agenda. Kitchen and Laundry are the places asking loudest for care.",
+  stats: [
+    { icon: "mdi:home-outline", label: "4 areas watched" },
+    { icon: "mdi:check-circle-outline", label: "8 helped lately" },
+    { icon: "mdi:alert-circle-outline", label: "2 asking now" },
+  ],
   areas: [
     {
       name: "Kitchen",
@@ -1075,7 +1080,7 @@ class HomekeepPanel extends HTMLElement {
   renderTabs() {
     const tabs = [
       { id: "right-now", label: "Right Now", icon: "mdi:home-heart" },
-      { id: "home-health", label: "Home Health", icon: "mdi:heart-pulse" },
+      { id: "home-health", label: "Home Care", icon: "mdi:home-outline" },
     ];
     return `
       <nav class="tabs" aria-label="Homekeep sections">
@@ -1100,9 +1105,12 @@ class HomekeepPanel extends HTMLElement {
           <p class="eyebrow">Visual test</p>
           <h1>${HOME_HEALTH.status}</h1>
           <p class="support">${HOME_HEALTH.note}</p>
+          <div class="meta health-stats" aria-label="Home care stats">
+            ${HOME_HEALTH.stats.map((stat) => `<span class="meta-chip icon-chip"><ha-icon icon="${stat.icon}"></ha-icon><strong>${stat.label}</strong></span>`).join("")}
+          </div>
         </div>
       </section>
-      <section class="health-list" aria-label="Area health">
+      <section class="health-list" aria-label="Area care">
         ${HOME_HEALTH.areas.map((area) => this.renderAreaHealth(area)).join("")}
       </section>
     `;
@@ -1114,11 +1122,7 @@ class HomekeepPanel extends HTMLElement {
         <div class="area-head">
           <div>
             <h2>${area.name}</h2>
-            <div class="area-chip-row" aria-label="${area.name} health summary">
-              <span class="meta-chip icon-chip"><ha-icon icon="mdi:home-heart"></ha-icon><strong>${area.status}</strong></span>
-              <span class="meta-chip icon-chip"><ha-icon icon="mdi:chart-line-variant"></ha-icon><strong>${area.trend}</strong></span>
-              <span class="meta-chip icon-chip"><ha-icon icon="mdi:heart-plus-outline"></ha-icon><strong>${area.lift}</strong></span>
-            </div>
+            <p>${area.status} · ${area.trend}</p>
           </div>
         </div>
         <div class="area-columns">
@@ -1137,7 +1141,7 @@ class HomekeepPanel extends HTMLElement {
                 <span>Short help</span>
               </button>
               <button class="secondary area-help nudge" data-action="area-help" data-help-mode="care" data-area="${area.name}" aria-label="Ask Right Now for a care nudge in ${area.name}">
-                <ha-icon icon="mdi:hand-heart-outline"></ha-icon>
+                <ha-icon icon="mdi:hand-heart"></ha-icon>
                 <span>Care nudge</span>
               </button>
             </div>
@@ -1180,8 +1184,8 @@ class HomekeepPanel extends HTMLElement {
         </div>
         <div class="meta">
           <span class="meta-chip icon-chip"><ha-icon icon="mdi:format-list-checks"></ha-icon><strong>${chores.length} tasks · ${duration} min</strong></span>
-          <span class="meta-chip icon-chip"><ha-icon icon="mdi:heart-pulse"></ha-icon><strong>${impactScope} ${healthGain}</strong></span>
-          <span class="meta-chip icon-chip"><ha-icon icon="mdi:bullseye-arrow"></ha-icon><strong>${bundle.context.goal}</strong></span>
+          <span class="meta-chip icon-chip"><ha-icon icon="mdi:home-outline"></ha-icon><strong>${impactScope} ${healthGain}</strong></span>
+          <span class="meta-chip icon-chip"><ha-icon icon="mdi:target"></ha-icon><strong>${bundle.context.goal}</strong></span>
           ${bundle.bonusKeeps ? `<span class="meta-chip icon-chip warm"><ha-icon icon="mdi:sparkles"></ha-icon><strong>+${bundle.bonusKeeps} Keeps</strong></span>` : ""}
         </div>
         ${this.renderBundleDetails(this.bundle.chores, areaNames)}
@@ -1261,8 +1265,11 @@ class HomekeepPanel extends HTMLElement {
     const remaining = session.chores.filter((chore) => chore.status === "pending" || chore.status === "ongoing");
     const skipped = session.chores.filter((chore) => chore.status === "skipped");
     const visibleChores = session.chores.filter((chore) => chore.status !== "skipped");
+    const activeChores = visibleChores.filter((chore) => chore.status !== "completed");
+    const completedChores = visibleChores.filter((chore) => chore.status === "completed");
+    const orderedChores = [...activeChores, ...completedChores];
     const allDone = remaining.length === 0;
-    const optionalVisible = this.state.optionalOffered && visibleChores.some((chore) => chore.optional);
+    const optionalVisible = this.state.optionalOffered && activeChores.some((chore) => chore.optional);
     const supportText = this.state.optionalOffered
       ? "Stop here, or pick one more small thing."
       : "Start with any Task. Homekeep will keep the next step clear.";
@@ -1272,19 +1279,38 @@ class HomekeepPanel extends HTMLElement {
         <h1>${this.state.optionalOffered && !allDone ? "That bundle helped. A few more fit." : allDone ? "That bundle helped." : session.title}</h1>
         ${this.renderSessionProgress()}
         <div class="session-live-slot">
-          ${this.state.activeItemId ? this.renderTimer() : `<p class="support">${supportText}</p>`}
+          ${this.renderSessionTopAction(allDone, supportText)}
         </div>
         <div class="flash-slot">
           ${this.state.completionFlash ? `<div class="flash ${this.state.completionFlash.level}">${this.state.completionFlash.keeps} Keeps · ${this.state.completionFlash.message}</div>` : ""}
         </div>
       </section>
       <section class="session-list">
-        ${visibleChores.map((chore, index) => `${optionalVisible && chore.optional && !visibleChores[index - 1]?.optional ? `${this.renderBundleMilestone()}${this.renderOptionalDivider()}` : ""}${chore.status === "completed" ? this.renderCompletedChore(chore) : this.renderSessionChore(chore, index)}`).join("")}
+        ${orderedChores.map((chore, index) => `${optionalVisible && chore.optional && !orderedChores[index - 1]?.optional ? `${this.renderBundleMilestone()}${this.renderOptionalDivider()}` : ""}${chore.status === "completed" ? this.renderCompletedChore(chore) : this.renderSessionChore(chore, index)}`).join("")}
         ${skipped.length ? this.renderSkippedSummary(skipped) : ""}
-        ${this.state.optionalOffered && !allDone ? this.renderSessionExit() : ""}
       </section>
-      ${allDone ? this.renderEnding() : ""}
     `;
+  }
+
+  renderSessionTopAction(allDone, supportText) {
+    if (allDone) {
+      return `
+        <div class="session-top-action">
+          <span>The session is complete.</span>
+          <button class="primary" data-action="finish">Back to Right Now</button>
+        </div>
+      `;
+    }
+    if (this.state.activeItemId) return this.renderTimer();
+    if (this.state.optionalOffered) {
+      return `
+        <div class="session-top-action">
+          <span>${supportText}</span>
+          <button class="primary" data-action="finish">Done for now</button>
+        </div>
+      `;
+    }
+    return `<p class="support">${supportText}</p>`;
   }
 
   renderSessionProgress() {
@@ -1360,31 +1386,10 @@ class HomekeepPanel extends HTMLElement {
     `;
   }
 
-  renderSessionExit() {
-    return `
-      <div class="session-exit">
-        <span>Stopping here counts.</span>
-        <button class="primary" data-action="finish">Back to Right Now</button>
-      </div>
-    `;
-  }
-
   renderSkippedSummary(skipped) {
     return `
       <section class="completed skipped">
         <span>${skipped.length} skipped</span>
-      </section>
-    `;
-  }
-
-  renderEnding() {
-    return `
-      <section class="ending">
-        <h2>The session is complete.</h2>
-        <p>Nice work. The home got a little lighter.</p>
-        <div class="actions">
-          <button class="primary" data-action="finish">Back to Right Now</button>
-        </div>
       </section>
     `;
   }
@@ -1572,8 +1577,6 @@ class HomekeepPanel extends HTMLElement {
         .done { color: #cfe9d9; }
         .done-badge { width: 38px; height: 38px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: #f5fff9; background: color-mix(in srgb, var(--hk-accent) 48%, #172d25); border: 1px solid color-mix(in srgb, var(--hk-accent) 56%, transparent); }
         .skipped { color: var(--hk-muted); }
-        .session-exit { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.045); border: 1px solid var(--hk-border-soft); }
-        .session-exit span { color: var(--hk-muted); font-weight: 680; }
         .ending { text-align: center; }
         .ending .actions { justify-content: center; }
         .summary { min-height: 70vh; display: grid; align-content: center; justify-items: center; gap: 14px; }
@@ -1599,7 +1602,6 @@ class HomekeepPanel extends HTMLElement {
           .row-actions { display: grid; grid-template-columns: 1fr 1fr; }
           .milestone-row { grid-template-columns: auto minmax(0, 1fr); }
           .milestone-row small { grid-column: 2; }
-          .session-exit { align-items: stretch; flex-direction: column; }
           .actions { justify-content: stretch; }
           .primary, .secondary, .ghost { width: 100%; }
           .benefit-action { width: 100%; max-width: none; margin-left: 0; }
