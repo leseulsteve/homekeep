@@ -118,6 +118,7 @@ class FrontendRegistrationTest(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("mdi:bullseye-arrow", source)
         self.assertNotIn("mdi:chart-line-variant", source)
         self.assertNotIn("mdi:heart-plus-outline", source)
+        self.assertNotIn("+${bundle.bonusKeeps} Keeps", source)
         self.assertNotIn("setTimeout(() => this.resetReady()", source)
         self.assertNotIn("Critical care", source)
         self.assertNotIn("HOME_HEALTH.score", source)

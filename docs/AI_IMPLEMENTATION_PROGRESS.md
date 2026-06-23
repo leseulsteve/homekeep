@@ -3660,6 +3660,31 @@ Known gaps / next prompt:
 - Re-run Home Care visual QA on mobile and desktop to confirm the cards scan
   cleanly without repeated labels.
 
+### 2026-06-23 - Keeps plus-sign cleanup
+
+Status: completed locally
+
+Implemented:
+- Removed the unnecessary `+` prefix from the suggested bundle Keeps chip.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_frontend -v`
+- `rg -n "\\+[^\\n]*Keeps|\\+\\$\\{[^\\n]*Keeps" custom_components/homekeep/frontend/homekeep-panel.js tests/test_frontend.py`
+
+Docs updated:
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Tests updated:
+- `tests/test_frontend.py`
+
+Important decisions:
+- Visible Keeps values should not use plus signs unless there is a specific
+  reason to communicate arithmetic.
+
+Known gaps / next prompt:
+- Continue scanning live UI text for unnecessary arithmetic-style prefixes.
+
 ## Resume Instructions
 
 When resuming implementation:

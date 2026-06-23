@@ -1184,7 +1184,7 @@ class HomekeepPanel extends HTMLElement {
           <span class="meta-chip icon-chip"><ha-icon icon="mdi:format-list-checks"></ha-icon><strong>${chores.length} tasks · ${duration} min</strong></span>
           <span class="meta-chip icon-chip"><ha-icon icon="mdi:home-outline"></ha-icon><strong>${impactScope} ${healthGain}</strong></span>
           <span class="meta-chip icon-chip"><ha-icon icon="mdi:target"></ha-icon><strong>${bundle.context.goal}</strong></span>
-          ${bundle.bonusKeeps ? `<span class="meta-chip icon-chip warm"><ha-icon icon="mdi:sparkles"></ha-icon><strong>+${bundle.bonusKeeps} Keeps</strong></span>` : ""}
+          ${bundle.bonusKeeps ? `<span class="meta-chip icon-chip warm"><ha-icon icon="mdi:sparkles"></ha-icon><strong>${bundle.bonusKeeps} Keeps</strong></span>` : ""}
         </div>
         ${this.renderBundleDetails(this.bundle.chores, areaNames)}
       </section>`}
