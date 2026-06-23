@@ -94,7 +94,8 @@ Meaning:
 - `Care Source`: who or what contributed care, such as a human, pet, plant,
   device, air/comfort system, quiet routine, or household rhythm
 - `Care Contribution`: the concrete thing that happened, such as completing a
-  Task, cleaner air, good coffee, protected quiet, watering, or a device cycle
+  Contribution/Task Bundle, completing Tasks inside that Contribution, cleaner
+  air, good coffee, protected quiet, watering, or a device cycle
 - `Keeps`: the home noticing care as non-scarce recognition
 - `Area/Home Health context`: where that care helped and what could help next
 
@@ -132,6 +133,44 @@ Care sources are a first-class axis alongside Areas:
 - The UI should eventually let users inspect both views: care by Area and care
   by source.
 
+Contribution vocabulary:
+
+- `Task` stays the name for an individual recurring household item.
+- `Contribution` is the preferred user-facing name for a suggested or completed
+  Task Bundle.
+- `Task Bundle` remains the structural product and implementation term, but the
+  app can invite the user into `a contribution` rather than asking them to
+  complete a bundle.
+- Humans, animals, pets, plants, objects, devices, routines, home systems, and
+  the home itself can all contribute when there is a meaningful, explainable
+  care signal.
+- Contribution language should feel optional, fitting, appreciative, and mutual.
+  It should never imply the user owes the home work.
+- A person who stops, skips, snoozes, removes a Task, or chooses not to continue
+  has not failed to contribute.
+
+Examples:
+
+```text
+This contribution fits the moment.
+```
+
+```text
+A small kitchen contribution is ready.
+```
+
+```text
+You can adjust the Tasks before starting.
+```
+
+```text
+The washer carried part of this contribution.
+```
+
+```text
+The home kept things quiet overnight.
+```
+
 Product review recommendations:
 
 - Introduce mutual care gradually. The first UI expression should be felt in
@@ -159,6 +198,108 @@ Product review recommendations:
   need care and contributors that carry care.
 - Protect the broker model. The home returns Keeps; Home Assistant helps provide
   the evidence; Homekeep interprets that evidence into care.
+
+## Derived Health Communication Recommendations
+
+1. Treat derived health as care rhythm.
+
+   Derived health should describe where care would help, what is holding steady,
+   and what has already helped. It should feel like the home showing its current
+   rhythm, not like a score the user is trying to maximize.
+
+   Use language such as `The kitchen could use care`, `Entryway is holding
+   steady`, or `Laundry has momentum now`. Avoid wording that implies failure,
+   such as `behind`, `bad`, `neglected`, or `failing`.
+
+2. Use labels instead of numbers.
+
+   User-facing Home Health and Area Health should use labels such as `Holding
+   steady`, `Could use care`, `Starting to build up`, `Recently refreshed`, and
+   `Needs a little help`. Numbers can stay internal for calculation, sorting,
+   thresholds, and integration behavior.
+
+   Do not show percent-like values, before/after health values, or raw deltas in
+   the main app. Visible numbers make normal household drift feel like a missed
+   perfect score.
+
+3. Explain the reason plainly.
+
+   Every health message should connect the label to concrete household facts.
+   The user should understand the reason without seeing the formula.
+
+   Examples: `Compost has waited longer than usual`, `Counters are starting to
+   build up`, `Laundry is carrying the clearest next lift`, or `The rug and
+   shelf are making the entryway feel busier`.
+
+4. Show what helped lately.
+
+   Area Health should preserve evidence of care that already happened, even when
+   the area still needs care. This keeps natural drift from erasing pride in
+   contribution.
+
+   Use a visible `Helped lately` region for recent human, animal, pet, plant,
+   object, device, routine, and home contributions when they are meaningful.
+   Examples: `Counters were reset recently`, `The washer carried part of
+   laundry`, `The purifier kept air moving`, or `The home stayed quiet overnight`.
+
+5. Show what helps next.
+
+   Health communication should lead to a small, concrete next contribution when
+   action would be useful. The next action should feel like an option that fits
+   the moment, not a demand.
+
+   Good language: `A short counter and compost pass would help most`,
+   `Starting a small load gives Laundry momentum`, or `Shake the entry rug when
+   you have a minute`.
+
+6. Use soft trend language.
+
+   Trends should explain movement without analytics flavor. Use phrases like
+   `Lifted a bit recently`, `Holding steady`, `Drifting down a little`,
+   `Recently refreshed`, or `Care would help here now`.
+
+   Avoid raw movement such as health deltas or before/after values. The goal is
+   to help the user sense household rhythm, not audit the score.
+
+7. Keep recommendations benefit-first.
+
+   Recommendation cards should show the household benefit of the proposed
+   Contribution. The Contribution contains Tasks, but the top-level offer should
+   emphasize the care it adds.
+
+   Examples: `Kitchen · Big lift`, `Home · Small lift`, `Laundry · Useful lift`,
+   or `This contribution helps the area that would benefit most right now`.
+   Avoid exposing health math inside the recommendation.
+
+8. Make completion feedback feel relieving.
+
+   Completion feedback should connect the Contribution to relief, steadiness, or
+   care returned by the home. It should not feel like a payout, grade, or
+   productivity reward.
+
+   Examples: `That helped the kitchen feel easier to keep up with`, `Laundry
+   has a little more momentum now`, `The entryway is holding steadier`, or `The
+   home noticed this contribution`.
+
+9. Separate appreciation from action.
+
+   Keep `Helped lately` and `Could help next` visually and conceptually
+   separate. Appreciation says care already happened; action says what would be
+   useful next.
+
+   This matters because an Area can still need care after meaningful
+   contributions. The UI should never imply that a human, animal, pet, plant,
+   object, device, routine, or the home failed because more care would help.
+
+10. Keep raw numbers internal.
+
+   Numeric derived health can drive sorting, thresholds, events, Projected
+   Impact, and Home Assistant integration details. The main app should translate
+   those values into household language.
+
+   Future diagnostic or developer surfaces may expose raw values, but the
+   primary user experience should communicate condition, reason, appreciation,
+   and next contribution.
 
 ## User-Facing Text Direction
 
@@ -698,8 +839,9 @@ Mock data decisions:
 - Include varied Mood and Capacity contexts: auto, low, quiet, focused, restless,
   and ready.
 - Include Keeps per Task and visible Bundle Keeps opportunities.
-- Include Home Health and Area Health mock numbers that line up with the
-  suggested bundle, such as `Home 74`, `Kitchen 48`, and `Kitchen 24`.
+- Include Home Health and Area Health mock labels that line up with the
+  suggested bundle, such as `Home · Mostly steady`, `Kitchen · Could use care`,
+  and `Big kitchen lift`.
 - Include one no-suggestion mock state.
 - Include `2-3` mocked optional Tasks with Keeps.
 - Choose mocked optional Tasks through stricter Recommendation Engine-like
@@ -884,20 +1026,19 @@ Projected Impact direction:
 
 Possible impact treatments:
 
-- area improvement, such as `Kitchen 24`
-- Home Health improvement, such as `Home 7`
-- compact projected gain, such as `Kitchen 24`
+- area improvement, such as `Big kitchen lift`
+- Home Health improvement, such as `Small home lift`
+- compact projected gain, such as `Visible kitchen lift`
 - friendly impact label, such as `Visible lift`, `Small win`, or
   `Big kitchen boost`
 - soft celebration after completion when projected impact is realized
 
 Chosen impact presentation:
 
-- Use a combination of numbers and friendly labels.
-- Numbers provide satisfying progress and explainability.
+- Use friendly labels instead of visible numbers.
 - Labels make the impact feel human and easy to choose.
-- Pair concise metrics with plain-language benefit, such as
-  `Kitchen 24 · Big kitchen boost`.
+- Pair scope with plain-language benefit, such as
+  `Kitchen · Big kitchen boost`.
 - Keep the presentation compact enough for mobile.
 
 Task Bundle title direction:
@@ -1310,22 +1451,26 @@ It should help the user understand where attention matters:
 
 Health should be presented as useful context, not a grade.
 
-Decision: Home Health and Area Health should include visible numbers.
+Decision: Home Health and Area Health should avoid visible numbers in the
+user-facing app.
 
-The number should provide clarity, progress, and quick comparison. It should not
-feel like a grade on the user. Pair the number with friendly household language
-so the meaning is obvious without making the screen clinical.
+Because Home Health is a living care signal rather than a percent-complete
+model, visible numbers can imply that `100` is the realistic target. The app
+should lead with friendly household labels, qualitative trends, and care
+actions. Numeric health may still exist internally for sorting, thresholds,
+Home Assistant integration, and Projected Impact calculations.
 
 Decision: Home Health should lead with a friendly status label, supported by
-area-level language, with the numeric score visible but visually secondary.
+area-level language.
 
 The primary read should be human and household-oriented, such as `The home is
 holding steady`. Area-level language should explain where care would help, such
-as `Kitchen could use attention`. The number should remain available for
-clarity and comparison, but it should not be the emotional headline of the view.
+as `Kitchen could use attention`. Do not make the raw health value available in
+the main app view for clarity or comparison; use labels and concrete next-care
+language instead.
 
-Decision: Home Health and Area Health use a `0-100` scale where higher is
-healthier.
+Decision: Home Health and Area Health use an internal `0-100` scale where
+higher is healthier.
 
 Area Health should communicate `how much would this area benefit from care
 right now?` rather than `what percent of tasks are done?` It is a household
@@ -1335,13 +1480,13 @@ health impact and driven mostly by Staleness.
 
 Preferred presentation:
 
-- whole-home health number with a friendly status label
-- area health numbers for the areas that matter most right now
-- short area-level language beside the number, such as `Kitchen could use care`
+- whole-home status label
+- area status labels for the areas that matter most right now
+- short area-level language beside the status, such as `Kitchen could use care`
   or `Entryway is holding steady`
 - small area trends where useful
-- projected improvement numbers when a suggested Task Bundle would help an
-  area, such as `Kitchen 24`
+- projected improvement labels when a suggested Task Bundle would help an area,
+  such as `Big kitchen lift`
 
 Suggested Area Health labels:
 
@@ -1354,15 +1499,15 @@ Suggested Area Health labels:
 Example Area Health language:
 
 ```text
-Kitchen 48 · Could use care
-Entryway 82 · Holding steady
-Bathroom 64 · Starting to build up
-Living room 91 · Feeling good
+Kitchen · Could use care
+Entryway · Holding steady
+Bathroom · Starting to build up
+Living room · Feeling good
 ```
 
 Decision: Area Health rows may show small trends too.
 
-Area trends should be visually smaller than the health number and status label.
+Area trends should be visually smaller than the Area name and status label.
 They should help the user understand recent movement without turning each row
 into analytics. Use the same `last 7 days` period as the Home Health header
 unless implementation discovers a better derived context.
@@ -1377,9 +1522,9 @@ steady Areas can omit trend detail.
 Examples:
 
 ```text
-Kitchen 48 · Could use care · -4
-Entryway 82 · Holding steady · +3
-Bathroom 64 · Starting to build up · down a little
+Kitchen · Could use care · down a little
+Entryway · Holding steady · lifted recently
+Bathroom · Starting to build up · down a little
 ```
 
 Ready Now should use Area Health to explain why a suggestion matters without
@@ -1387,8 +1532,8 @@ showing every area all the time. Prefer a compact Area Health strip tied to the
 current suggestion, such as:
 
 ```text
-Kitchen 48 · 24 with this bundle
-Entryway 82 · steady
+Kitchen · Big lift with this bundle
+Entryway · steady
 ```
 
 Area Health colors should be warm and calm. Use green, blue, amber, coral, or
@@ -1442,21 +1587,21 @@ state, stale care, or a meaningful Projected Impact, show compact context inside
 the suggestion. If the suggestion is neutral, light, or self-explanatory, let
 the suggestion stand without extra health context.
 
-The whole-home number gives the satisfying sense that the home is being cared
-for. The area number explains why the current Task Bundle matters. The UI
+The whole-home status gives the satisfying sense that the home is being cared
+for. The area status explains why the current Task Bundle matters. The UI
 should avoid turning this into a large dashboard section.
 
 Recommended Ready Now treatment:
 
 ```text
-Home 74 · Mostly steady
-Kitchen 48 · This bundle helps most
+Home · Mostly steady
+Kitchen · This bundle helps most
 ```
 
 Recommended expanded-bundle treatment:
 
 ```text
-Kitchen 24 · Big kitchen boost
+Kitchen · Big kitchen boost
 ```
 
 Decision: On Ready Now, the compact Home Health and Area Health treatment should
@@ -1472,8 +1617,8 @@ Recommended collapsed bundle structure:
 ```text
 Evening Kitchen Lift
 12 min · calm · Kitchen
-Home 74 · Mostly steady
-Kitchen 48 · This bundle helps most
+Home · Mostly steady
+Kitchen · This bundle helps most
 Fits your time and gives the kitchen a visible lift.
 ```
 
@@ -1510,7 +1655,7 @@ list of large Home Assistant Area cards.
 
 Use a scannable card list rather than a home map, room diagram, or pure ranked
 `needs care most` view. Each Home Assistant Area should have a large enough
-card to show the area number, status, small trend, and useful detail without
+card to show the area status, small trend, and useful detail without
 feeling cramped. The list may still sort or highlight areas that need care, but
 the user's mental model should remain `these are the areas of my home`.
 
@@ -1519,8 +1664,8 @@ status label.
 
 People think first in terms of places in the home, such as `Kitchen` or
 `Entryway`, then ask how that place is doing. The status label should sit close
-to the Area name, with the numeric Area Health score visible but secondary to
-the place/status read.
+to the Area name. Do not add a visible numeric Area Health score in the main
+Homekeep app surface.
 
 Decision: Use one vertical column of large Area Health cards.
 
@@ -1546,28 +1691,27 @@ without much benefit at that size.
 Each Area Health card should show:
 
 - area name
-- Area Health number
 - friendly status label
 - small trend where useful
 - what the user can do to help the area
 - primary visible area action
 - recent care or recent improvement when useful
 - next upcoming Task for healthy areas
-- one main contributing Task for areas below `70`, plus a compact `more ways
-  to help` line when there are additional contributors
+- one main contributing Task for areas below the internal healthy threshold,
+  plus a compact `more ways to help` line when there are additional contributors
 - suggested next care opportunity when appropriate
 
-Decision: Place the Area Health number large on the right side of each card.
+Decision: Place the Area Health status label near the Area name on each card.
 
 The top-left of the card should carry area identity with the Home Assistant
-Area icon and area name. The large right-side number makes health easy to scan
-down the vertical card list without crowding the area name.
+Area icon, area name, and status label. A small qualitative lift label may sit
+on the right when useful, but it should not be a raw number.
 
 Recommended card header pattern:
 
 ```text
-[icon] Kitchen                    48
-Could use care · -4
+[icon] Kitchen                    Big lift available
+Could use care · drifting down
 ```
 
 Decision: Place the Area card primary action at the bottom after the details.
@@ -1579,15 +1723,15 @@ why it helps.
 Recommended card flow:
 
 ```text
-[icon] Kitchen                    48
-Could use care · -4
+[icon] Kitchen                    Big lift available
+Could use care · drifting down
 Dishes are carrying the most staleness.
-Clear dishes · 14
+Clear dishes · strong lift
 [Care for this area]
 ```
 
-The Home Health view as a whole should also show the whole-home health number
-and friendly status in the large header above the area cards.
+The Home Health view as a whole should also show the whole-home status in the
+large header above the area cards.
 
 Decision: Home Health should use all Home Assistant Areas configured in Home
 Assistant by default.
@@ -1688,8 +1832,8 @@ Health may be out of date
 Health is catching up
 ```
 
-Decision: Area cards below `70` should show one main contributing Task plus a
-small `more ways to help` line.
+Decision: Areas below the internal healthy threshold should show one main
+contributing Task plus a small `more ways to help` line.
 
 A contributing Task is a Task that is currently pulling the Area Health down
 or would provide a clear Projected Impact if completed. It should be explainable
@@ -1714,8 +1858,8 @@ Inline expansion should show the remaining contributing Tasks compactly:
 
 ```text
 2 more ways to help
-Wipe counters · 8
-Take out compost · 6
+Wipe counters · useful lift
+Take out compost · useful lift
 ```
 
 Tapping any expanded Task should open that Task's details, with the same
@@ -1736,10 +1880,11 @@ hierarchy to keep the page scannable.
 
 Open card details:
 
-- areas below `70` show one main contributing Task and a compact `more ways to
-  help` line
+- areas below the internal healthy threshold show one main contributing Task
+  and a compact `more ways to help` line
 - healthy areas show recent care and next upcoming Task
-- all cards keep the number, status label, and small trend visible
+- all cards keep the Area name, status label, qualitative lift, and small trend
+  visible
 - details should stay compact enough that the list remains easy to scan
 
 Decision: Only areas below a certain health threshold should show contributing
@@ -1747,10 +1892,10 @@ Task details.
 
 Healthy areas should not be forced to expose contributing Tasks because that
 can make the whole home feel like a problem list. When an area is healthy, its
-card can simply show the number, friendly status, and recent care or steady
-state.
+card can simply show the friendly status, recent care, or steady state.
 
-Decision: Show contributing Task details for areas below `70`.
+Decision: Show contributing Task details for areas below the internal healthy
+threshold.
 
 This keeps the area list calmer. Areas can show `Starting to build up` without
 immediately exposing a task breakdown, while lower-health areas show the
@@ -1812,11 +1957,11 @@ Kept this area steady: Purifier · Fern · Quiet hours
 Recent help: You, the washer, and the drying rack moved laundry along.
 ```
 
-Area Health should not only explain why the number is lower. It should also
+Area Health should not only explain why the status is lower. It should also
 explain why the area is not lower:
 
 ```text
-Kitchen 64 · Starting to build up
+Kitchen · Starting to build up
 Coffee, dishes, and the purifier helped this area hold together.
 Counters would help most next.
 ```
@@ -1845,10 +1990,10 @@ Recommendation: Area Health cards should visually separate `Helped lately` from
 `Could help next`. This keeps pride and action from competing:
 
 ```text
-[icon] Kitchen                    64
-Starting to build up · -3
+[icon] Kitchen                    Useful lift available
+Starting to build up · drifting down
 Helped lately: Coffee machine · Purifier · You
-Could help next: Wipe counters · 8
+Could help next: Wipe counters · useful lift
 [Care for this area]
 ```
 
@@ -1887,9 +2032,10 @@ care.
 
 Decision: All areas should be expandable.
 
-Areas at `70+` should still be expandable for context, but they should not show
-contributing Task details unless they drop below `70`. Healthy area expansion can
-show steady-state information, recent care, or why the area is doing well.
+Areas at or above the internal healthy threshold should still be expandable for
+context, but they should not show contributing Task details unless they drop
+below that threshold. Healthy area expansion can show steady-state information,
+recent care, or why the area is doing well.
 
 Decision: Healthy expanded areas should show both recent care and the next
 upcoming Task.
@@ -1900,7 +2046,7 @@ useful planning context without making the area feel like a problem.
 Example healthy expanded area:
 
 ```text
-Entryway 82 · Holding steady
+Entryway · Holding steady
 Recent care is helping this area stay ready.
 Next: Shake entry rug · tomorrow
 ```
@@ -1908,10 +2054,10 @@ Next: Shake entry rug · tomorrow
 Example expanded area:
 
 ```text
-Kitchen 48 · Could use care
-Clear dishes · 14
-Wipe counters · 8
-Take out compost · 6
+Kitchen · Could use care
+Clear dishes · strong lift
+Wipe counters · useful lift
+Take out compost · useful lift
 ```
 
 Decision: Tapping a contributing Task should open Task details only.
@@ -1998,15 +2144,17 @@ This is a visual-test candidate, not service wiring. Right Now remains the
 default opening surface. The Home Health tab may use synthetic area data and
 should focus on validating navigation, whole-home header treatment, Area Health
 cards, supportive copy, and the separation between `Helped lately` and `Could
-help next`.
+help next`. Area cards may include gentle synthetic requests for `Short help`
+or a `Care nudge`, but those requests should hand off to Right Now rather than
+turning Home Health into a second task giver.
 
-Live Test 3 does not validate direct Area Health actions, Home Assistant Area
-configuration handling, hidden/unmanaged Area behavior, freshness/stale states,
-service calls, diagnostics, Plan, Add Task, Activity, Settings, or the final
-Home Health backend contract.
+Live Test 3 does not validate final direct Area Health actions, Home Assistant
+Area configuration handling, hidden/unmanaged Area behavior, freshness/stale
+states, service calls, diagnostics, Plan, Add Task, Activity, Settings, or the
+final Home Health backend contract.
 
-Decision: Area cards below `70` should use `Care for this area` as the primary
-action label.
+Decision: Area cards below the internal healthy threshold should use `Care for
+this area` as the primary action label.
 
 This label is direct but still soft. It matches the product goal of caring for
 the home without using harsher language such as `fix`, `repair`, or `urgent`.
@@ -2014,12 +2162,12 @@ the home without using harsher language such as `fix`, `repair`, or `urgent`.
 Example low-health area card:
 
 ```text
-Kitchen 48 · Could use care · -4
+Kitchen · Could use care · drifting down
 Dishes are carrying the most staleness.
 [Care for this area]
 ```
 
-Decision: Healthy areas above `70` should keep a softer primary action that
+Decision: Internally healthy areas should keep a softer primary action that
 opens the next upcoming Task details.
 
 Healthy areas should remain actionable without feeling urgent. Use softer action
@@ -2029,7 +2177,7 @@ labels such as `Keep it steady` or `See next care` instead of the stronger
 Example healthy area card:
 
 ```text
-Entryway 82 · Holding steady · +3
+Entryway · Holding steady · lifted recently
 Recent care is helping this area stay ready.
 Next: Shake entry rug · tomorrow
 [Keep it steady]
@@ -2087,18 +2235,18 @@ like a hidden bundle or a second session.
 The expanded view should still avoid grade-like treatment. It should answer
 `where would care help?` rather than `what is wrong?`.
 
-Decision: The `Home Health` view should show the whole-home number as a large
+Decision: The `Home Health` view should show the whole-home status as a large
 header at the top.
 
 The header should make the view feel like a real destination. It should show the
-whole-home health number, a friendly status label, and a short care-focused
-summary. The area list should sit below the header.
+friendly whole-home status label and a short care-focused summary. The area
+list should sit below the header.
 
 Decision: The large Home Health header should include a small trend.
 
-The trend should show recent movement in the home health number, such as
-`+6 in the last 7 days`, without turning the header into an analytics
-dashboard. Use the trend to reinforce that care is having an effect.
+The trend should show recent movement in soft language, such as `Lifted a bit
+over the last 7 days`, without turning the header into an analytics dashboard.
+Use the trend to reinforce that care is having an effect.
 
 Decision: The Home Health trend period should default to `last 7 days`.
 
@@ -2112,26 +2260,23 @@ care would help. The wording and visual treatment should stay soft. Avoid
 making a negative trend feel like a failure or warning unless a future explicit
 urgent state exists.
 
-Decision: Trend copy may use both numeric movement and soft wording.
+Decision: Trend copy should use soft wording instead of numeric movement.
 
-Use numeric movement when it helps clarity, such as `+6 in the last 7 days` or
-`-4 in the last 7 days`. Use soft wording when it better protects the tone,
-such as `Down a little in the last 7 days`.
+Use soft wording that protects the tone, such as `Down a little in the last 7
+days` or `Lifted a bit in the last 7 days`.
 
 Examples:
 
 ```text
-+6 in the last 7 days
--4 in the last 7 days
+Lifted a bit in the last 7 days
 Down a little in the last 7 days
 ```
 
 Example header:
 
 ```text
-Home 74
 Mostly steady
-+6 in the last 7 days
+Lifted a bit in the last 7 days
 The kitchen could use care, but the home is holding together.
 ```
 
@@ -2147,7 +2292,7 @@ competing with Ready Now's recommendation flow and avoids vague actions like
 
 Avoid:
 
-- presenting the number as a personal score
+- presenting raw health numbers as the main user-facing representation
 - red-heavy warning treatment for normal household staleness
 - grades such as `A`, `C`, or `failing`
 - shame wording such as dirty, bad, neglected, or behind
@@ -2380,9 +2525,9 @@ Contains:
 
 - large whole-home health header
 - one vertical column of large Home Assistant Area cards
-- Area Health number, status, trend, and health-based tint
+- Area Health status, trend, qualitative lift, and health-based tint
 - Home Assistant configured Area icon
-- one main contributing Task for areas below `70`
+- one main contributing Task for areas below the internal healthy threshold
 - compact `more ways to help` inline expansion
 - direct Task details and single-Task starts
 
@@ -2528,13 +2673,13 @@ Change before service wiring:
   card should carry the bundle title and specific recommendation details. Apply
   this broadly to future recommendation surfaces so headings and invitation copy
   do not repeat each other.
-- Generate the Right Now greeting once when Right Now loads, and regenerate it
-  only when the user changes meaningful top-level readiness context such as
-  time or mood. The greeting should be mood/readiness aware and
-  stay separate from the specific Task Bundle title. Do not change the greeting
-  on every shuffle or ordinary recommendation swap unless the user's
-  top-level context meaningfully changed. Let the bundle card carry
-  recommendation-specific details.
+- Generate the Right Now greeting when Right Now loads, and regenerate it when
+  the user changes task-time, Mood Context, or Area; when the time of day
+  changes the greeting context; and when the user returns to Right Now from
+  another view. The greeting should keep a stable two-line-height area, stay
+  separate from the specific Task Bundle title, and not change on every shuffle
+  or ordinary recommendation swap unless one of those top-level contexts
+  changed. Let the bundle card carry recommendation-specific details.
 - Remove redundant section labels when the UI object is already clear. For
   example, do not show `Suggested Task Bundle` above the suggested bundle card;
   the card title, content, and action should make its purpose obvious. Use status
@@ -2547,19 +2692,19 @@ Change before service wiring:
   so it belongs with the controls for shaping the current moment. Apply this
   broadly to future recommendation surfaces.
 - In recommendation cards, combine the Area and health-gain metadata into one
-  scoped impact chip. For single-area Task Bundles, show the area and gain
-  together, such as `Kitchen 24`. For mixed-area bundles, use a truthful
-  whole-home or mixed-area scope, such as `Home 3`, rather than showing a
-  separate area chip that competes with the health chip. Do not use
-  before/after notation such as `57 -> 74`, and do not prefix the gain with
-  `+`; the chip already communicates a positive projected gain.
+  scoped impact chip. For single-area Task Bundles, show the area and
+  qualitative gain together, such as `Kitchen · Big lift`. For mixed-area
+  bundles, use a truthful whole-home or mixed-area scope, such as `Home · Small
+  lift`, rather than showing a separate area chip that competes with the impact
+  chip. Do not use before/after notation such as `57 -> 74`, and do not prefix
+  the gain with `+`; the chip already communicates a positive projected gain.
 - Do not prefix positive Keeps, health gain, impact gain, or other
   always-positive reward/gain values with `+`.
 - Fold the Projected Impact into the primary recommendation action instead of
   showing it as a separate chip. Use a compact emphasis button: projected benefit
   on the left, action icon on the right, stronger background color than secondary
   controls. The button may use an accessible label such as `Start this bundle`,
-  but visible text should emphasize the projected benefit, such as `Kitchen 24`
+  but visible text should emphasize the projected benefit, such as `Kitchen`
   and `Big kitchen boost`.
 - Place the projected-benefit/start action in the suggested Task Bundle card
   header, aligned to the top-right of the title/reason block on wider screens.
@@ -2585,11 +2730,12 @@ Change before service wiring:
   blank state. Guesses must remain visible, correctable, and never treated as
   irreversible user preference learning unless the user explicitly confirms
   that behavior.
-- Icons inside chips should sit in a distinct centered icon background. Treat
-  this as an icon slot: the icon is centered within its own small backing
-  surface, and chip spacing should be adjusted around that slot. Do not force
-  this treatment onto every button; action buttons may use a simpler icon when
-  that reads better.
+- Icons inside mixed icon+text chips should sit in a distinct left-side icon
+  segment. The segment background should fill the chip height to the border,
+  share the chip's left rounded edge, and meet the plain text area with a clean
+  color edge instead of a separate divider stroke. Do not force this treatment
+  onto every button; action buttons may use a simpler icon when that reads
+  better.
 - Context chips should not repeat visible labels when the icon is
   self-explanatory. Show the icon and current value; keep the label as an
   accessible name and tooltip.

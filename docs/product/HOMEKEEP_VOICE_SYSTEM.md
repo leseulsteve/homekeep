@@ -109,13 +109,13 @@ Keeps should always be framed as coming from the home as a whole, not from an
 individual Home Assistant Area.
 
 Keeps are the language of mutual care, not only Task completion. Humans care
-for the home. Plants can care for air, humidity, shade, beauty, and presence.
-Purifiers can care for air quality. Home Assistant devices can carry part of the
-care, such as a washing machine helping with laundry or a coffee machine making
-good coffee. Pets and pet routines can reflect care for another living
-inhabitant. Quiet-hour and comfort routines can protect rest and household
-rhythm. Keeps can acknowledge all of this later, as care circulating through the
-home.
+for the home. Animals and pets can be cared for and can shape the home's care
+rhythm. Plants can care for air, humidity, shade, beauty, and presence. Objects
+and Home Assistant devices can carry part of the care, such as a washing
+machine helping with laundry or a coffee machine making good coffee. Quiet-hour
+and comfort routines can protect rest and household rhythm. The home itself can
+contribute by keeping shelter, quiet, comfort, safety, and readiness steady.
+Keeps can acknowledge all of this later, as care circulating through the home.
 
 The home is the broker of Keeps. Home Assistant helps the home notice care by
 providing local device, entity, Area, sensor, automation, and event signals.
@@ -185,6 +185,61 @@ Keeps copy and presentation rules:
   contributors. Use language of appreciation, not ranking.
 - Keeps may support proud reflection later, such as `The home was cared for from
   many sides this week`, but not a leaderboard or total-chasing surface.
+
+Contribution voice:
+
+- Keep `Task` as the individual item.
+- Use `Contribution` as the user-facing frame for a suggested or completed Task
+  Bundle.
+- Contribution copy should feel like invitation, fit, appreciation, and shared
+  care. Avoid duty, debt, pressure, productivity, or moral language.
+- Do not imply the user owes the home a Contribution.
+- Do not imply the home is disappointed when a person stops, skips, snoozes, or
+  chooses not to continue.
+- Humans, animals, pets, plants, objects, devices, routines, home systems, and
+  the home itself can contribute when there is a meaningful care signal.
+- Use `Contribution` where it helps the bundle feel coherent. Keep visible Task
+  lists clear so the user still knows what they are choosing.
+
+Prefer:
+
+```text
+This contribution fits the moment.
+```
+
+```text
+A small kitchen contribution is ready.
+```
+
+```text
+Adjust the Tasks before starting.
+```
+
+```text
+The washer carried part of this contribution.
+```
+
+```text
+The home kept things quiet overnight.
+```
+
+Avoid:
+
+```text
+You need to contribute more.
+```
+
+```text
+Contribution required.
+```
+
+```text
+You failed to contribute today.
+```
+
+```text
+The home is waiting on you.
+```
 
 Area Health contribution voice:
 

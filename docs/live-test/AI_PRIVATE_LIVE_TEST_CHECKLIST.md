@@ -293,7 +293,8 @@ Suggested bundle card:
   user-entered Chore length does not feel like rigid truth
 - [ ] Area/Home Health context appears only when it explains the recommendation
 - [ ] Area and health-gain metadata are combined into one scoped chip, such as
-  `Kitchen 24` or `Home 3`, without before/after notation or a plus sign
+  `Kitchen · Big lift` or `Home · Small lift`, without raw health numbers,
+  before/after notation, or a plus sign
 - [ ] Projected Impact is folded into the compact primary action button
 - [ ] Primary action sits in the card header/top-right area, not below the
   variable-height Chore list
@@ -309,8 +310,8 @@ Home Health visibility and navigation:
 - [ ] Confirm returning from Home Health to Right Now is obvious
 - [ ] Confirm Home Health visibility does not crowd or weaken the Right Now
   recommendation flow
-- [ ] Confirm Home Health copy and numbers feel supportive, not like a grade on
-  the user
+- [ ] Confirm Home Health copy and qualitative labels feel supportive, not like
+  a grade on the user
 
 Included and removed Chores:
 
@@ -408,14 +409,16 @@ Panel navigation:
 
 Home Health visual review:
 
-- [ ] Confirm the header shows a whole-home number, `Home Health` label, and
-  friendly status copy
+- [ ] Confirm the header shows the `Home Health` label and friendly whole-home
+  status copy without raw health numbers
 - [ ] Confirm the visual treatment feels like household context, not a grade on
   the user
-- [ ] Confirm Area cards show Area name, health number, status, and available
-  lift
+- [ ] Confirm Area cards show Area name, status, and qualitative available lift
+  without raw health numbers
 - [ ] Confirm `Helped lately` and `Could help next` are visibly separate on
   each Area card
+- [ ] Confirm Area help actions feel gentle and hand off to Right Now as the
+  main task giver
 - [ ] Confirm the copy treats health decline as normal drift, not failure
 - [ ] Confirm the page uses synthetic Areas and Tasks only
 - [ ] Confirm mobile cards stack cleanly without clipped labels, overlap, or

@@ -91,44 +91,84 @@ const BUNDLES = [
 ];
 
 const HOME_HEALTH = {
-  score: 74,
+  label: "Home Health",
+  trend: "Lifted a bit over the last 7 days",
   status: "Steady with a few useful places to help",
-  note: "The home is mostly steady. Kitchen and Laundry have the clearest lift available right now.",
+  note: "The home is mostly steady, and it still has a little agenda. Kitchen and Laundry are the places asking loudest for care.",
   areas: [
     {
       name: "Kitchen",
-      health: 48,
+      status: "Could use care",
       trend: "Could use care",
       helped: ["Dishes stayed moving", "Counters were reset recently"],
       next: "A short counter and compost pass would help most.",
-      impact: 24,
+      lift: "Big lift available",
     },
     {
       name: "Bathroom",
-      health: 57,
+      status: "Starting to build up",
       trend: "Steady, drifting down",
       helped: ["Fresh towel helped", "Sink stayed usable"],
       next: "A quiet sink refresh keeps this area easy.",
-      impact: 17,
+      lift: "Useful lift available",
     },
     {
       name: "Entryway",
-      health: 52,
+      status: "Starting to build up",
       trend: "Visible lift available",
       helped: ["Shoes were straightened", "Landing shelf stayed lighter"],
       next: "The rug and shelf are the best small lift.",
-      impact: 16,
+      lift: "Visible lift available",
     },
     {
       name: "Laundry",
-      health: 43,
+      status: "Could use care",
       trend: "Overdue care",
       helped: ["Washer cycle carried some care", "Dry towels are ready to fold"],
       next: "Starting a small load gives this area momentum.",
-      impact: 26,
+      lift: "Big lift available",
     },
   ],
 };
+
+const QUICK_AREA_TASKS = [
+  {
+    id: "quick-kitchen-counter",
+    name: "Wipe one counter",
+    area: "Kitchen",
+    minutes: 5,
+    keeps: 6,
+    keepLine: "gives the kitchen a small clear place to land",
+    impact: { label: "Quick kitchen help", home: 2, areaName: "Kitchen", areaBefore: 48, areaAfter: 56 },
+  },
+  {
+    id: "quick-bathroom-sink",
+    name: "Clear the bathroom sink",
+    area: "Bathroom",
+    minutes: 5,
+    keeps: 6,
+    keepLine: "keeps the sink easy to use",
+    impact: { label: "Quick bathroom help", home: 2, areaName: "Bathroom", areaBefore: 57, areaAfter: 64 },
+  },
+  {
+    id: "quick-entry-shelf",
+    name: "Clear the entry shelf",
+    area: "Entryway",
+    minutes: 5,
+    keeps: 6,
+    keepLine: "makes the first landing spot easier",
+    impact: { label: "Quick entryway help", home: 2, areaName: "Entryway", areaBefore: 52, areaAfter: 60 },
+  },
+  {
+    id: "quick-laundry-lint",
+    name: "Empty dryer lint",
+    area: "Laundry",
+    minutes: 2,
+    keeps: 3,
+    keepLine: "keeps the next load easier to start",
+    impact: { label: "Quick laundry help", home: 1, areaName: "Laundry", areaBefore: 43, areaAfter: 49 },
+  },
+];
 
 const WHILE_THERE_CANDIDATES = [
   {
@@ -328,25 +368,41 @@ const OPTIONAL_CHORE_CANDIDATES = [
 ];
 
 const GREETINGS_BY_CONTEXT = {
+  morning: [
+    "Good morning.",
+    "Morning check-in.",
+  ],
+  afternoon: [
+    "Good afternoon.",
+    "There is room this afternoon.",
+  ],
+  evening: [
+    "Good evening.",
+    "Evening can stay gentle.",
+  ],
+  night: [
+    "Late day, lighter touch.",
+    "Tonight can stay quiet.",
+  ],
   low: [
-    "Let's keep this light. The home can still get a little care.",
-    "A small, gentle pass can be enough for right now.",
+    "Something small and gentle can still help.",
+    "Let's keep this light.",
   ],
   quiet: [
     "A quiet bit of care can fit here.",
-    "There is a calm way to help the home right now.",
+    "There is a calm way to help.",
   ],
   focused: [
     "There is room for one useful pass.",
-    "A clear task bundle can move the home forward.",
+    "A clear task bundle can move things forward.",
   ],
   high: [
     "There is room for one useful pass.",
-    "A clear task bundle can move the home forward.",
+    "A clear task bundle can move things forward.",
   ],
   restless: [
-    "A visible lift can give that restlessness somewhere useful to go.",
-    "There is a small task bundle with some motion in it.",
+    "A visible lift can use that extra motion.",
+    "A small task bundle has some movement in it.",
   ],
   ready: [
     "The home has a fuller bundle ready if you want to lean in.",
@@ -357,8 +413,58 @@ const GREETINGS_BY_CONTEXT = {
     "Something small can still help.",
   ],
   default: [
-    "Good evening. I found something small that can make the home feel lighter.",
+    "I found something small that can make the home feel lighter.",
     "The home has a useful place to start.",
+  ],
+};
+
+const GREETING_AREAS = {
+  Auto: [
+    "I found a useful place to start.",
+    "The home has a useful place to start.",
+  ],
+  Kitchen: [
+    "The kitchen has a clear lift ready.",
+    "A kitchen pass would help right now.",
+  ],
+  Entryway: [
+    "The entryway has a visible lift ready.",
+    "A small entryway reset would help.",
+  ],
+  Bathroom: [
+    "The bathroom has a contained refresh ready.",
+    "A quiet bathroom pass would help.",
+  ],
+  Laundry: [
+    "Laundry has momentum waiting.",
+    "A laundry pass would move things along.",
+  ],
+  "Living room": [
+    "The living room can open back up.",
+    "A living room reset would help.",
+  ],
+};
+
+const GREETING_TIMES = {
+  [TIME_AUTO]: [
+    "I matched it to this moment.",
+    "It can fit this moment.",
+  ],
+  "5 min": [
+    "Five minutes is enough.",
+    "This can stay tiny.",
+  ],
+  "10 min": [
+    "Ten minutes can make a dent.",
+    "This can stay compact.",
+  ],
+  "15 min": [
+    "A short pass can move things.",
+    "There is room for a steady pass.",
+  ],
+  "25 min": [
+    "There is room for a fuller pass.",
+    "A fuller pass can help where it matters.",
   ],
 };
 
@@ -366,10 +472,26 @@ function pickFrom(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
-function pickRightNowGreeting(context) {
-  if (context.time === "5 min") return pickFrom(GREETINGS_BY_CONTEXT.short);
+function currentDayPart(date = new Date()) {
+  const hour = date.getHours();
+  if (hour >= 5 && hour < 12) return "morning";
+  if (hour >= 12 && hour < 17) return "afternoon";
+  if (hour >= 17 && hour < 22) return "evening";
+  return "night";
+}
+
+function pickRightNowGreeting(context, date = new Date()) {
+  const dayPart = currentDayPart(date);
+  const timeCandidates = GREETING_TIMES[context.time] || GREETING_TIMES[TIME_AUTO];
+  if (context.time === "5 min") {
+    return `${pickFrom(GREETINGS_BY_CONTEXT[dayPart])} ${pickFrom(GREETINGS_BY_CONTEXT.short)}`;
+  }
+  if (context.area !== "Auto") {
+    const areaCandidates = GREETING_AREAS[context.area] || GREETING_AREAS.Auto;
+    return `${pickFrom(GREETINGS_BY_CONTEXT[dayPart])} ${pickFrom([...areaCandidates, ...timeCandidates])}`;
+  }
   const candidates = GREETINGS_BY_CONTEXT[context.mood] || GREETINGS_BY_CONTEXT.default;
-  return pickFrom(candidates);
+  return `${pickFrom(GREETINGS_BY_CONTEXT[dayPart])} ${pickFrom([...candidates, ...timeCandidates])}`;
 }
 
 function timeOptionsForContext(context) {
@@ -528,6 +650,10 @@ function publicOptionalChore(candidate) {
   return chore;
 }
 
+function quickAreaTaskFor(areaName) {
+  return QUICK_AREA_TASKS.find((task) => task.area === areaName) || null;
+}
+
 class HomekeepPanel extends HTMLElement {
   constructor() {
     super();
@@ -549,6 +675,8 @@ class HomekeepPanel extends HTMLElement {
       finalSummary: null,
       completionFlash: null,
       activeTab: "right-now",
+      quickAreaTask: null,
+      greetingDayPart: currentDayPart(),
       context: {
         ...BUNDLES[0].context,
         time: TIME_AUTO,
@@ -569,6 +697,7 @@ class HomekeepPanel extends HTMLElement {
       this.shadowRoot.addEventListener("click", this.boundClick);
     }
     this.render();
+    this.dayPartTimer = window.setInterval(() => this.refreshGreetingForDayPart(), 60000);
     this.timer = window.setInterval(() => {
       if (this.state.view === "session" && this.state.activeItemId && !this.state.paused) {
         this.state.elapsed += 1;
@@ -580,6 +709,7 @@ class HomekeepPanel extends HTMLElement {
   disconnectedCallback() {
     if (this.boundClick) this.shadowRoot.removeEventListener("click", this.boundClick);
     window.clearInterval(this.timer);
+    window.clearInterval(this.dayPartTimer);
     window.clearTimeout(this.refineTimer);
     window.clearTimeout(this.summaryTimer);
   }
@@ -589,6 +719,26 @@ class HomekeepPanel extends HTMLElement {
   }
 
   get bundle() {
+    if (this.state.quickAreaTask) {
+      const task = this.state.quickAreaTask;
+      return {
+        id: `quick-${task.area.toLowerCase().replaceAll(" ", "-")}`,
+        title: `${task.area} Short Help`,
+        duration: task.minutes,
+        context: {
+          ...this.state.context,
+          time: `${task.minutes} min`,
+          capacity: "low",
+          goal: "quick wins",
+          area: task.area,
+        },
+        reason: `Home Health asked for short help in ${task.area}.`,
+        greeting: `${task.area} is asking for one short bit of help.`,
+        impact: task.impact,
+        bonusKeeps: 0,
+        chores: [task],
+      };
+    }
     const bundle = BUNDLES[this.state.selected];
     const whileThereTask = pickWhileThereTask(bundle, this.state.context, new Set(this.state.rejectedWhileThere), new Set(this.state.removed));
     return whileThereTask ? { ...bundle, chores: [...bundle.chores, whileThereTask] } : bundle;
@@ -600,6 +750,29 @@ class HomekeepPanel extends HTMLElement {
       return [this.state.context.time, ...options];
     }
     return options;
+  }
+
+  nextRightNowGreeting(context = this.state.context) {
+    let greeting = pickRightNowGreeting(context);
+    for (let attempt = 0; attempt < 4 && greeting === this.state.rightNowGreeting; attempt += 1) {
+      greeting = pickRightNowGreeting(context);
+    }
+    return greeting;
+  }
+
+  refreshRightNowGreeting(context = this.state.context) {
+    this.state.rightNowGreeting = this.nextRightNowGreeting(context);
+    this.state.greetingDayPart = currentDayPart();
+  }
+
+  refreshGreetingForDayPart() {
+    const dayPart = currentDayPart();
+    if (dayPart === this.state.greetingDayPart) return;
+    this.state.greetingDayPart = dayPart;
+    if (this.state.view === "ready" && this.state.activeTab === "right-now") {
+      this.refreshRightNowGreeting();
+      this.render();
+    }
   }
 
   visibleChores() {
@@ -640,6 +813,7 @@ class HomekeepPanel extends HTMLElement {
     this.refine({
       selected: next,
       context,
+      quickAreaTask: null,
       areaExplicit: this.state.areaExplicit,
       timeExplicit: this.state.timeExplicit,
       moodExplicit: this.state.moodExplicit,
@@ -659,14 +833,16 @@ class HomekeepPanel extends HTMLElement {
     const timeExplicit = key === "time" ? value !== TIME_AUTO : this.state.timeExplicit;
     const moodExplicit = key === "mood" ? value !== "auto" : this.state.moodExplicit;
     const selected = this.pickBundle(context);
-    const shouldRegenerateGreeting = ["time", "mood"].includes(key);
+    const rightNowGreeting = this.nextRightNowGreeting(context);
     this.refine({
       context,
       areaExplicit,
       timeExplicit,
       moodExplicit,
       selected,
-      rightNowGreeting: shouldRegenerateGreeting ? pickRightNowGreeting(context) : this.state.rightNowGreeting,
+      quickAreaTask: null,
+      rightNowGreeting,
+      greetingDayPart: currentDayPart(),
       removed: [],
       noSuggestion: context.area === "Living room" && context.mood === "ready",
     });
@@ -700,6 +876,37 @@ class HomekeepPanel extends HTMLElement {
   restoreChore(choreId) {
     this.state.removed = this.state.removed.filter((id) => id !== choreId);
     this.render();
+  }
+
+  requestAreaHelp(areaName, mode = "short") {
+    const shortHelp = mode === "short";
+    const quickAreaTask = shortHelp ? quickAreaTaskFor(areaName) : null;
+    if (shortHelp && !quickAreaTask) return;
+    const context = {
+      ...this.state.context,
+      time: shortHelp ? "5 min" : TIME_AUTO,
+      area: areaName,
+      mood: shortHelp ? this.state.context.mood : "ready",
+      capacity: shortHelp ? "low" : "strong",
+      goal: shortHelp ? "quick wins" : "overdue care",
+    };
+    const selected = this.pickBundle(context);
+    this.refine({
+      activeTab: "right-now",
+      context,
+      selected,
+      quickAreaTask,
+      areaExplicit: true,
+      timeExplicit: shortHelp,
+      moodExplicit: !shortHelp,
+      expanded: true,
+      removed: [],
+      noSuggestion: false,
+      rightNowGreeting: shortHelp
+        ? `${areaName} is asking for one short bit of help.`
+        : `${areaName} could use a little more care. Right Now found a gentle pass.`,
+      greetingDayPart: currentDayPart(),
+    });
   }
 
   startSession() {
@@ -840,8 +1047,6 @@ class HomekeepPanel extends HTMLElement {
     };
     this.state.view = "summary";
     this.render();
-    window.clearTimeout(this.summaryTimer);
-    this.summaryTimer = window.setTimeout(() => this.resetReady(), 2400);
   }
 
   resetReady() {
@@ -850,6 +1055,8 @@ class HomekeepPanel extends HTMLElement {
     this.state.finalSummary = null;
     this.state.expanded = false;
     this.state.removed = [];
+    this.state.quickAreaTask = null;
+    this.refreshRightNowGreeting();
     this.render();
   }
 
@@ -884,9 +1091,9 @@ class HomekeepPanel extends HTMLElement {
   renderHomeHealth() {
     return `
       <section class="health-hero">
-        <div class="health-score">
-          <span>${HOME_HEALTH.score}</span>
-          <small>Home Health</small>
+        <div class="health-status">
+          <span>${HOME_HEALTH.label}</span>
+          <small>${HOME_HEALTH.trend}</small>
         </div>
         <div>
           <p class="eyebrow">Visual test</p>
@@ -906,22 +1113,33 @@ class HomekeepPanel extends HTMLElement {
         <div class="area-head">
           <div>
             <h2>${area.name}</h2>
-            <p>${area.trend}</p>
-          </div>
-          <div class="area-meter" aria-label="${area.name} health ${area.health}">
-            <span>${area.health}</span>
-            <small>${area.impact} lift available</small>
+            <div class="area-chip-row" aria-label="${area.name} health summary">
+              <span class="meta-chip icon-chip"><ha-icon icon="mdi:home-heart"></ha-icon><strong>${area.status}</strong></span>
+              <span class="meta-chip icon-chip"><ha-icon icon="mdi:chart-line-variant"></ha-icon><strong>${area.trend}</strong></span>
+              <span class="meta-chip icon-chip"><ha-icon icon="mdi:heart-plus-outline"></ha-icon><strong>${area.lift}</strong></span>
+            </div>
           </div>
         </div>
-        <div class="health-bar" aria-hidden="true"><span style="width: ${area.health}%"></span></div>
         <div class="area-columns">
           <div>
             <span class="area-kicker">Helped lately</span>
-            ${area.helped.map((item) => `<p>${item}</p>`).join("")}
+            <div class="area-chip-row helped">
+              ${area.helped.map((item) => `<span class="meta-chip icon-chip soft"><ha-icon icon="mdi:sparkles"></ha-icon><strong>${item}</strong></span>`).join("")}
+            </div>
           </div>
           <div>
             <span class="area-kicker">Could help next</span>
             <p>${area.next}</p>
+            <div class="area-actions" aria-label="${area.name} help options">
+              <button class="secondary area-help" data-action="area-help" data-help-mode="short" data-area="${area.name}" aria-label="Ask for short help in ${area.name}">
+                <ha-icon icon="mdi:timer-sand"></ha-icon>
+                <span>Short help</span>
+              </button>
+              <button class="secondary area-help nudge" data-action="area-help" data-help-mode="care" data-area="${area.name}" aria-label="Ask Right Now for a care nudge in ${area.name}">
+                <ha-icon icon="mdi:hand-heart-outline"></ha-icon>
+                <span>Care nudge</span>
+              </button>
+            </div>
           </div>
         </div>
       </article>
@@ -935,6 +1153,7 @@ class HomekeepPanel extends HTMLElement {
     const areaNames = [...new Set(chores.map((chore) => chore.area))];
     const impactScope = areaNames.length === 1 ? areaNames[0] : bundle.impact.areaName;
     const healthGain = bundle.impact.areaAfter - bundle.impact.areaBefore;
+    const moodLabel = this.state.context.mood === "auto" ? "Balanced fit" : `${this.state.context.mood} fit`;
     const fitLine = contextFitLine(this.state.context, bundle, duration, areaNames, this.state.areaExplicit);
     return `
       <section class="hero">
@@ -955,16 +1174,16 @@ class HomekeepPanel extends HTMLElement {
             <p class="fit-line">${fitLine}</p>
           </div>
           <button class="primary benefit-action" data-action="start-session" aria-label="Start this bundle">
-            <span>
-              <strong>${bundle.impact.areaName} ${bundle.impact.areaAfter - bundle.impact.areaBefore}</strong>
-              <small>${bundle.impact.label}</small>
-            </span>
+            <span>Start</span>
             <ha-icon icon="mdi:arrow-right"></ha-icon>
           </button>
         </div>
         <div class="meta">
-          <span><ha-icon icon="mdi:format-list-checks"></ha-icon>${chores.length} tasks · ${duration} min</span>
-          <span><ha-icon icon="mdi:heart-pulse"></ha-icon>${impactScope} ${healthGain}</span>
+          <span class="meta-chip icon-chip"><ha-icon icon="mdi:format-list-checks"></ha-icon><strong>${chores.length} tasks · ${duration} min</strong></span>
+          <span class="meta-chip icon-chip"><ha-icon icon="mdi:heart-pulse"></ha-icon><strong>${impactScope} ${healthGain}</strong></span>
+          <span class="meta-chip icon-chip"><ha-icon icon="mdi:bullseye-arrow"></ha-icon><strong>${bundle.context.goal}</strong></span>
+          <span class="meta-chip icon-chip"><ha-icon icon="mdi:weather-partly-cloudy"></ha-icon><strong>${moodLabel}</strong></span>
+          ${bundle.bonusKeeps ? `<span class="meta-chip icon-chip warm"><ha-icon icon="mdi:sparkles"></ha-icon><strong>+${bundle.bonusKeeps} Keeps</strong></span>` : ""}
         </div>
         ${this.renderBundleDetails(this.bundle.chores, areaNames)}
       </section>`}
@@ -992,7 +1211,7 @@ class HomekeepPanel extends HTMLElement {
     const currentValue = displayContextValue(this.state.context[key]);
     return `
       <div class="chip-wrap">
-        <button class="chip ${open ? "open" : ""} ${explicit ? "explicit" : "inferred"}" data-chip="${key}" aria-label="${chip.label}: ${currentValue}" title="${chip.label}">
+        <button class="chip icon-chip ${open ? "open" : ""} ${explicit ? "explicit" : "inferred"}" data-chip="${key}" aria-label="${chip.label}: ${currentValue}" title="${chip.label}">
           <ha-icon icon="${chip.icon}"></ha-icon>
           <strong>${currentValue}</strong>
         </button>
@@ -1053,9 +1272,13 @@ class HomekeepPanel extends HTMLElement {
         <p class="eyebrow">Task Session</p>
         <h1>${this.state.optionalOffered && !allDone ? "That bundle helped. A few more fit." : allDone ? "That bundle helped." : session.title}</h1>
         ${this.renderSessionProgress()}
-        ${this.state.activeItemId ? this.renderTimer() : `<p class="support">${supportText}</p>`}
+        <div class="session-live-slot">
+          ${this.state.activeItemId ? this.renderTimer() : `<p class="support">${supportText}</p>`}
+        </div>
+        <div class="flash-slot">
+          ${this.state.completionFlash ? `<div class="flash ${this.state.completionFlash.level}">${this.state.completionFlash.keeps} Keeps · ${this.state.completionFlash.message}</div>` : ""}
+        </div>
       </section>
-      ${this.state.completionFlash ? `<div class="flash ${this.state.completionFlash.level}">${this.state.completionFlash.keeps} Keeps · ${this.state.completionFlash.message}</div>` : ""}
       <section class="session-list">
         ${visibleChores.map((chore, index) => `${optionalVisible && chore.optional && !visibleChores[index - 1]?.optional ? `${this.renderBundleMilestone()}${this.renderOptionalDivider()}` : ""}${chore.status === "completed" ? this.renderCompletedChore(chore) : this.renderSessionChore(chore, index)}`).join("")}
         ${skipped.length ? this.renderSkippedSummary(skipped) : ""}
@@ -1175,6 +1398,7 @@ class HomekeepPanel extends HTMLElement {
         <h1>${summary.title} is complete.</h1>
         <p>${summary.chores.map((chore) => chore.name).join(", ")}.</p>
         <div class="impact">${summary.keeps} Keeps · The home feels a little lighter.</div>
+        <button class="primary" data-action="dismiss-summary">Dismiss</button>
       </section>
     `;
   }
@@ -1217,6 +1441,8 @@ class HomekeepPanel extends HTMLElement {
         .tabs ha-icon { width: 18px; --mdc-icon-size: 18px; color: var(--hk-accent); }
         .eyebrow { margin: 0 0 10px; color: var(--hk-muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0; font-weight: 700; }
         h1 { margin: 0 auto; max-width: 760px; font-size: clamp(2rem, 6vw, 4rem); line-height: 1.04; font-weight: 760; letter-spacing: 0; }
+        .hero h1 { min-height: 2.08em; display: flex; align-items: center; justify-content: center; text-wrap: balance; }
+        .session-top h1 { min-height: 2.08em; display: flex; align-items: center; justify-content: center; text-wrap: balance; }
         h2 { margin: 0; font-size: 1.32rem; line-height: 1.16; letter-spacing: 0; font-weight: 760; }
         p { margin: 0; line-height: 1.48; }
         .chips { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 26px; }
@@ -1230,27 +1456,35 @@ class HomekeepPanel extends HTMLElement {
           padding: 0 13px;
           cursor: pointer;
         }
-        .chip { display: flex; align-items: center; gap: 8px; padding-left: 7px; backdrop-filter: blur(16px); }
+        .chip { display: flex; align-items: center; backdrop-filter: blur(16px); }
+        .icon-chip { gap: 0; padding: 0; overflow: hidden; --hk-chip-icon-width: 40px; }
         .chip.randomize { width: 40px; min-width: 40px; justify-content: center; padding: 0; background: var(--hk-accent-soft); border-color: color-mix(in srgb, var(--hk-accent) 42%, transparent); }
-        .chip ha-icon {
-          width: 26px;
-          height: 26px;
-          min-width: 26px;
+        .icon-chip ha-icon {
+          align-self: stretch;
+          width: var(--hk-chip-icon-width);
+          min-width: var(--hk-chip-icon-width);
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          border-radius: 999px;
-          background: rgba(255,255,255,0.085);
+          background: rgba(255,255,255,0.1);
           color: var(--hk-accent);
+        }
+        .chip.icon-chip.explicit ha-icon { background: color-mix(in srgb, var(--hk-accent) 16%, rgba(255,255,255,0.08)); }
+        .chip.icon-chip.open ha-icon {
+          background: color-mix(in srgb, var(--hk-accent) 28%, rgba(255,255,255,0.08));
         }
         .chip.randomize ha-icon {
           width: 23px;
           height: 23px;
           min-width: 23px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 999px;
           --mdc-icon-size: 18px;
-          background: color-mix(in srgb, var(--hk-accent) 24%, transparent);
+          color: var(--hk-accent);
         }
-        .chip strong { font-size: 0.88rem; font-weight: 720; }
+        .chip strong { font-size: 0.88rem; font-weight: 720; padding: 0 13px 0 10px; }
         .chip.inferred strong { color: color-mix(in srgb, var(--hk-text) 78%, var(--hk-muted)); }
         .chip.explicit { background: rgba(255,255,255,0.092); border-color: color-mix(in srgb, var(--hk-accent) 46%, transparent); }
         .chip.open { background: color-mix(in srgb, var(--hk-accent) 24%, transparent); border-color: color-mix(in srgb, var(--hk-accent) 58%, transparent); }
@@ -1260,32 +1494,40 @@ class HomekeepPanel extends HTMLElement {
         .suggestion, .session-list, .ending { margin-top: 18px; padding: 22px; border: 1px solid var(--hk-border); border-radius: 8px; background: var(--hk-card); box-shadow: 0 22px 70px rgba(0, 0, 0, 0.22); backdrop-filter: blur(22px); }
         .health-hero { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: center; padding: 24px 0 18px; }
         .health-hero h1 { margin: 0; text-align: left; font-size: clamp(2rem, 5vw, 3.55rem); }
-        .health-score { width: 128px; height: 128px; border-radius: 50%; display: grid; place-content: center; text-align: center; background: color-mix(in srgb, var(--hk-accent) 18%, transparent); border: 1px solid color-mix(in srgb, var(--hk-accent) 42%, transparent); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24); }
-        .health-score span { font-size: 2.65rem; line-height: 1; font-weight: 820; }
-        .health-score small, .area-meter small { color: var(--hk-muted); font-weight: 740; }
+        .health-status { width: 142px; min-height: 118px; border-radius: 8px; display: grid; align-content: center; gap: 8px; text-align: center; padding: 14px; box-sizing: border-box; background: color-mix(in srgb, var(--hk-accent) 18%, transparent); border: 1px solid color-mix(in srgb, var(--hk-accent) 42%, transparent); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24); }
+        .health-status span { font-size: 1.05rem; line-height: 1.08; font-weight: 820; }
+        .health-status small { color: var(--hk-muted); font-weight: 740; line-height: 1.25; }
         .health-list { display: grid; gap: 12px; margin-top: 8px; }
         .area-card { padding: 16px; border: 1px solid var(--hk-border); border-radius: 8px; background: var(--hk-card); box-shadow: 0 18px 54px rgba(0, 0, 0, 0.18); backdrop-filter: blur(22px); }
-        .area-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: start; }
-        .area-head p { margin-top: 5px; color: var(--hk-muted); }
-        .area-meter { min-width: 108px; padding: 9px 11px; border-radius: 8px; background: rgba(255,255,255,0.055); border: 1px solid var(--hk-border-soft); text-align: right; }
-        .area-meter span { display: block; font-size: 1.55rem; line-height: 1; font-weight: 820; }
-        .health-bar { height: 8px; overflow: hidden; margin: 14px 0; border-radius: 999px; background: rgba(255,255,255,0.065); }
-        .health-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--hk-warm), var(--hk-accent)); }
+        .area-head { display: grid; gap: 10px; align-items: start; }
+        .area-chip-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+        .area-chip-row.helped { margin-top: 0; }
         .area-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .area-columns > div { padding: 11px; border-radius: 8px; background: rgba(255,255,255,0.042); border: 1px solid var(--hk-border-soft); }
         .area-kicker { display: block; margin-bottom: 6px; color: color-mix(in srgb, var(--hk-accent) 78%, var(--hk-muted)); font-size: 0.78rem; font-weight: 800; }
         .area-columns p { color: var(--hk-muted); font-size: 0.9rem; }
         .area-columns p + p { margin-top: 4px; }
+        .area-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .area-help { display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 0 11px; }
+        .area-help ha-icon { width: 18px; --mdc-icon-size: 18px; color: var(--hk-accent); }
+        .area-help.nudge { background: color-mix(in srgb, var(--hk-accent) 11%, transparent); }
         .suggestion.refining { filter: blur(0.45px); opacity: 0.82; }
         .suggestion-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: start; }
         .suggestion-head p, .support, .session-progress, .ending p { color: var(--hk-muted); margin-top: 6px; }
         .session-progress { font-size: 0.9rem; font-weight: 720; }
+        .session-live-slot { min-height: 58px; display: grid; place-items: center; }
+        .flash-slot { min-height: 50px; display: grid; place-items: center; margin-top: 2px; }
         .fit-line { color: color-mix(in srgb, var(--hk-accent) 72%, var(--hk-muted)); font-size: 0.88rem; font-weight: 680; }
         .icon-button, .ghost-icon { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--hk-border-soft); display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.052); color: var(--hk-text); cursor: pointer; }
         .icon-button.disabled { opacity: 0.55; cursor: default; }
         .meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 12px; }
-        .meta span, .impact, .keeps-line { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 10px; border-radius: 999px; background: rgba(255,255,255,0.058); border: 1px solid var(--hk-border-soft); color: var(--hk-text); font-size: 0.86rem; font-weight: 700; }
-        .meta ha-icon { width: 17px; color: var(--hk-accent); }
+        .meta-chip, .impact, .keeps-line { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 10px; border-radius: 999px; background: rgba(255,255,255,0.058); border: 1px solid var(--hk-border-soft); color: var(--hk-text); font-size: 0.86rem; font-weight: 700; }
+        .meta-chip.icon-chip { --hk-chip-icon-width: 34px; }
+        .meta-chip strong { padding: 0 10px 0 9px; font-size: inherit; font-weight: inherit; }
+        .meta-chip.warm { background: rgba(214, 181, 109, 0.105); color: #ead7a6; border-color: rgba(214, 181, 109, 0.22); }
+        .meta-chip.warm ha-icon { color: #ead7a6; }
+        .meta-chip.soft { background: rgba(255,255,255,0.042); color: var(--hk-muted); }
+        .meta-chip.soft ha-icon { color: color-mix(in srgb, var(--hk-accent) 68%, var(--hk-muted)); }
         .impact { background: rgba(214, 181, 109, 0.14); color: #edd390; }
         .details { margin-top: 14px; display: grid; gap: 8px; }
         .keeps-line { justify-content: space-between; border-radius: 8px; padding: 9px 11px; width: 100%; box-sizing: border-box; color: #ead7a6; background: rgba(214, 181, 109, 0.105); border-color: rgba(214, 181, 109, 0.22); }
@@ -1303,9 +1545,7 @@ class HomekeepPanel extends HTMLElement {
         .chore-row small { font-size: 0.82rem; }
         .actions, .row-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
         .primary { border-color: color-mix(in srgb, var(--hk-accent) 65%, transparent); background: color-mix(in srgb, var(--hk-accent) 72%, #10221e); color: #f7fffb; font-weight: 760; }
-        .benefit-action { display: inline-flex; align-items: center; justify-content: space-between; gap: 18px; min-width: 196px; max-width: 248px; margin-left: auto; padding: 8px 12px 8px 16px; text-align: left; box-shadow: 0 10px 26px rgba(0,0,0,0.2); }
-        .benefit-action span { display: grid; gap: 1px; }
-        .benefit-action small { font-size: 0.78rem; line-height: 1.2; font-weight: 650; opacity: 0.84; }
+        .benefit-action { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-width: 112px; margin-left: auto; padding: 8px 13px 8px 16px; box-shadow: 0 10px 26px rgba(0,0,0,0.2); }
         .benefit-action ha-icon { width: 19px; color: #f7fffb; }
         .secondary { background: rgba(255,255,255,0.075); font-weight: 720; }
         .ghost { min-width: 40px; padding: 0 12px; background: transparent; color: var(--hk-muted); }
@@ -1321,9 +1561,9 @@ class HomekeepPanel extends HTMLElement {
         .optional-divider small { color: var(--hk-muted); line-height: 1.35; }
         .next { display: inline-block; margin-bottom: 6px; color: var(--hk-accent); font-weight: 740; font-size: 0.8rem; }
         .next.optional { color: var(--hk-muted); }
-        .timer { display: inline-flex; align-items: center; gap: 12px; margin-top: 16px; padding: 8px 8px 8px 18px; border-radius: 999px; background: var(--hk-card-strong); border: 1px solid var(--hk-border-soft); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24); }
+        .timer { display: inline-flex; align-items: center; gap: 12px; padding: 8px 8px 8px 18px; border-radius: 999px; background: var(--hk-card-strong); border: 1px solid var(--hk-border-soft); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24); }
         .timer span { font-size: 1.45rem; line-height: 1; font-variant-numeric: tabular-nums; font-weight: 800; }
-        .flash { position: sticky; top: 12px; z-index: 3; margin: 0 auto 12px; width: fit-content; padding: 10px 16px; border-radius: 999px; color: #f5fff9; background: color-mix(in srgb, var(--hk-accent) 52%, #163028); font-weight: 800; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.26); }
+        .flash { width: fit-content; padding: 10px 16px; border-radius: 999px; color: #f5fff9; background: color-mix(in srgb, var(--hk-accent) 52%, #163028); font-weight: 800; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.26); }
         .flash.bundle { padding-inline: 18px; background: color-mix(in srgb, var(--hk-accent) 68%, #18372d); box-shadow: 0 16px 38px rgba(0, 0, 0, 0.32); }
         .flash.optional { background: color-mix(in srgb, #d6b56d 30%, var(--hk-accent) 42%); }
         .flash.optional-2 { background: color-mix(in srgb, #d6b56d 42%, var(--hk-accent) 48%); box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3); }
@@ -1344,11 +1584,11 @@ class HomekeepPanel extends HTMLElement {
           .tabs { margin-bottom: 12px; }
           .tabs button { padding: 0 10px; }
           h1 { font-size: clamp(1.85rem, 9vw, 2.7rem); }
+          .session-top h1 { min-height: 2.18em; }
           .health-hero { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 14px; padding-top: 16px; }
           .health-hero h1 { text-align: center; font-size: clamp(1.8rem, 8vw, 2.5rem); }
-          .health-score { width: 112px; height: 112px; }
-          .area-head, .area-columns { grid-template-columns: 1fr; }
-          .area-meter { text-align: left; }
+          .health-status { width: 124px; min-height: 108px; }
+          .area-columns { grid-template-columns: 1fr; }
           .chips { margin-top: 18px; gap: 6px; }
           .suggestion, .session-list, .ending { margin-top: 14px; padding: 14px; }
           .suggestion-head { grid-template-columns: 1fr; }
@@ -1374,8 +1614,10 @@ class HomekeepPanel extends HTMLElement {
     if (!target) return;
     const action = target.dataset.action;
     if (target.dataset.tab) {
+      const returningToRightNow = target.dataset.tab === "right-now" && this.state.activeTab !== "right-now";
       this.state.activeTab = target.dataset.tab;
       this.state.selector = null;
+      if (returningToRightNow) this.refreshRightNowGreeting();
       this.render();
       return;
     }
@@ -1394,11 +1636,13 @@ class HomekeepPanel extends HTMLElement {
     if (target.dataset.complete) this.completeChore(target.dataset.complete);
     if (target.dataset.skip) this.skipChore(target.dataset.skip);
     if (action === "start-session") this.startSession();
+    if (action === "area-help") this.requestAreaHelp(target.dataset.area, target.dataset.helpMode);
     if (action === "shuffle") this.shuffle();
     if (action === "toggle-pause") {
       this.state.paused = !this.state.paused;
       this.render();
     }
+    if (action === "dismiss-summary") this.resetReady();
     if (action === "finish") this.finishSession();
   }
 }

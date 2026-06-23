@@ -79,9 +79,18 @@ area_health = weighted_average(chore_health, ChoreDefinition.health_weight)
 ```
 
 Where Staleness derives from durable scheduling facts, especially
-`ChoreState.next_due_at` when available. Area Health must clamp to `0..100`,
-where `100` means no enabled Chore in the area is meaningfully stale. Disabled
-Chores do not participate in Area Health.
+`ChoreState.next_due_at` when available. Area Health must clamp to `0..100` for
+internal calculation, event thresholding, and integration stability, where
+`100` means no enabled Chore in the area is meaningfully stale. Disabled Chores
+do not participate in Area Health.
+
+Numeric health values are not the preferred user-facing representation because
+they can imply a percent-complete model or an attainable perfect score.
+Homekeep app surfaces should translate health into status labels, qualitative
+trend language, and care-focused explanations. Use the numeric value internally
+for sorting, thresholds, and Projected Impact, but avoid visible Home Health or
+Area Health numbers in the user experience unless a future explicit diagnostic
+surface calls for raw values.
 
 An area with no enabled Chores may return `100` for calculation stability, but
 user-facing surfaces should avoid presenting that as a meaningful health win.
@@ -97,7 +106,7 @@ Example explanation payload:
 
 ```yaml
 area_id: kitchen
-score: 62
+health_bucket: starting_to_build_up
 label: Starting to build up
 contributors:
   - chore_id: wipe_counters
@@ -144,6 +153,7 @@ not create historical event noise.
 - startup rebuilds or lazily computes health values
 - stored `staleness_score` is not required for correctness
 - area health changed event fires on bucket crossing
-- area health changed event fires on absolute delta of at least 10 points
+- area health changed event fires on an internal absolute delta of at least 10
+  points
 - area health changed event does not fire for smaller same-bucket changes
 - area health changed event does not fire during startup/cache rebuild

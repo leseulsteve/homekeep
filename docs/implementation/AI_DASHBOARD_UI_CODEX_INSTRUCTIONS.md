@@ -86,7 +86,8 @@ Implementation boundary:
   Home Health visual entry.
 - A fast mocked Ready Now prototype is acceptable before real service wiring.
 - Do not implement Home Health and Areas beyond mocked visual navigation,
-  synthetic area cards, Projected Impact, or a small context hint.
+  synthetic area cards, Projected Impact, a small context hint, or gentle
+  mocked Area requests that hand off to Right Now.
 - Keep Right Now as the default opening surface. Home Health should be reachable
   from panel-level navigation and should not crowd the recommendation flow.
 - Do not implement Plan / Scheduled Tasks.
@@ -171,8 +172,11 @@ It must:
 - show a substantial Mood Context greeting first
 - generate the Right Now greeting from top-level readiness context, not from the
   selected Task Bundle title
-- keep the greeting stable through shuffle unless time or mood changes
-  meaningfully
+- regenerate the greeting on page load, task-time changes, Mood Context
+  changes, Area changes, time-of-day context, and when returning to Right Now
+  from another view
+- keep the greeting stable through shuffle unless one of those top-level
+  contexts changes, and reserve a consistent two-line-height greeting area
 - auto-generate the best suggested Task Session on open
 - use inferred/default context when the user has not chosen values
 - show context as compact colored chips with icons and the current value; avoid
@@ -219,9 +223,9 @@ It must:
 - during live review, check whether `Best fit` for Time and Area is understood
   and whether mobile vertical density remains comfortable
 - let each chip open a small inline selector
-- center chip icons inside a distinct icon-slot background, with spacing
-  adjusted for that layout; do not force this treatment onto action buttons
-  where the simpler icon reads better
+- place mixed chip icons inside a full-height left segment whose background
+  reaches the chip border; the segment's color edge separates it from the text,
+  without adding a separate divider stroke
 - wait briefly after chip changes before refreshing, so multiple changes can
   settle together
 - keep the current suggestion visible while refining

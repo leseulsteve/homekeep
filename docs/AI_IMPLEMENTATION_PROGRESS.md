@@ -1719,7 +1719,9 @@ Implemented:
   `dashboard`.
 
 Tests/checks run:
-- Pending in this pass.
+- `python3 -m unittest tests.test_frontend -v`
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `git diff --check -- PROJECT_BRIEF.md docs/AI_DECISION_LOG.md docs/specs/DERIVED_HEALTH.md docs/product/HOMEKEEP_APP_PLAN.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md custom_components/homekeep/frontend/homekeep-panel.js tests/test_frontend.py`
 
 Docs updated:
 - `AGENTS.md`
@@ -2781,7 +2783,9 @@ Implemented:
   session, and helper storage failed only at the script template layer.
 
 Tests/checks run:
-- Pending in this pass.
+- `python3 -m unittest tests.test_frontend -v`
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `git diff --check -- PROJECT_BRIEF.md docs/AI_DECISION_LOG.md docs/specs/DERIVED_HEALTH.md docs/product/HOMEKEEP_APP_PLAN.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md custom_components/homekeep/frontend/homekeep-panel.js tests/test_frontend.py`
 
 Docs updated:
 - `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
@@ -2940,7 +2944,9 @@ Implemented:
   and tests to reference the split examples.
 
 Tests/checks run:
-- Pending in this pass.
+- `python3 -m unittest tests.test_frontend -v`
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `git diff --check -- PROJECT_BRIEF.md docs/AI_DECISION_LOG.md docs/specs/DERIVED_HEALTH.md docs/product/HOMEKEEP_APP_PLAN.md docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md docs/AI_IMPLEMENTATION_PROGRESS.md custom_components/homekeep/frontend/homekeep-panel.js tests/test_frontend.py`
 
 Docs updated:
 - `docs/product/HOMEKEEP_APP_PLAN.md`
@@ -3196,6 +3202,358 @@ Known gaps / next prompt:
 - Commit `50242e4` was pushed to `main` for the private HACS candidate.
 - Update Homekeep from HACS in the private Home Assistant instance, restart
   Home Assistant, and run Gate 3C.
+
+### 2026-06-23 - Label-first Home Health direction
+
+Status: completed locally
+
+Implemented:
+- Changed the product direction so user-facing Home Health and Area Health use
+  labels, qualitative trends, and care-focused explanations instead of raw
+  numeric health values.
+- Kept numeric health as an internal calculation/integration value for sorting,
+  thresholds, events, and Projected Impact.
+- Updated the mocked Home Health panel to remove the whole-home number, Area
+  health numbers, and percent-like bars.
+- Added frontend source checks to guard against reintroducing numeric Home
+  Health display in the mocked panel.
+
+Tests/checks run:
+- `git diff --check -- PROJECT_BRIEF.md docs/AI_DECISION_LOG.md docs/product/HOMEKEEP_APP_PLAN.md docs/product/HOMEKEEP_VOICE_SYSTEM.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `PROJECT_BRIEF.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/specs/DERIVED_HEALTH.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Tests updated:
+- `tests/test_frontend.py`
+
+Important decisions:
+- Because Home Health is not expected to realistically reach a perfect state,
+  the app should not teach users to interpret health as a percent-like score.
+- Raw health values may still exist for internal Homekeep and Home Assistant
+  integration behavior until a later entity/API compatibility pass decides
+  whether to add label-based companion entities.
+
+Known gaps / next prompt:
+- Review whether `sensor.homekeep_home_health` should gain a label-first
+  companion sensor or be hidden from the primary user experience in a future
+  Home Assistant entity contract pass.
+
+### 2026-06-23 - Contribution vocabulary and health communication guidance
+
+Status: completed locally
+
+Implemented:
+- Documented that `Task` remains the individual user-facing item.
+- Documented that a suggested or completed `Task Bundle` should be framed as a
+  `Contribution` in user-facing app copy.
+- Added guardrails that Contribution language must feel optional,
+  appreciative, fitting, and mutual rather than obligatory.
+- Expanded the mutual-care model to include humans, animals, pets, plants,
+  objects, devices, routines, home systems, and the home itself as possible
+  contributors when signals are meaningful.
+- Added a thorough ten-point derived health communication guide covering
+  labels, reasons, `Helped lately`, `Could help next`, trend language,
+  recommendations, completion feedback, appreciation/action separation, and
+  keeping raw numbers internal.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+- `git diff --check -- custom_components/homekeep/frontend/homekeep-panel.js docs/product/HOMEKEEP_APP_PLAN.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `PROJECT_BRIEF.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Do not rename individual Tasks to Contributions.
+- Use Contribution as the humane, user-facing frame for the bundled care offer.
+- Contribution copy must never suggest duty, debt, pressure, or disappointment.
+
+Known gaps / next prompt:
+- Future UI copy pass should replace visible `Suggested Task Bundle` phrasing
+  with Contribution-oriented copy while keeping Task rows clear.
+
+### 2026-06-23 - Mixed chip icon segment correction
+
+Status: completed locally
+
+Implemented:
+- Reformatted mixed icon+text chips so the icon background fills a full-height
+  left segment up to the chip border.
+- Applied the same segment pattern to the proposed Task Bundle metadata chips.
+- Introduced a shared `icon-chip` class for mixed icon+text chip styling.
+- Removed the floating icon-slot background treatment from mixed chips.
+- Kept the boundary between icon and text as the color edge where the segment
+  meets the plain chip body, without adding a separate divider stroke.
+- Kept the shuffle icon-only chip on its separate compact treatment.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `python3 -m unittest tests.test_frontend tests.test_reload_unload -v`
+
+Docs updated:
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Mixed icon+text chips should use a full-height icon segment. The segment's
+  background color change is the divider; do not add an extra line or border
+  between icon and text.
+- Icon-only chips, such as the shuffle button, should not add a separate icon
+  background inside the button.
+
+Known gaps / next prompt:
+- Re-run the visual review in the Home Assistant panel after installing the
+  updated candidate.
+
+### 2026-06-23 - Right Now greeting refresh reset
+
+Status: completed locally
+
+Implemented:
+- Reset the Right Now greeting generation rule so it now considers task-time,
+  Mood Context, Area, and time of day.
+- Regenerated the greeting on page load, task-time changes, Mood Context
+  changes, Area changes, returning to Right Now from another tab, and returning
+  to Ready Now after the summary flow.
+- Added a lightweight once-per-minute day-part check so the greeting can refresh
+  when the open panel crosses morning, afternoon, evening, or night.
+- Kept shuffle from regenerating the greeting by itself.
+- Added a retry when refreshing the greeting so visible trigger changes are less
+  likely to land on the same phrase.
+- Reserved a consistent two-line-height greeting area in the Ready Now hero.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_frontend -v`
+
+Docs updated:
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- The greeting is contextual to the moment and top-level filters, not to the
+  selected Task Bundle title.
+- The greeting should not create layout jump when the phrase changes.
+
+Known gaps / next prompt:
+- Re-run the visual review in the Home Assistant panel after installing the
+  updated candidate.
+
+### 2026-06-23 - Home Health area help handoff
+
+Status: completed locally
+
+Implemented:
+- Added gentle mocked Area Health actions for `Short help` and `Care nudge`.
+- Kept Right Now as the main task giver: Home Health requests now hand off to
+  the Right Now surface instead of becoming a parallel task builder.
+- Added synthetic quick Area tasks for short time-budget help.
+- Softened the Home Health header and Area action copy so the home's needs are
+  felt without becoming harsh or punitive.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_frontend -v`
+
+Docs updated:
+- `docs/AI_DECISION_LOG.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Tests updated:
+- `tests/test_frontend.py`
+
+Important decisions:
+- Area Health can make a gentle request for help, but Right Now remains the
+  central place that gives the task.
+- `Critical care` language is too sharp for this surface; use gentler language
+  such as `Care nudge`.
+
+Known gaps / next prompt:
+- Re-run the Home Assistant panel visual review and decide whether the handoff
+  should become a real service-backed behavior or remain a mocked review affordance.
+
+### 2026-06-23 - Suggested bundle card redundancy trim
+
+Status: completed locally
+
+Implemented:
+- Removed duplicate Area Health lift copy from the suggested bundle start
+  button.
+- Kept health context in the metadata chip and made the start button a compact
+  action-only CTA.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_frontend -v`
+
+Docs updated:
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- The suggested bundle card should not repeat the same health lift in both the
+  chip row and primary action. The CTA starts the flow; the chip explains why.
+
+Known gaps / next prompt:
+- Re-review the card visually in Home Assistant to confirm the CTA now reads as
+  an action rather than another status surface.
+
+### 2026-06-23 - Suggested bundle chip richness
+
+Status: completed locally
+
+Implemented:
+- Added additional icon chips to the suggested bundle card for goal, mood fit,
+  and bonus Keeps.
+- Kept the compact start CTA action-only and left Area Health lift in the chip
+  row to avoid the previous redundancy.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_frontend -v`
+
+Docs updated:
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Tests updated:
+- `tests/test_frontend.py`
+
+Important decisions:
+- More chips are welcome when each chip carries a distinct part of the care
+  context: size, health lift, goal, mood fit, or Keeps.
+
+Known gaps / next prompt:
+- Review the suggested bundle card at mobile width to make sure the richer chip
+  row still scans cleanly.
+
+### 2026-06-23 - Home Health chip richness
+
+Status: completed locally
+
+Implemented:
+- Added icon chip rows to Home Health Area cards for status, trend, available
+  lift, and recent helped-lately signals.
+- Removed the separate Area lift meter so Area facts live in the same chip
+  language as the suggested bundle card.
+- Kept Area help buttons visually distinct as actions rather than status chips.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_frontend -v`
+
+Docs updated:
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Tests updated:
+- `tests/test_frontend.py`
+
+Important decisions:
+- Home Health can use lots of chips as long as they are small, icon-led, and
+  descriptive rather than numeric or grade-like.
+
+Known gaps / next prompt:
+- Review Home Health on mobile to ensure the denser chip rows wrap cleanly.
+
+### 2026-06-23 - Task Session header stability
+
+Status: completed locally
+
+Implemented:
+- Reserved stable vertical space for the running-session support/timer line.
+- Moved completion feedback into an always-present flash slot inside the Task
+  Session header.
+- Removed sticky flash insertion above the task list so completing or starting
+  a Task does not bounce the list up and down.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_frontend -v`
+
+Docs updated:
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Tests updated:
+- `tests/test_frontend.py`
+
+Important decisions:
+- The running Task Session header should reserve space for changing state so
+  the task list stays visually anchored during start, pause, complete, and
+  flash-feedback transitions.
+
+Known gaps / next prompt:
+- Visually review active-session transitions in the Home Assistant panel,
+  especially first start, completion flash, optional-task offer, and mobile
+  width.
+
+### 2026-06-23 - Session summary explicit dismiss
+
+Status: completed locally
+
+Implemented:
+- Removed the automatic return from the completed Task Session summary.
+- Added an explicit `Dismiss` button to the session-complete summary page.
+- Wired the dismiss action to return to Right Now only when the user taps it.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest discover -s tests -v`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+
+Docs updated:
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Tests updated:
+- `tests/test_frontend.py`
+
+Important decisions:
+- Completion feedback should stay visible until dismissed in the live session
+  review flow; it should not disappear automatically.
+
+Known gaps / next prompt:
+- Confirm in the Home Assistant panel that the completed summary remains open
+  long enough for live review and dismisses cleanly.
+
+### 2026-06-23 - Remote live-test build update without version bump
+
+Status: completed locally
+
+Implemented:
+- Prepared the current Live Test 3 UI/documentation changes for a remote build
+  update without changing the integration manifest version.
+- Kept `custom_components/homekeep/manifest.json` at `0.0.5` per Steve's
+  explicit instruction not to bump.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest discover -s tests -v`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `git diff --check`
+- Targeted privacy/secret scan across changed files; hits were guardrail/spec
+  terms such as `session_id`, `tokens`, and checklist language, not secrets.
+
+Docs updated:
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- This remote build update is a private live-test candidate update only. No
+  version bump, tag, or public release claim is included.
+
+Known gaps / next prompt:
+- After the push, update the private Home Assistant instance from the remote
+  source and run the current Live Test 3 visual checklist.
 
 ## Resume Instructions
 

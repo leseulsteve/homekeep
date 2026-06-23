@@ -32,8 +32,8 @@ guilt-inducing list of overdue tasks.
 
 Homekeep's promise is broader than tasks alone: help the home and its
 inhabitants keep each other well. Sometimes that means nudging care for a stale
-area; sometimes it means protecting quiet, keeping a plant or pet routine
-visible, or suggesting that enough has been done for now.
+area; sometimes it means protecting quiet, keeping a plant, animal, or pet
+routine visible, or suggesting that enough has been done for now.
 
 Keeps are part of that promise. Over time, Keeps should represent care
 circulating through the home: humans caring for rooms and routines, plants
@@ -49,9 +49,9 @@ human doing the gathering, loading, moving, and folding, and the washing machine
 doing the machine work. This should feel collaborative, not transactional.
 
 Keeps are non-scarce because care is abundant. They are recognition, not
-currency: they are not spent, stolen, traded, or depleted. More humans, pets,
-plants, devices, and routines contributing to the home means more care can be
-noticed.
+currency: they are not spent, stolen, traded, or depleted. More humans, animals,
+pets, plants, objects, devices, routines, and home systems contributing to the
+home means more care can be noticed.
 
 Care source contribution should be treated as a first-class product axis, at
 the same level as caring for an Area. Homekeep should help users see both
@@ -85,7 +85,13 @@ Home Assistant Area
 prioritize tasks.
 
 Task Bundle
-: A recommended set of tasks that work well together.
+: A recommended set of tasks that work well together. In user-facing app copy,
+a selected Task Bundle should usually be framed as a Contribution.
+
+Contribution
+: The user-facing name for a fitting Task Bundle once Homekeep is inviting the
+user to do it or recognizing that it was done. Contribution language should feel
+optional, appreciative, and mutual, not obligatory.
 
 Task Session
 : A tracked contribution session where one or more users complete selected
@@ -109,10 +115,12 @@ Recommendation Engine
 : The local decision engine that scores, groups, explains, and offers tasks.
 
 Home Health
-: A high-level score that summarizes how much care the home needs. Homekeep may
-also calculate area-level health internally. Area Health should eventually show
-both what would help next and who or what helped lately, because health
-naturally drifts down as care gets stale and contribution should remain visible.
+: A high-level household status that summarizes where care would help. Homekeep
+may calculate numeric health values internally, but user-facing Home Health and
+Area Health should use labels, trends, and care-focused language rather than
+numbers. Area Health should eventually show both what would help next and who
+or what helped lately, because health naturally drifts down as care gets stale
+and contribution should remain visible.
 
 Staleness
 : How much a task needs attention based on elapsed time, adaptive interval,
@@ -175,7 +183,7 @@ Kitchen Lift · 13 min
 - Wipe counters
 - Start dishwasher
 
-Projected: Kitchen 48 -> 72, Home 63 -> 70
+Projected: Big kitchen lift
 Reason: high Kitchen Health impact, fits your time, and you often choose kitchen
 tasks on Friday afternoons.
 ```

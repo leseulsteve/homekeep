@@ -12,6 +12,12 @@ implementation pass.
 - `Task` is the project-wide product and user-facing term.
 - Use `Task Bundle`, `Task Session`, `Smart Task List`, `Task Variant`,
   `Task Group`, and `Bonus Task` in new product, UX, and user-facing docs.
+- `Contribution` is the preferred user-facing frame for a suggested or completed
+  Task Bundle. Individual items remain `Task`; the bundled care offering can be
+  called a Contribution in app copy.
+- Contribution language must be invitational and appreciative. It must not
+  imply obligation, debt, assignment, moral duty, or that the user failed by
+  stopping, skipping, snoozing, or declining more care.
 - `Chore` is now legacy implementation/API vocabulary. Existing Python classes,
   storage keys, service names, entity ids, tests, and older specs may continue
   to use `Chore`, `ChoreDefinition`, `ChoreState`, `Chore Session`,
@@ -91,6 +97,10 @@ implementation pass.
 - Area Health is a `0..100` derived, health-weighted average of enabled Task
   health for one Home Assistant Area. It answers how much that area would
   benefit from care now, not what percent of its Tasks are completed.
+- Numeric Health values are internal calculation and integration values, not the
+  primary user-facing language. Homekeep app surfaces should express Home
+  Health and Area Health through friendly labels, qualitative trends, and
+  care-focused explanations instead of visible numbers or percent-like bars.
 - Area Health contributor explanations should use inspectable derived reasons
   such as Staleness, health weight, and Projected Impact.
 - Area Health naturally drifts down as care gets stale. This is a normal home
@@ -100,6 +110,11 @@ implementation pass.
   air/comfort systems, and routines that contributed to an Area. Separate
   `Helped lately` from `Could help next` so appreciation does not compete with
   the next care action.
+- Contribution surfaces may also include animals, household objects, and the
+  home itself when there is a meaningful care signal. For example, a washer can
+  carry part of laundry, a coffee machine can contribute comfort, a pet routine
+  can support an animal, and the home can contribute by keeping quiet, comfort,
+  safety, or readiness steady.
 - Area contribution display must be appreciation, not ranking. Do not sort
   people, pets, plants, devices, or routines as winners and losers, and do not
   imply that any contributor failed when Area Health declines naturally.
@@ -184,6 +199,11 @@ implementation pass.
   carried care?`. A contribution may belong to both, such as a human changing a
   purifier filter in Bedroom, a litter routine supporting a pet and an Area, or
   a washer carrying part of laundry.
+- A Task Bundle, device action, plant-care action, animal-care routine, object
+  serving its household purpose, or the home maintaining comfort may be modeled
+  as a contribution when it is meaningful, local, and explainable. A single
+  Task remains a Task in user-facing vocabulary unless future design explicitly
+  changes that boundary.
 - Future UI should support both perspectives without making one subordinate to
   the other: care by Area and care by source.
 - Future care-source categories may include `human_care`, `plant_care`,
@@ -285,6 +305,10 @@ implementation pass.
   Health behavior surface is complete.
 - The first Home Health visual surface should separate `Helped lately` from
   `Could help next` so natural Area Health drift does not erase visible care.
+- In the mocked sidebar app, Area Health may gently ask Right Now for help with
+  an area through short-help or care-nudge actions. Right Now remains the main
+  task giver; Home Health should make the home's needs felt without becoming a
+  parallel recommendation builder.
 
 ## Product North Star
 
