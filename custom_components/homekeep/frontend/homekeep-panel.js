@@ -875,6 +875,7 @@ class HomekeepPanel extends HTMLElement {
 
   restoreChore(choreId) {
     this.state.removed = this.state.removed.filter((id) => id !== choreId);
+    this.state.rejectedWhileThere = this.state.rejectedWhileThere.filter((id) => id !== choreId);
     this.render();
   }
 
@@ -1153,7 +1154,6 @@ class HomekeepPanel extends HTMLElement {
     const areaNames = [...new Set(chores.map((chore) => chore.area))];
     const impactScope = areaNames.length === 1 ? areaNames[0] : bundle.impact.areaName;
     const healthGain = bundle.impact.areaAfter - bundle.impact.areaBefore;
-    const moodLabel = this.state.context.mood === "auto" ? "Balanced fit" : `${this.state.context.mood} fit`;
     const fitLine = contextFitLine(this.state.context, bundle, duration, areaNames, this.state.areaExplicit);
     return `
       <section class="hero">
@@ -1182,7 +1182,6 @@ class HomekeepPanel extends HTMLElement {
           <span class="meta-chip icon-chip"><ha-icon icon="mdi:format-list-checks"></ha-icon><strong>${chores.length} tasks · ${duration} min</strong></span>
           <span class="meta-chip icon-chip"><ha-icon icon="mdi:heart-pulse"></ha-icon><strong>${impactScope} ${healthGain}</strong></span>
           <span class="meta-chip icon-chip"><ha-icon icon="mdi:bullseye-arrow"></ha-icon><strong>${bundle.context.goal}</strong></span>
-          <span class="meta-chip icon-chip"><ha-icon icon="mdi:weather-partly-cloudy"></ha-icon><strong>${moodLabel}</strong></span>
           ${bundle.bonusKeeps ? `<span class="meta-chip icon-chip warm"><ha-icon icon="mdi:sparkles"></ha-icon><strong>+${bundle.bonusKeeps} Keeps</strong></span>` : ""}
         </div>
         ${this.renderBundleDetails(this.bundle.chores, areaNames)}
@@ -1441,7 +1440,7 @@ class HomekeepPanel extends HTMLElement {
         .tabs ha-icon { width: 18px; --mdc-icon-size: 18px; color: var(--hk-accent); }
         .eyebrow { margin: 0 0 10px; color: var(--hk-muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0; font-weight: 700; }
         h1 { margin: 0 auto; max-width: 760px; font-size: clamp(2rem, 6vw, 4rem); line-height: 1.04; font-weight: 760; letter-spacing: 0; }
-        .hero h1 { min-height: 2.08em; display: flex; align-items: center; justify-content: center; text-wrap: balance; }
+        .hero h1 { height: 2.08em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-wrap: balance; }
         .session-top h1 { min-height: 2.08em; display: flex; align-items: center; justify-content: center; text-wrap: balance; }
         h2 { margin: 0; font-size: 1.32rem; line-height: 1.16; letter-spacing: 0; font-weight: 760; }
         p { margin: 0; line-height: 1.48; }
@@ -1522,7 +1521,7 @@ class HomekeepPanel extends HTMLElement {
         .icon-button.disabled { opacity: 0.55; cursor: default; }
         .meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 12px; }
         .meta-chip, .impact, .keeps-line { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 10px; border-radius: 999px; background: rgba(255,255,255,0.058); border: 1px solid var(--hk-border-soft); color: var(--hk-text); font-size: 0.86rem; font-weight: 700; }
-        .meta-chip.icon-chip { --hk-chip-icon-width: 34px; }
+        .meta-chip.icon-chip { --hk-chip-icon-width: 34px; gap: 0; padding: 0; overflow: hidden; }
         .meta-chip strong { padding: 0 10px 0 9px; font-size: inherit; font-weight: inherit; }
         .meta-chip.warm { background: rgba(214, 181, 109, 0.105); color: #ead7a6; border-color: rgba(214, 181, 109, 0.22); }
         .meta-chip.warm ha-icon { color: #ead7a6; }

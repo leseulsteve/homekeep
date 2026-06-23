@@ -3555,6 +3555,43 @@ Known gaps / next prompt:
 - After the push, update the private Home Assistant instance from the remote
   source and run the current Live Test 3 visual checklist.
 
+### 2026-06-23 - Live Test 3 card chip and greeting polish
+
+Status: completed locally
+
+Implemented:
+- Fixed suggested-card and Home Health card chips so the icon segment reaches
+  the left chip border like the Today filter chips.
+- Removed the redundant mood/fit chip from the suggested card because the Mood
+  filter already carries that information.
+- Clamped the Right Now greeting block to two lines to prevent vertical jumping
+  from longer generated greetings.
+- Fixed restore/undo for proposed extra Tasks so restoring a removed
+  `while-there` Task clears the rejection and brings it back instead of making
+  it disappear.
+
+Tests/checks run:
+- `/Users/steve/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --check custom_components/homekeep/frontend/homekeep-panel.js`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest tests.test_frontend -v`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m unittest discover -s tests -v`
+- `env PYTHONPYCACHEPREFIX=/private/tmp/homekeep-pycache python3 -m compileall -q custom_components tests`
+- `git diff --check`
+
+Docs updated:
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Tests updated:
+- `tests/test_frontend.py`
+
+Important decisions:
+- Repeated information should be removed from chip rows even when chips are
+  visually appealing. Chips should each carry a distinct job.
+- Right Now greetings must fit the reserved two-line hero area.
+
+Known gaps / next prompt:
+- Rebuild/push the remote live-test candidate again after these final UI polish
+  fixes.
+
 ## Resume Instructions
 
 When resuming implementation:
