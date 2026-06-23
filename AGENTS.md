@@ -5,13 +5,13 @@ Keep the product brief human-readable. Put implementation details in `docs/`.
 ## Canonical Terms
 
 - Homekeep
-- Chore
+- Task
 - Home Assistant Area
-- Chore Bundle
-- Chore Session
+- Task Bundle
+- Task Session
 - Ready-Now Mode
 - Scheduled-Suggestion Mode
-- Smart Chore List
+- Smart Task List
 - Recommendation Engine
 - Staleness
 - Home Health
@@ -21,8 +21,8 @@ Keep the product brief human-readable. Put implementation details in `docs/`.
 Use these when they make implementation clearer, but do not treat them as
 top-level product vocabulary:
 
-- Chore Variant
-- Chore Group
+- Task Variant
+- Task Group
 - Area Health
 - Group Health
 - Projected Impact
@@ -30,7 +30,19 @@ top-level product vocabulary:
 - Session-History Learning
 - Mood Context
 - Light Session
-- Bonus Chore
+- Bonus Task
+
+Legacy implementation/API vocabulary:
+
+- Existing code, storage, service names, and older specs may still use `Chore`,
+  `ChoreDefinition`, `ChoreState`, `Chore Session`, `Chore Bundle`,
+  `Smart Chore List`, and `Bonus Chore` until a deliberate compatibility
+  migration is implemented.
+- New product, UX, and user-facing documentation should use `Task`,
+  `Task Bundle`, `Task Session`, `Smart Task List`, and `Bonus Task`.
+- Do not rename Home Assistant services, storage keys, entity ids, or Python
+  classes from Chore to Task with a blind text replacement. Plan aliases,
+  migration, and backwards compatibility first.
 
 ## Engineering Standards
 
@@ -51,7 +63,7 @@ top-level product vocabulary:
 - Unknown chore IDs must not crash handlers.
 - For session completions, validate `completed_by` against session
   participants when participants are present.
-- Bonus Chores use the original session through `bonus_pending` and
+- Bonus Tasks use the original session through `bonus_pending` and
   `bonus_active`; they must not create an unbounded chain.
 - Skips, snoozes, dismissals, and cancellations must not count as completions.
 - Calendar details should be minimized in durable storage.

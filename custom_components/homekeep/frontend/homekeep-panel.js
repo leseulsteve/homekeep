@@ -18,10 +18,10 @@ const CHIPS = {
 const BUNDLES = [
   {
     id: "kitchen-reset",
-    title: "Kitchen Reset",
+    title: "Kitchen Lift",
     duration: 15,
     context: { time: "15 min", capacity: "steady", mood: "focused", goal: "visible lift", area: "Kitchen" },
-    reason: "The kitchen has the clearest lift for a short reset.",
+    reason: "The kitchen has the clearest lift for a short focused pass.",
     greeting: "Good evening. I found something small that can make the home feel lighter.",
     impact: { label: "Big kitchen boost", home: 7, areaName: "Kitchen", areaBefore: 48, areaAfter: 72 },
     bonusKeeps: 4,
@@ -55,7 +55,7 @@ const BUNDLES = [
     impact: { label: "Steady bathroom lift", home: 5, areaName: "Bathroom", areaBefore: 57, areaAfter: 74 },
     bonusKeeps: 3,
     chores: [
-      { id: "reset-bathroom-sink", name: "Reset bathroom sink", area: "Bathroom", minutes: 6, keeps: 7, keepLine: "brings the sink back to easy use" },
+      { id: "reset-bathroom-sink", name: "Clear bathroom sink", area: "Bathroom", minutes: 6, keeps: 7, keepLine: "brings the sink back to easy use" },
       { id: "replace-hand-towel", name: "Replace hand towel", area: "Bathroom", minutes: 4, keeps: 4, keepLine: "adds a clean finish" },
     ],
   },
@@ -76,10 +76,10 @@ const BUNDLES = [
   },
   {
     id: "evening-reset",
-    title: "Evening Reset",
+    title: "Evening Lift",
     duration: 5,
     context: { time: "5 min", capacity: "low", mood: "auto", goal: "quick wins", area: "Auto" },
-    reason: "A tiny mixed-area reset keeps the evening gentle.",
+    reason: "A tiny mixed-area pass keeps the evening gentle.",
     greeting: "Five gentle minutes can still help the home feel cared for.",
     impact: { label: "Small home lift", home: 3, areaName: "Home", areaBefore: 74, areaAfter: 77 },
     bonusKeeps: 2,
@@ -211,18 +211,18 @@ const GREETINGS_BY_CONTEXT = {
   ],
   focused: [
     "There is room for one useful pass.",
-    "A clear reset can move the home forward.",
+    "A clear task bundle can move the home forward.",
   ],
   high: [
     "There is room for one useful pass.",
-    "A clear reset can move the home forward.",
+    "A clear task bundle can move the home forward.",
   ],
   restless: [
-    "A visible reset can give that restlessness somewhere useful to go.",
-    "There is a small reset with some motion in it.",
+    "A visible lift can give that restlessness somewhere useful to go.",
+    "There is a small task bundle with some motion in it.",
   ],
   ready: [
-    "The home has a fuller reset ready if you want to lean in.",
+    "The home has a fuller bundle ready if you want to lean in.",
     "There is room to push a little where it matters.",
   ],
   short: [
@@ -341,7 +341,7 @@ function contextFitLine(context, bundle, duration, areaNames, areaExplicit) {
   const moodText = context.mood === "auto" ? "balanced" : context.mood;
   const timeText = context.time === TIME_AUTO ? `${duration}-minute` : context.time.replace(" min", "-minute");
   const areaText = context.area !== "Auto" ? context.area : areaNames.length === 1 ? areaNames[0] : "the home";
-  return `Picked for a ${moodText} ${timeText} reset in ${areaText}.`;
+  return `Picked for a ${moodText} ${timeText} task bundle in ${areaText}.`;
 }
 
 function noSuggestionMessage(context) {
@@ -575,7 +575,7 @@ class HomekeepPanel extends HTMLElement {
       return {
         keeps: chore.keeps,
         level: "bundle",
-        message: "Suggested reset complete. The home feels lighter.",
+        message: "Suggested bundle complete. The home feels lighter.",
       };
     }
     if (chore.optional) {
@@ -719,7 +719,7 @@ class HomekeepPanel extends HTMLElement {
             <p>${bundle.reason}</p>
             <p class="fit-line">${fitLine}</p>
           </div>
-          <button class="primary benefit-action" data-action="start-session" aria-label="Choose this reset">
+          <button class="primary benefit-action" data-action="start-session" aria-label="Start this bundle">
             <span>
               <strong>${bundle.impact.areaName} ${bundle.impact.areaAfter - bundle.impact.areaBefore}</strong>
               <small>${bundle.impact.label}</small>
@@ -728,7 +728,7 @@ class HomekeepPanel extends HTMLElement {
           </button>
         </div>
         <div class="meta">
-          <span><ha-icon icon="mdi:format-list-checks"></ha-icon>${chores.length} chores · ${duration} min</span>
+          <span><ha-icon icon="mdi:format-list-checks"></ha-icon>${chores.length} tasks · ${duration} min</span>
           <span><ha-icon icon="mdi:heart-pulse"></ha-icon>${impactScope} ${healthGain}</span>
         </div>
         ${this.renderBundleDetails(this.bundle.chores, areaNames)}
@@ -776,8 +776,8 @@ class HomekeepPanel extends HTMLElement {
     return `
       <div class="details">
         <div class="keeps-line ${bonusAvailable ? "" : "lost"}">
-          <span>${bonusAvailable ? `${this.bundle.bonusKeeps} Keeps for the full reset` : `Full-reset Keeps not active`}</span>
-          <span>${includedCount} of ${chores.length} included · ${bonusAvailable ? "The home gives a little back." : "Restore removed Chores to bring the reset back together."}</span>
+          <span>${bonusAvailable ? `${this.bundle.bonusKeeps} bundle Keeps` : `Bundle Keeps not active`}</span>
+          <span>${includedCount} of ${chores.length} included · ${bonusAvailable ? "The home gives a little back." : "Restore removed Tasks to bring the bundle back together."}</span>
         </div>
         ${chores.map((chore) => {
           const isRemoved = removed.has(chore.id);
@@ -810,11 +810,11 @@ class HomekeepPanel extends HTMLElement {
     const optionalVisible = this.state.optionalOffered && visibleChores.some((chore) => chore.optional);
     const supportText = this.state.optionalOffered
       ? "Stop here, or pick one more small thing."
-      : "Start with any Chore. Homekeep will keep the next step clear.";
+      : "Start with any Task. Homekeep will keep the next step clear.";
     return `
       <section class="session-top">
-        <p class="eyebrow">Chore Session</p>
-        <h1>${this.state.optionalOffered && !allDone ? "That reset helped. A few more fit." : allDone ? "That reset helped." : session.title}</h1>
+        <p class="eyebrow">Task Session</p>
+        <h1>${this.state.optionalOffered && !allDone ? "That bundle helped. A few more fit." : allDone ? "That bundle helped." : session.title}</h1>
         ${this.renderSessionProgress()}
         ${this.state.activeItemId ? this.renderTimer() : `<p class="support">${supportText}</p>`}
       </section>
@@ -834,7 +834,7 @@ class HomekeepPanel extends HTMLElement {
     const plannedDone = planned.filter((chore) => chore.status === "completed").length;
     const optionalDone = optional.filter((chore) => chore.status === "completed").length;
     const plannedText = `${plannedDone} of ${planned.length} planned done`;
-    const optionalText = optional.length ? `${optionalDone} of ${optional.length} optional done` : "planned reset in progress";
+    const optionalText = optional.length ? `${optionalDone} of ${optional.length} optional done` : "planned bundle in progress";
     return `<p class="session-progress">${plannedText} · ${optionalText}</p>`;
   }
 
@@ -894,7 +894,7 @@ class HomekeepPanel extends HTMLElement {
     return `
       <div class="milestone-row">
         <ha-icon icon="mdi:check-circle-outline"></ha-icon>
-        <span>Suggested reset complete</span>
+        <span>Suggested bundle complete</span>
         <small>The home feels lighter.</small>
       </div>
     `;

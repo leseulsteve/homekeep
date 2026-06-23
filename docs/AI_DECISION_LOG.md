@@ -7,6 +7,22 @@ Codex must read this before implementation. If another document conflicts with
 this file, follow this file and update the conflicting document in the same
 implementation pass.
 
+## Vocabulary
+
+- `Task` is the project-wide product and user-facing term.
+- Use `Task Bundle`, `Task Session`, `Smart Task List`, `Task Variant`,
+  `Task Group`, and `Bonus Task` in new product, UX, and user-facing docs.
+- `Chore` is now legacy implementation/API vocabulary. Existing Python classes,
+  storage keys, service names, entity ids, tests, and older specs may continue
+  to use `Chore`, `ChoreDefinition`, `ChoreState`, `Chore Session`,
+  `Chore Bundle`, `Smart Chore List`, and `Bonus Chore` until a deliberate
+  compatibility migration is designed and implemented.
+- Do not rename Home Assistant services such as `homekeep.create_chore` or
+  storage/model symbols with a blind text replacement. Add aliases, migration,
+  deprecation notes, and tests first.
+- User-facing UI should avoid `Chore` except where it is unavoidable for legacy
+  API names, diagnostics, or migration notes.
+
 ## Service Flow
 
 - `homekeep.create_chore` creates an enabled Chore definition and initial
@@ -72,11 +88,21 @@ implementation pass.
   derived values.
 - Cached health or staleness values are disposable and rebuildable.
 - Health scores must remain correct after cache loss or restart.
-- Area Health is a `0..100` derived, health-weighted average of enabled Chore
+- Area Health is a `0..100` derived, health-weighted average of enabled Task
   health for one Home Assistant Area. It answers how much that area would
-  benefit from care now, not what percent of its Chores are completed.
+  benefit from care now, not what percent of its Tasks are completed.
 - Area Health contributor explanations should use inspectable derived reasons
   such as Staleness, health weight, and Projected Impact.
+- Area Health naturally drifts down as care gets stale. This is a normal home
+  rhythm, not a failure. Future Area Health UI should proudly show who and what
+  helped keep an Area healthy or prevented it from falling further.
+- Area Health contribution surfaces may show humans, pets, plants, devices,
+  air/comfort systems, and routines that contributed to an Area. Separate
+  `Helped lately` from `Could help next` so appreciation does not compete with
+  the next care action.
+- Area contribution display must be appreciation, not ranking. Do not sort
+  people, pets, plants, devices, or routines as winners and losers, and do not
+  imply that any contributor failed when Area Health declines naturally.
 - `homekeep_area_health_changed` fires only on Area Health bucket crossing or
   absolute delta of at least 10 points. It does not fire during startup/cache
   rebuild.
@@ -108,20 +134,74 @@ implementation pass.
 
 - Keeps are a lightweight signal of care returned by the home, not productivity
   points, money, wages, or a score on the user.
+- The home is the broker of Keeps. Home Assistant provides local evidence from
+  entities, devices, Areas, sensors, automations, service calls, state changes,
+  and events. Homekeep interprets that evidence into care contributions, and the
+  home returns Keeps as recognition.
+- Home Assistant must not be framed as the emotional giver of Keeps. It is the
+  trusted local signal layer that helps the home notice care.
+- Not every Home Assistant event is care. A signal becomes a care contribution
+  only when it maps to a meaningful household care outcome.
 - Keeps come from the home as a whole, not from individual Home Assistant Areas.
+  Future Keeps may be attributed to care sources inside the home, such as
+  humans, plants, pets, purifiers, comfort devices, and routines, but they still
+  represent care circulating through the home rather than a score owned by that
+  source.
 - Keeps are tied to care completion, not speed, streaks, rankings, optimization,
   or performance.
-- Full-reset Keeps represent harmony in a coherent suggested bundle, not a
-  pressure reward for obeying the app.
-- Optional Chores can add Keeps, but optional continuation must not create a
+- Keeps can later acknowledge care returned by non-human sources: a plant
+  helping air, humidity, shade, beauty, or presence; an air purifier keeping air
+  steadier; a pet routine keeping a living being cared for; a quiet-hour routine
+  protecting rest; a coffee machine making good coffee; ventilation, watering,
+  filter changes, or humidity balance improving comfort.
+- Because Homekeep is integrated with Home Assistant, Keeps may later support
+  shared-care attribution across people and devices. For example, a laundry
+  Task can acknowledge both the human who gathered/loaded/folded laundry and
+  the washing machine that carried part of the care. This is attribution of care
+  contribution, not ownership, wage, scoring, or competition.
+- Bundle Keeps represent harmony in a coherent suggested Task Bundle, not a
+  pressure reward for obeying the app. Avoid `reset` as the main user-facing
+  concept for these actions; it sounds like clearing a productivity slate rather
+  than contributing care to the home.
+- Optional Tasks can add Keeps, but optional continuation must not create a
   reward chain.
 - User-facing Keeps values that are always positive should not use a `+` prefix.
+- Keeps use a non-scarce care model because they are recognition, not currency.
+  Keeps are not spent, earned, traded, stolen, depleted, or competed for. A
+  plant helping the air does not reduce the Keeps available to a person, and a
+  coffee machine making good coffee does not take Keeps away from a washing
+  machine. More care sources means more care can be noticed.
 - Avoid `earn`, `earned`, `spend`, `bank`, `redeem`, shop, wallet, upgrade,
   exchange-rate, coin, trophy, badge-heavy, and leaderboard metaphors.
-- Keeps can help tiny Chores feel like they count. Home Health explains where
+- Keeps can help tiny Tasks feel like they count. Home Health explains where
   care helps; Keeps acknowledge that care happened.
-- Keeps may support quiet care reflection later, but not leaderboards, rankings,
-  shopping, upgrades, or total-chasing surfaces.
+- Keeps and Area Health have distinct jobs. Keeps show that care flowed through
+  the home. Area Health shows where care helped, where care is naturally
+  drifting down, and what would help next. Care contributions can be attributed
+  to Areas and sources, but Keeps still come from the home as a whole.
+- Care source contribution is a first-class product axis alongside Area care.
+  Area care answers `where did care help?`; source care answers `who or what
+  carried care?`. A contribution may belong to both, such as a human changing a
+  purifier filter in Bedroom, a litter routine supporting a pet and an Area, or
+  a washer carrying part of laundry.
+- Future UI should support both perspectives without making one subordinate to
+  the other: care by Area and care by source.
+- Future care-source categories may include `human_care`, `plant_care`,
+  `pet_care`, `device_care`, `air_care`, `comfort_care`, `quiet_care`, and
+  `routine_care`. A coffee machine usually belongs to `device_care` and
+  `comfort_care`. These should remain explanatory categories, not currencies or
+  leaderboards.
+- Keeps totals by source should be proudly visible in future reflection
+  surfaces. Humans, pets, plants, devices, comfort systems, and routines can all
+  have visible care contribution totals when useful. This should feel like
+  appreciation for the home's care network, not a leaderboard, ranking,
+  shopping, upgrade, or total-chasing surface.
+- Future implementation may model mutual care as
+  `Care Source -> Care Contribution -> Keeps -> Area/Home Health context`.
+  Future `CareContribution` records may include `source_id`, `area_id`,
+  `care_kind`, `keeps`, `happened_at`, and optional related Chore or Chore
+  Session ids. This is not part of the current MVP unless Steve explicitly asks
+  for it.
 
 ## Adaptive Intervals
 
@@ -154,6 +234,33 @@ implementation pass.
   random or contradictory suggestions.
 - User correction signals such as removal, skip, dismiss, and snooze should
   soften, resize, defer, or retime suggestions before suppressing useful care.
+- Right Now is the human contribution gateway into mutual care. It should not be
+  treated as a generic task screen or productivity queue. It helps a person
+  join the home's care flow at the scale that fits the moment.
+- Right Now context controls such as Time, Mood, and Area are contribution-fit
+  controls, not productivity filters. The suggested bundle is an invitation for
+  the human to contribute beside existing care from plants, pets, devices,
+  routines, and prior human work.
+- Right Now completion and ending states should emphasize what the human added
+  to the home, not only what tasks were completed.
+
+## Product North Star
+
+- Homekeep's main product goal is mutual care: the home has needs, and the home
+  can also help care for its inhabitants, including humans, pets, and plants.
+- Every product, design, and implementation decision should move toward this
+  direction, even when a given MVP phase is focused narrowly on Tasks,
+  Recommendation Engine behavior, Home Health, or the app surface.
+- This direction should guide planning for comfort, quiet hours, plant care, pet
+  routines, household rhythm, and stopping/rest signals.
+- This does not expand the current MVP beyond tasks, Home Health,
+  Recommendation Engine behavior, and the Homekeep app surface unless Steve
+  explicitly asks for that scope.
+- Future inhabitant-care features must stay practical and environmental. Do not
+  make medical, mental-health, diagnostic, or psychological claims.
+- The care-bias principle is mutual care, not productivity: sometimes Homekeep
+  nudges care for the home, and sometimes it protects the user, pet, plant, or
+  household rhythm from overextension.
 
 ## Snooze And Dismissal
 
@@ -218,24 +325,24 @@ implementation pass.
 - Mood inference must be local-first, explainable, short-lived, and
   user-correctable.
 - Mood Context must not make medical or mental health claims and must not hide
-  urgent stale chores by itself.
+  urgent stale Tasks by itself.
 - Post-prototype direction: consider evolving Mood Context into broader
   Readiness Context where recommendation behavior primarily uses capacity,
   energy, time, chore friction, explicit modes, and user correction. Mood should
   remain optional and should not become a hidden diagnosis layer. See
   `docs/product/MOOD_READINESS_FEATURE_PLAN.md`.
 
-## Bonus Chores
+## Bonus Tasks
 
-- Bonus Chores use the original session through `bonus_pending` and
+- Bonus Tasks use the original session through `bonus_pending` and
   `bonus_active`.
-- A session may offer at most one Bonus Chore in MVP.
-- Pending Bonus Chore offers expire after 15 minutes.
-- Expired pending Bonus Chore offers lazily mark the session `completed`.
+- A session may offer at most one Bonus Task in MVP.
+- Pending Bonus Task offers expire after 15 minutes.
+- Expired pending Bonus Task offers lazily mark the session `completed`.
 - Late `accept_bonus_chore` calls after expiry raise `bonus_chore_expired`.
 - `active -> bonus_pending` and `paused -> bonus_pending` are both valid when
   all planned items are complete.
-- Pausing does not block Bonus Chore eligibility.
+- Pausing does not block Bonus Task eligibility.
 
 ## Participants
 

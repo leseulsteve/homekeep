@@ -9,7 +9,7 @@ templates, and repetition control.
 
 ## Purpose
 
-Homekeep helps people care for their home without turning chores into guilt,
+Homekeep helps people care for their home without turning tasks into guilt,
 pressure, or a giant overdue list.
 
 The voice should make the app feel:
@@ -30,7 +30,7 @@ Prefer:
 ```text
 The kitchen gets a little lighter.
 This helps the entryway feel ready.
-A small reset is ready.
+A small bundle is ready.
 ```
 
 Avoid:
@@ -47,16 +47,21 @@ optimized.
 Homekeep's voice should act like a care companion for the home, not a coach for
 the person.
 
+Homekeep should speak from a mutual-care point of view: the home is cared for,
+and the home also helps care for the humans, pets, and plants inside it. This is
+the main product goal, not a side theme. Keep it practical and environmental. Do
+not make claims about a person's health, feelings, or mental state.
+
 Voice refinement rules:
 
 - Use `care` as an anchor verb.
 - Use `Complete` only where the interface needs a clear action label; prefer
   warmer feedback such as `That helped` or `The home feels a little lighter`.
-- Use `ready` carefully for invitations, such as `A small reset is ready`, but
+- Use `ready` carefully for invitations, such as `A small bundle is ready`, but
   do not overuse it across every state.
 - Keep moods implicit. Do not say `Since you're tired`; say
   `Let's keep this light`.
-- Use one main metaphor family: home, care, lightness, reset, fresh start, and
+- Use one main metaphor family: home, care, lightness, useful passes, fresh starts, and
   steady step.
 - Avoid mixing in game, battle, productivity, fitness, or optimization
   metaphors.
@@ -68,16 +73,19 @@ Approved voice refinements:
 
 - Homekeep should treat the home as the emotional center of the app. The user is
   helping the home; the app is not grading the user.
+- Homekeep treats the home as a reciprocal care environment: it can help protect
+  quiet, comfort, plant care, pet routines, and household rhythm, while still
+  avoiding medical, psychological, or productivity-coach language.
 - Tone should stay consistent across screens: calm, practical, softly
   assistant-like, and never needy for attention.
 - Variation should be deep enough to avoid repetition, but controlled enough
   that Homekeep still sounds like the same product every time.
 - Use warmth most strongly at moments of transition: greeting, choosing a
-  bundle, completing a Chore, stopping, and choosing whether to do One more.
+  bundle, completing a Task, stopping, and choosing whether to do One more.
 - Keep routine controls plain and stable. Buttons, chip labels, timers, and
   status labels should not become poetic.
-- Use playful language only when it makes the Chore feel more inviting or more
-  memorable, especially in Chore Bundle titles. Do not make every line playful.
+- Use playful language only when it makes the Task feel more inviting or more
+  memorable, especially in Task Bundle titles. Do not make every line playful.
 - Use encouragement to make care feel possible, not to push the user into doing
   more.
 - Homekeep may gently nudge toward what the home needs, but that nudge should
@@ -96,9 +104,23 @@ Approved voice refinements:
 - When copy is uncertain, choose the quieter version.
 
 Keeps should follow the same principle. Keeps are not productivity points.
-They are a small sign of care returned by the home when it is cared for.
+They are a small sign of care returned by the home when care is flowing.
 Keeps should always be framed as coming from the home as a whole, not from an
 individual Home Assistant Area.
+
+Keeps are the language of mutual care, not only Task completion. Humans care
+for the home. Plants can care for air, humidity, shade, beauty, and presence.
+Purifiers can care for air quality. Home Assistant devices can carry part of the
+care, such as a washing machine helping with laundry or a coffee machine making
+good coffee. Pets and pet routines can reflect care for another living
+inhabitant. Quiet-hour and comfort routines can protect rest and household
+rhythm. Keeps can acknowledge all of this later, as care circulating through the
+home.
+
+The home is the broker of Keeps. Home Assistant helps the home notice care by
+providing local device, entity, Area, sensor, automation, and event signals.
+Voice should keep the emotional agency with the home, not with Home Assistant.
+Say `the home noticed care`, not `Home Assistant awarded points`.
 
 Keeps language should feel:
 
@@ -112,7 +134,7 @@ Keeps language should not feel like:
 
 - a scorecard
 - a wage
-- a chore tax
+- a task tax
 - an arcade currency
 - a ranking system
 
@@ -125,20 +147,109 @@ Keeps copy and presentation rules:
 - Avoid transactional language such as `earn`, `earned`, `spend`, `bank`, or
   `redeem`.
 - Prefer quiet reciprocal language, such as `The home gives a little back`.
-- Prefer full-reset or care-together language over bonus/currency language,
-  such as `4 Keeps for the full reset`.
+- When explaining Home Assistant's role, use practical signal language: `Home
+  Assistant helped notice this`, `the washer cycle was seen`, or `the purifier
+  signal helped the home recognize air care`.
+- Do not say `Home Assistant gave Keeps`, `Home Assistant paid out`, or
+  `the device earned points`.
+- For future plant, air, comfort, or routine care, prefer grounded copy such as
+  `Fern helped the air today`, `Bedroom air stayed lighter`, `The purifier kept
+  things steady`, `Watering helped the room breathe`, `The coffee helped the
+  morning start kindly`, or `The home kept a little more comfort today`.
+- For shared human/device care, use collaborative language such as `The washer
+  carried part of this bundle` or `You and the washer moved laundry along`.
+  Avoid making devices sound like employees, competitors, or score owners.
+- Prefer Bundle Keeps or care-together language over bonus/currency language,
+  such as `4 bundle Keeps`.
 - Do not use hype language such as `maximum reward`.
 - Do not use money-like mechanics such as wallets, shops, upgrades, or exchange
   rates.
+- Explain the non-scarce Keeps model as abundance, not scoring: `Keeps are the
+  home noticing care. They are not a currency. They do not run out.`
+- Never imply one care source takes Keeps from another. More care sources means
+  more care can be noticed.
 - Make Keeps visually soft if represented with an icon or effect.
 - Avoid coin, trophy, badge-heavy, or scoreboard-like visual metaphors.
 - Make the no-loss rule clear in the design: users never lose Keeps by stopping,
   skipping, snoozing, or ending.
-- Use Keeps to help tiny Chores feel like they count.
+- Use Keeps to help tiny Tasks feel like they count.
 - Let Home Health say where care helps and Keeps say care happened. They should
   support each other, not compete for attention.
-- Keeps may support quiet reflection later, such as `You helped the kitchen
-  feel lighter this week`, but not a leaderboard or total-chasing surface.
+- Treat care source language as important as Area language. `Where care helped`
+  and `who or what carried care` are both central to Homekeep's voice.
+- Name source care clearly when useful: a human changed a filter, a litter
+  routine cared for a pet, a purifier helped the air, a washer carried laundry,
+  a coffee machine made the morning kinder.
+- Keeps totals by care source can be proudly displayed in reflection surfaces:
+  humans, pets, plants, devices, air, comfort, quiet routines, and other
+  contributors. Use language of appreciation, not ranking.
+- Keeps may support proud reflection later, such as `The home was cared for from
+  many sides this week`, but not a leaderboard or total-chasing surface.
+
+Area Health contribution voice:
+
+- Area Health naturally drifts down as care gets stale. Say this like a rhythm,
+  not a failure.
+- Proudly name who or what helped when useful: humans, pets, plants, devices,
+  air, comfort, and routines.
+- Separate appreciation from the next action. `Helped lately` should feel
+  proud; `Could help next` should feel practical.
+- Avoid winner/loser language between contributors.
+- Avoid implying that a contributor failed because an Area still needs care.
+
+Prefer:
+
+```text
+The kitchen drifted down, but it was cared for from many sides.
+Coffee helped the morning. The purifier kept air moving. You cleared dishes.
+Counters would help most next.
+```
+
+```text
+You and the washer carried this room this week.
+```
+
+Avoid:
+
+```text
+Washer contributed more than you.
+Kitchen lost health because nobody kept up.
+Fern only added 1 Keep.
+```
+
+Right Now contribution voice:
+
+- Right Now should sound like a human invitation to join the home's care flow,
+  not a command to clear tasks.
+- Speak to contribution, fit, and care. Avoid productivity, assignment, or work
+  queue language.
+- Let Mood, Time, and Area feel like ways to shape how the person can contribute
+  now.
+- End-state copy should say what the human added to the home.
+
+Prefer:
+
+```text
+Something small you can add right now.
+```
+
+```text
+This helps you join what the home already has going.
+```
+
+```text
+You added care to the kitchen today.
+```
+
+Avoid:
+
+```text
+Start your task queue.
+```
+
+```text
+Complete these tasks to improve your score.
+```
 
 The voice should not feel:
 
@@ -195,7 +306,7 @@ mechanically repetitive, but it also should not reshuffle every label on every
 render.
 
 First-person language is allowed for assistant-like moments, but should be used
-sparingly. Homekeep may say things like `I found a small reset` when it makes
+sparingly. Homekeep may say things like `I found a small bundle` when it makes
 the interaction feel clear and helpful. Prefer neutral phrasing when repeated
 first-person copy would feel chatty.
 
@@ -227,7 +338,7 @@ Primary intents:
 - acknowledge completion
 - support skipping or snoozing
 - make stopping feel successful
-- offer a Bonus Chore
+- offer a Bonus Task
 - explain empty state
 - explain stale or expired state
 - recover from error
@@ -243,7 +354,7 @@ the user.
 Good:
 
 ```text
-A small reset might fit right now.
+A small bundle might fit right now.
 ```
 
 Avoid:
@@ -270,7 +381,7 @@ Good qualities:
 Example tone:
 
 ```text
-There is a small reset ready when you are.
+There is a small bundle ready when you are.
 ```
 
 ### Focused
@@ -286,7 +397,7 @@ Good qualities:
 Example tone:
 
 ```text
-This kitchen reset fits the next 10 minutes.
+This kitchen bundle fits the next 10 minutes.
 ```
 
 ### Tired
@@ -335,7 +446,7 @@ Good qualities:
 Example tone:
 
 ```text
-There is a good reset ready to knock out.
+There is a good bundle ready to knock out.
 ```
 
 ### Unknown Or Auto
@@ -362,16 +473,16 @@ Do not create one global bucket of interchangeable strings.
 Recommended copy families:
 
 - Ready Now greeting
-- Suggested Chore Session framing
+- Suggested Task Session framing
 - Recommendation reason summary
 - Primary action label
 - Context adjustment prompt
-- Active Chore Session progress
+- Active Task Session progress
 - Completion acknowledgement
 - Skip acknowledgement
 - Snooze acknowledgement
 - Done for now ending
-- Bonus Chore offer
+- Bonus Task offer
 - Empty state
 - Expired Scheduled-Suggestion state
 - Error recovery
@@ -400,8 +511,8 @@ Example template:
 Possible rendered lines:
 
 ```text
-Good evening. A quick kitchen reset could fit 10 minutes.
-Let's keep this light. The entryway reset is small and useful.
+Good evening. A quick kitchen bundle could fit 10 minutes.
+Let's keep this light. The entryway lift is small and useful.
 One steady step. The bathroom refresh fits your current energy.
 ```
 
@@ -438,7 +549,7 @@ is reading unless the state actually changes.
 
 ## Ready Now Greeting Strategy
 
-The Ready Now greeting should be ambient first, then the suggested Chore Session can
+The Ready Now greeting should be ambient first, then the suggested Task Session can
 be specific underneath.
 
 Good structure:
@@ -453,12 +564,12 @@ Example:
 
 ```text
 Let's keep this light.
-The kitchen reset fits about 10 minutes.
+The kitchen bundle fits about 10 minutes.
 Start gently
 ```
 
 This keeps the first moment feeling like a voice assistant rather than a task
-manager yelling the next chore.
+manager yelling the next task.
 
 ## Recommendation Reasons
 
@@ -498,7 +609,7 @@ Reason copy should not mention:
 
 "Done for now" should be emotionally first-class.
 
-Stopping after a planned Chore Session should feel successful, not like quitting.
+Stopping after a planned Task Session should feel successful, not like quitting.
 
 Good ending lines:
 
@@ -512,14 +623,14 @@ Nice. The home got a little lighter.
 Avoid:
 
 ```text
-Only one chore completed.
+Only one task completed.
 You still have overdue tasks.
 Don't stop now.
 ```
 
-## Bonus Chore Voice
+## Bonus Task Voice
 
-Bonus Chores should feel optional and positive.
+Bonus Tasks should feel optional and positive.
 
 Good:
 
@@ -539,14 +650,14 @@ Good:
 
 ```text
 Nothing needs attention right now.
-You can still add a chore or plan something for later.
+You can still add a task or plan something for later.
 ```
 
 Avoid:
 
 ```text
 No data.
-No chores found.
+No tasks found.
 ```
 
 ## Error And Stale-State Voice

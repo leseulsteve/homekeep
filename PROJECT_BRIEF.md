@@ -2,14 +2,21 @@
 
 ## Summary
 
-Homekeep is a Home Assistant integration for adaptive household chores. It helps
+Homekeep is a Home Assistant integration for adaptive household tasks. It helps
 people decide what to do next by learning the care patterns of the home, the
 current context, and what users historically choose to complete.
 
-Homekeep is not a static chore checklist. It is a light Chore Session planner.
-When a user is ready to do chores, they tell Home Assistant, answer a few simple
-context questions, review a short Smart Chore List or Chore Bundle, choose what
-they want to do, and start a tracked Chore Session.
+Homekeep is not a static task checklist. It is a light Task Session planner.
+When a user is ready to contribute, they tell Home Assistant, answer a few
+simple context questions, review a short Smart Task List or Task Bundle, choose
+what they want to do, and start a tracked Task Session.
+
+Homekeep's main goal is mutual care: the home has needs, and the home also helps
+care for the humans, pets, and plants who live inside it. Every product,
+design, and implementation decision should move in that direction, even when the
+current MVP work is focused on tasks. The practical center remains household
+care, comfort, readiness, and small environmental support, not wellness coaching
+or medical/psychological claims.
 
 ## Product Promise
 
@@ -17,11 +24,46 @@ Homekeep should answer:
 
 ```text
 Given who is ready, how much time they have, how they feel, and what the home
-needs, what is the most useful Chore Session to offer right now?
+needs, what is the most useful Task Session to offer right now?
 ```
 
 The system should feel helpful, gentle, and practical. It should avoid a giant
 guilt-inducing list of overdue tasks.
+
+Homekeep's promise is broader than tasks alone: help the home and its
+inhabitants keep each other well. Sometimes that means nudging care for a stale
+area; sometimes it means protecting quiet, keeping a plant or pet routine
+visible, or suggesting that enough has been done for now.
+
+Keeps are part of that promise. Over time, Keeps should represent care
+circulating through the home: humans caring for rooms and routines, plants
+helping air and presence, purifiers keeping air steady, and comfort routines
+protecting rest. A coffee machine can also return Keeps through comfort and
+ritual: good coffee is a small way the home takes care of its inhabitants.
+Keeps are not points for people; they are the soft trace of mutual care
+happening.
+
+Because Homekeep lives in Home Assistant, connected devices can also participate
+in that trace. A Task like laundry can acknowledge shared care between the
+human doing the gathering, loading, moving, and folding, and the washing machine
+doing the machine work. This should feel collaborative, not transactional.
+
+Keeps are non-scarce because care is abundant. They are recognition, not
+currency: they are not spent, stolen, traded, or depleted. More humans, pets,
+plants, devices, and routines contributing to the home means more care can be
+noticed.
+
+Care source contribution should be treated as a first-class product axis, at
+the same level as caring for an Area. Homekeep should help users see both
+`where care helped` and `who or what carried care`: a human changing filters, a
+pet routine like emptying litter, a purifier improving air, a coffee machine
+making the morning kinder, or a washer carrying part of laundry.
+
+The home is the broker of Keeps, with help from Home Assistant. Home Assistant
+provides signals from Areas, entities, devices, sensors, automations, and
+service events. Homekeep interprets those signals as care contributions. The
+home returns Keeps as recognition. This keeps Keeps emotional and home-centered,
+while Home Assistant remains the trusted local signal layer.
 
 Homekeep's user-facing language should follow `docs/product/HOMEKEEP_VOICE_SYSTEM.md`.
 The app should use structured, mood-aware copy families rather than random
@@ -29,59 +71,69 @@ string variation.
 
 ## Core Terms
 
-Chore
-: A durable recurring household task that Homekeep tracks over time.
+Task
+: A durable recurring household contribution that Homekeep tracks over time.
+Task is the project-wide product and user-facing term.
+
+Legacy Chore
+: Existing code, storage, service names, and older specs may still use Chore
+until a deliberate compatibility migration is implemented. Do not expose Chore
+in new user-facing UI unless showing a legacy API or diagnostic name.
 
 Home Assistant Area
 : A room or location from Home Assistant that Homekeep can use to group and
-prioritize chores.
+prioritize tasks.
 
-Chore Bundle
-: A recommended set of chores that work well together.
+Task Bundle
+: A recommended set of tasks that work well together.
 
-Chore Session
-: A tracked work session where one or more users complete selected chores.
+Task Session
+: A tracked contribution session where one or more users complete selected
+tasks.
 
 Ready-Now Mode
-: The user says they are ready now, and Homekeep proposes an immediate Light
-Session.
+: The human contribution gateway into mutual care. The user says they are ready
+now, and Homekeep proposes an immediate Light Session that helps them join the
+home's care flow at the scale that fits the moment.
 
 Scheduled-Suggestion Mode
-: Homekeep proposes a saved Chore Session plan for a future window, such as
-next Friday or before guests arrive. It is not an active Chore Session until
+: Homekeep proposes a saved Task Session plan for a future window, such as
+next Friday or before guests arrive. It is not an active Task Session until
 the user starts a fresh recommendation.
 
-Smart Chore List
-: A short curated list of recommended chores or bundles generated for the user,
+Smart Task List
+: A short curated list of recommended tasks or bundles generated for the user,
 moment, goal, and home state.
 
 Recommendation Engine
-: The local decision engine that scores, groups, explains, and offers chores.
+: The local decision engine that scores, groups, explains, and offers tasks.
 
 Home Health
 : A high-level score that summarizes how much care the home needs. Homekeep may
-also calculate area-level health internally.
+also calculate area-level health internally. Area Health should eventually show
+both what would help next and who or what helped lately, because health
+naturally drifts down as care gets stale and contribution should remain visible.
 
 Staleness
-: How much a chore needs attention based on elapsed time, adaptive interval,
+: How much a task needs attention based on elapsed time, adaptive interval,
 and context.
 
-Supporting concepts used in the implementation docs include Chore Variant,
-Chore Group, Projected Impact, Calendar Context, Session-History Learning,
-Light Session, and Bonus Chore.
+Supporting concepts used in the implementation docs include Task Variant,
+Task Group, Projected Impact, Calendar Context, Session-History Learning,
+Light Session, and Bonus Task.
 
 ## Main User Flow
 
-1. User tells Home Assistant: "I am ready to do chores."
+1. User tells Home Assistant: "I am ready to contribute."
 2. Homekeep asks only the context it needs.
 3. User provides time, energy, and goal.
-4. Homekeep generates a Smart Chore List.
-5. User chooses a chore or Chore Bundle.
-6. Homekeep starts a Chore Session.
+4. Homekeep generates a Smart Task List.
+5. User chooses a task or Task Bundle.
+6. Homekeep starts a Task Session.
 7. User completes, skips, snoozes, or ends the session.
-8. Homekeep updates chore history, adaptive intervals, Staleness, and health
+8. Homekeep updates task history, adaptive intervals, Staleness, and health
 scores.
-9. Homekeep may offer an optional Bonus Chore.
+9. Homekeep may offer an optional Bonus Task.
 
 ## Smart Recommendations
 
@@ -104,12 +156,12 @@ Mood Context should feel like a gentle planning aid. Homekeep may infer that a
 shorter, quieter, or quick-win session fits the moment, but the user can always
 override it.
 
-The first Smart Chore List should stay small:
+The first Smart Task List should stay small:
 
 ```text
-1 best Chore Bundle
-1 best single chore
-1 easiest useful chore
+1 best Task Bundle
+1 best single task
+1 easiest useful task
 up to 3 alternates
 ```
 
@@ -118,7 +170,7 @@ Every recommendation should include a short reason.
 Example:
 
 ```text
-Kitchen Reset · 13 min
+Kitchen Lift · 13 min
 - Empty compost
 - Wipe counters
 - Start dishwasher
@@ -130,7 +182,7 @@ tasks on Friday afternoons.
 
 ## Calendar-Aware Planning
 
-Homekeep should analyze Home Assistant calendar context and suggest chores that
+Homekeep should analyze Home Assistant calendar context and suggest tasks that
 help with real life.
 
 Examples:
@@ -138,7 +190,7 @@ Examples:
 ```text
 Guests tomorrow:
 - bathroom refresh
-- entryway reset
+- entryway lift
 - trash
 - dishes
 
@@ -149,7 +201,7 @@ Vacation Friday:
 - move laundry
 
 Busy evening:
-- offer short low-energy chores
+- offer short low-energy tasks
 ```
 
 Calendar data should be minimized. Homekeep should store derived context when
@@ -168,7 +220,7 @@ Kitchen
 - Start dishwasher
 ```
 
-Area grouping is not mandatory. Some sessions should group chores by purpose.
+Area grouping is not mandatory. Some sessions should group tasks by purpose.
 
 Example:
 
@@ -182,13 +234,13 @@ Trash Run
 
 ## Light Rewards
 
-Chore Sessions should stay light by default.
+Task Sessions should stay light by default.
 
 ```text
-2 minutes: one tiny chore
-5 minutes: one or two quick chores
-15 minutes: a small Chore Bundle
-30 minutes: a focused reset
+2 minutes: one tiny task
+5 minutes: one or two quick tasks
+15 minutes: a small Task Bundle
+30 minutes: a focused Task Bundle
 ```
 
 After a session, Homekeep should make stopping feel successful:
@@ -199,7 +251,7 @@ One more
 Plan later
 ```
 
-If the user asks for "one more", Homekeep should offer a small Bonus Chore and
+If the user asks for "one more", Homekeep should offer a small Bonus Task and
 treat that as positive momentum. It should never punish stopping after the
 planned session.
 
@@ -207,22 +259,22 @@ planned session.
 
 The MVP should include:
 
-- Chore definitions and completion history
+- Task definitions and completion history
 - adaptive intervals
 - Staleness
 - Home Health and Area Health
-- Ready-Now Chore Sessions
+- Ready-Now Task Sessions
 - Scheduled-Suggestion saved proposals
-- Smart Chore Lists
-- Chore Bundles
+- Smart Task Lists
+- Task Bundles
 - Projected Impact
 - Home Assistant services and sensors
 - Home Assistant To-do projections
-- Chore creation from the Homekeep dashboard
+- Task creation from the Homekeep dashboard
 - Homekeep sidebar app flow
 - Calendar Context
 - Session-History Learning
-- Light Sessions and Bonus Chores
+- Light Sessions and Bonus Tasks
 
 ## How To Build This Project
 
@@ -311,7 +363,7 @@ Update docs/AI_IMPLEMENTATION_PROGRESS.md before finishing.
 ### Phase 3 Prompt
 
 ```text
-Implement Homekeep Phase 3: Chore Session lifecycle.
+Implement Homekeep Phase 3: Task Session lifecycle.
 
 Follow AGENTS.md Implementation Mode. Resume from docs/AI_IMPLEMENTATION_PROGRESS.md.
 
@@ -349,7 +401,7 @@ Read:
 
 Deliver:
 - deterministic normalized scoring
-- best Chore Bundle, best single chore, easiest useful chore
+- best Task Bundle, best single task, easiest useful task
 - stable recommendation_id values
 - recommendation explanations
 - RecommendationSnapshot lifecycle
@@ -433,7 +485,7 @@ Deliver:
 - Ready-Now launcher
 - time/energy/goal controls
 - recommendation display
-- Add Chore flow
+- Add Task flow
 - active session controls
 - Done for now / One more flow
 
@@ -469,6 +521,6 @@ Update docs/AI_IMPLEMENTATION_PROGRESS.md before finishing.
 
 ## Product Principle
 
-Homekeep should not ask, "What chores are due?"
+Homekeep should not ask, "What tasks are due?"
 
 It should ask, "What useful, achievable care can we offer at this moment?"

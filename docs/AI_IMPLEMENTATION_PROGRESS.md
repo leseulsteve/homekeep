@@ -11,12 +11,11 @@ current_phase: 8
 current_phase_name: Hardening and release readiness
 last_updated: 2026-06-22
 last_codex_summary: >
-  Right Now now treats a Chore's user-entered duration as a starting estimate,
-  not fixed truth. Recommendation payload durations prefer learned completion
-  samples, then adapt lightly to Mood/Readiness, Capacity, and session momentum.
-  The second mocked Right Now live-test candidate remains locally ready for
-  Steve's private Home Assistant review; use Gate 3B in
-  docs/live-test/AI_PRIVATE_LIVE_TEST_CHECKLIST.md.
+  Homekeep's main product vocabulary now uses Task project-wide for product,
+  UX, and user-facing language. Chore remains legacy implementation/API
+  vocabulary until a deliberate compatibility migration is designed. The mutual
+  care model remains the north star: care by Area and care by source, with the
+  home brokering non-scarce Keeps through Home Assistant signals.
 ```
 
 ## Phase Checklist
@@ -57,6 +56,255 @@ Important decisions:
 Known gaps / next prompt:
 - ...
 ```
+
+### 2026-06-22 - Project vocabulary moves from Chore to Task
+
+Status: completed locally
+
+Implemented:
+- Made `Task` the project-wide product and user-facing term.
+- Updated the project brief, app plan, voice guidance, and agent vocabulary for
+  `Task`, `Task Bundle`, `Task Session`, `Smart Task List`, `Task Variant`,
+  `Task Group`, and `Bonus Task`.
+- Added a decision-log compatibility boundary: `Chore` remains legacy
+  implementation/API vocabulary for existing Python classes, storage keys,
+  Home Assistant service names, entity ids, tests, and older specs until a
+  deliberate migration is designed.
+- Added guardrails against blind code/API renames from Chore to Task.
+
+Tests/checks run:
+- `git diff --check -- AGENTS.md PROJECT_BRIEF.md docs/AI_DECISION_LOG.md docs/product/HOMEKEEP_APP_PLAN.md docs/product/HOMEKEEP_VOICE_SYSTEM.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+- `rg -n "\bChore\b|\bChores\b|\bchore\b|\bchores\b" PROJECT_BRIEF.md docs/product/HOMEKEEP_APP_PLAN.md docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+
+Docs updated:
+- `AGENTS.md`
+- `PROJECT_BRIEF.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- New UI and product language should use Task, not Chore.
+- Existing `homekeep.create_chore`, `ChoreDefinition`, `ChoreState`, storage
+  keys, and other API/code symbols must not be renamed without aliases,
+  migrations, deprecation notes, and tests.
+
+Known gaps / next prompt:
+- Plan the technical Chore-to-Task compatibility migration separately if Steve
+  wants API/code vocabulary to change too.
+
+### 2026-06-22 - Mutual care documentation consolidation
+
+Status: completed locally
+
+Implemented:
+- Added the canonical mutual-care model:
+  `Care Source -> Care Contribution -> Keeps -> Area/Home Health context`.
+- Clarified the distinction between Keeps and Area Health: Keeps show that care
+  flowed through the home; Area Health shows where care helped, where care is
+  drifting down, and what helps next.
+- Replaced currency-flavored `infinite economy` wording with the non-scarce
+  Keeps model.
+- Replaced personal-name examples in new contribution copy with neutral
+  `You` examples.
+- Added a future `CareSource` / `CareContribution` data-shape note without
+  expanding MVP scope.
+- Added product-review recommendations for how the ideas should fit together:
+  gradual introduction, Right Now first, Home Health contribution second,
+  simple active-session Keeps, meaningful attribution only, and non-competitive
+  reflection.
+- Elevated care source contribution to a first-class product axis alongside
+  Area care: Area care answers `where did care help?`, while source care answers
+  `who or what carried care?`.
+- Added the Keeps broker model: the home returns Keeps, Home Assistant provides
+  local evidence, and Homekeep interprets that evidence into care
+  contributions.
+
+Tests/checks run:
+- `git diff --check -- PROJECT_BRIEF.md docs/AI_DECISION_LOG.md docs/product/HOMEKEEP_APP_PLAN.md docs/product/HOMEKEEP_VOICE_SYSTEM.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `PROJECT_BRIEF.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- The mutual-care ideas now have one canonical model for future implementation
+  to follow.
+- Non-scarce Keeps should be explained as abundance and recognition, not as an
+  economy or currency.
+- Homekeep should preserve both care perspectives: care by Area and care by
+  source. Neither should be treated as a secondary detail of the other.
+- Home Assistant is the signal layer for Keeps, not the emotional giver of
+  Keeps. Not every Home Assistant event is care.
+
+Known gaps / next prompt:
+- Commit the unstaged documentation pass only after Steve confirms the product
+  direction feels right.
+
+### 2026-06-22 - Right Now as human contribution gateway
+
+Status: completed locally
+
+Implemented:
+- Documented Right Now as the human contribution gateway into mutual care, not
+  merely a chore screen.
+- Added design implications for greeting, context controls, suggested bundle,
+  primary action, active session feedback, ending summary, and Area Health
+  connection.
+- Added voice guidance so Right Now sounds like an invitation to contribute to
+  the home's care flow rather than a task queue.
+
+Tests/checks run:
+- `git diff --check -- PROJECT_BRIEF.md docs/AI_DECISION_LOG.md docs/product/HOMEKEEP_APP_PLAN.md docs/product/HOMEKEEP_VOICE_SYSTEM.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `PROJECT_BRIEF.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Time, Mood, and Area in Right Now are contribution-fit controls, not
+  productivity filters.
+- The suggested Chore Bundle is an invitation for a human to join care already
+  happening in the home.
+
+Known gaps / next prompt:
+- Future Right Now design pass should check whether greeting, primary action,
+  and ending summary communicate human contribution clearly.
+
+### 2026-06-22 - Area Health contribution visibility
+
+Status: completed locally
+
+Implemented:
+- Documented that Area Health should proudly show who and what helped an Area,
+  not only what is pulling the Area Health down.
+- Added the principle that Area Health naturally drifts down as care gets stale,
+  and that this should be presented as a normal home rhythm rather than a
+  failure.
+- Added UI suggestions for `Helped lately`, `Care sources`, `Kept this area
+  steady`, and separate `Could help next` treatment.
+- Added contributor categories for humans, pets, plants, devices, air/comfort
+  systems, and routines.
+
+Tests/checks run:
+- `git diff --check -- PROJECT_BRIEF.md docs/AI_DECISION_LOG.md docs/product/HOMEKEEP_APP_PLAN.md docs/product/HOMEKEEP_VOICE_SYSTEM.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `PROJECT_BRIEF.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Area Health UI should preserve pride in contribution even when the area still
+  needs care.
+- Contribution display should be appreciative and prominent, not ranked or
+  competitive.
+
+Known gaps / next prompt:
+- Future Home Health design pass should sketch Area cards with separate
+  `Helped lately` and `Could help next` regions.
+
+### 2026-06-22 - Non-scarce Keeps model
+
+Status: completed locally
+
+Implemented:
+- Documented the explanation for a non-scarce Keeps model: Keeps are recognition
+  of care, not currency.
+- Added guardrails that Keeps are not spent, traded, stolen, depleted, exchanged,
+  or competed for.
+- Documented that more humans, pets, plants, devices, and routines contributing
+  to the home means more care can be noticed.
+
+Tests/checks run:
+- `git diff --check -- PROJECT_BRIEF.md docs/AI_DECISION_LOG.md docs/product/HOMEKEEP_APP_PLAN.md docs/product/HOMEKEEP_VOICE_SYSTEM.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `PROJECT_BRIEF.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- The product metaphor for Keeps is abundance, warmth, gratitude, and care
+  recognition, not scarcity or money.
+- One care source never takes Keeps from another.
+
+Known gaps / next prompt:
+- Future Keeps UI should explain the concept simply: `Keeps are the home
+  noticing care. They are not a currency. They do not run out.`
+
+### 2026-06-22 - Proud Keeps care-source totals
+
+Status: completed locally
+
+Implemented:
+- Documented that future Keeps reflection surfaces should proudly display total
+  Keeps by care source: humans, pets, plants, devices, air/comfort systems,
+  quiet routines, and other meaningful contributors.
+- Kept the non-competitive guardrail: care-source totals are appreciation for
+  the home's care network, not leaderboards, rankings, currencies, or
+  total-chasing surfaces.
+
+Tests/checks run:
+- `git diff --check -- docs/AI_DECISION_LOG.md docs/product/HOMEKEEP_APP_PLAN.md docs/product/HOMEKEEP_VOICE_SYSTEM.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `docs/AI_DECISION_LOG.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Keeps source totals should be prominent in future reflection, not hidden.
+- The presentation should be proud and appreciative, while avoiding comparison
+  pressure between humans, pets, plants, devices, or routines.
+
+Known gaps / next prompt:
+- Future design pass should sketch a Keeps reflection surface that shows care
+  source totals without feeling like a scoreboard.
+
+### 2026-06-22 - Mutual care north star
+
+Status: completed locally
+
+Implemented:
+- Promoted mutual care to Homekeep's main product goal: the home has needs, and
+  the home also helps care for its humans, pets, and plants.
+- Documented that every product, design, and implementation decision should move
+  toward mutual care, even when the current MVP remains focused on chores.
+- Added guardrails so future inhabitant-care features stay practical,
+  environmental, and routine-aware rather than medical, psychological, or
+  productivity-coach oriented.
+
+Tests/checks run:
+- `git diff --check -- PROJECT_BRIEF.md docs/product/HOMEKEEP_APP_PLAN.md docs/product/HOMEKEEP_VOICE_SYSTEM.md docs/AI_DECISION_LOG.md docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Docs updated:
+- `PROJECT_BRIEF.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+- `docs/AI_DECISION_LOG.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+
+Important decisions:
+- Mutual care is the north star, not a side theme or distant optional feature.
+- Chore and Right Now work should be shaped as the first expression of a larger
+  reciprocal-care product.
+
+Known gaps / next prompt:
+- After Live Test 2, review whether the Right Now flow already communicates
+  mutual care or still feels only like chore optimization.
 
 ### 2026-06-22 - Version 0.0.4 private Live Test 2 publish prep
 
@@ -2759,6 +3007,50 @@ Known gaps / next prompt:
 - Private Home Assistant retest should confirm storage migration from version
   `2` to `3` and that session forms no longer ask for fields inferred from the
   selected recommendation.
+
+### 2026-06-22 - Right Now language moves away from reset
+
+Status: completed locally
+
+Implemented:
+- Replaced visible Right Now mock copy that framed the recommendation as a
+  `reset` with Task Bundle, lift, or useful-pass language.
+- Changed the projected-benefit action accessible label from `Choose this reset`
+  to `Start this bundle`.
+- Renamed visible mock bundle titles such as `Kitchen Reset` and
+  `Evening Reset` to `Kitchen Lift` and `Evening Lift`.
+- Reframed full-reset Keeps as Bundle Keeps in the product plan, voice system,
+  Codex UI instructions, decision log, and mocked frontend copy.
+- Kept internal ids, method names, and legacy values containing `reset`
+  untouched when they are compatibility or implementation details rather than
+  user-facing copy.
+
+Tests/checks run:
+- `git diff --check -- AGENTS.md PROJECT_BRIEF.md custom_components/homekeep/frontend/homekeep-panel.js docs/AI_DECISION_LOG.md docs/AI_IMPLEMENTATION_PROGRESS.md docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md docs/product/HOMEKEEP_APP_PLAN.md docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+- Targeted `rg` scan for old Right Now reset phrases such as
+  `Choose this reset`, `full-reset Keeps`, `Kitchen Reset`, and `small reset`.
+- Targeted `rg` scan for visible `Chore`/`Chores` in product/UI files; only
+  the intentional `Legacy Chore` compatibility note remains in
+  `PROJECT_BRIEF.md`.
+
+Docs updated:
+- `docs/AI_DECISION_LOG.md`
+- `docs/product/HOMEKEEP_APP_PLAN.md`
+- `docs/product/HOMEKEEP_VOICE_SYSTEM.md`
+- `docs/implementation/AI_DASHBOARD_UI_CODEX_INSTRUCTIONS.md`
+- `docs/AI_IMPLEMENTATION_PROGRESS.md`
+- `PROJECT_BRIEF.md`
+
+Important decisions:
+- `Reset` is no longer the main Right Now concept. It sounds like clearing a
+  productivity slate instead of contributing care to the home.
+- The preferred main action label is `Start this bundle`.
+- `Bundle Keeps` is the preferred user-facing phrase for intact-bundle harmony
+  Keeps.
+
+Known gaps / next prompt:
+- Continue preserving internal/API compatibility names until a deliberate
+  migration plan covers aliases, storage compatibility, services, and tests.
 
 ## Resume Instructions
 

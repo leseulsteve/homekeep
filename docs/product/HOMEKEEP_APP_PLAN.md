@@ -48,8 +48,117 @@ What can I adjust?
 ```
 
 The UI should avoid making the user confront a giant overdue list. It should
-offer a small, explainable path into a Chore Session, make stopping feel
-successful, and keep chores practical rather than punitive.
+offer a small, explainable path into a Task Session, make stopping feel
+successful, and keep tasks practical rather than punitive.
+
+## Main Product Goal: Mutual Care
+
+Homekeep's main goal is mutual care: the home and its inhabitants care for each
+other.
+
+The current MVP is about tasks, Home Health, Task Sessions, and practical
+household readiness, but every design and implementation choice should point
+toward this larger direction. The house should not only ask for care; it should
+also help take care of its humans, pets, and plants through practical,
+environmental, and routine-aware support.
+
+Examples of this future direction:
+
+- plant care that adapts to season, sunlight, weather, and missed watering
+- pet care reminders that feel warm, ordinary, and reliable
+- household comfort nudges for air quality, humidity, temperature, noise, and
+  quiet hours
+- human support that protects rest and stopping, such as `you have done enough
+  for now`
+- shared routines where the home helps keep the household rhythm gentle and
+  visible
+
+This should not become a wellness coach, medical system, psychological
+diagnosis, or productivity optimizer. Homekeep should stay practical and
+environmental: the house cares by making life lighter, calmer, safer, and easier
+to maintain.
+
+This is the source of the existing care-bias principle. Homekeep's quiet agenda
+is not productivity; it is mutual care. Sometimes the app nudges the user to
+care for the home. Sometimes it protects the user, pet, plant, or household
+rhythm from being overextended.
+
+Canonical mutual-care model:
+
+```text
+Care Source -> Care Contribution -> Keeps -> Area/Home Health context
+```
+
+Meaning:
+
+- `Care Source`: who or what contributed care, such as a human, pet, plant,
+  device, air/comfort system, quiet routine, or household rhythm
+- `Care Contribution`: the concrete thing that happened, such as completing a
+  Task, cleaner air, good coffee, protected quiet, watering, or a device cycle
+- `Keeps`: the home noticing care as non-scarce recognition
+- `Area/Home Health context`: where that care helped and what could help next
+
+Broker model:
+
+- The home is the broker of Keeps.
+- Home Assistant is the local signal layer that helps Homekeep see care:
+  entities, devices, Areas, sensors, automations, service calls, state changes,
+  and events.
+- Homekeep interprets those signals into care contributions.
+- The home returns Keeps as recognition of care.
+- Home Assistant should not be presented as the emotional giver of Keeps. It is
+  the trusted integration fabric that lets the home notice care accurately.
+- Homekeep should avoid pretending every Home Assistant event is care. A signal
+  becomes a care contribution only when it maps to a meaningful household care
+  outcome.
+
+Keeps and Area Health have distinct jobs:
+
+- Keeps show that care flowed through the home.
+- Area Health shows where care helped, where care is naturally drifting down,
+  and what would help next.
+- Care contributions can be attributed to Areas and sources, but Keeps still
+  come from the home as a whole.
+
+Care sources are a first-class axis alongside Areas:
+
+- Area care answers `where did care help?`
+- Source care answers `who or what carried care?`
+- A single contribution can belong to both, such as `Changed bedroom purifier
+  filter`: Bedroom is the Area, and the human plus purifier are care sources.
+- Pet care such as emptying litter, device care such as running a washer cycle,
+  plant care such as watering, and comfort care such as good coffee should be
+  visible as meaningful care, not treated as secondary to cleaning an Area.
+- The UI should eventually let users inspect both views: care by Area and care
+  by source.
+
+Product review recommendations:
+
+- Introduce mutual care gradually. The first UI expression should be felt in
+  Right Now copy, completion feedback, and Area Health contribution language
+  before Homekeep builds a full care-source ledger.
+- Let Right Now carry the first human-facing expression: the human joins the
+  home's care flow, contributes at a fitting scale, and sees what they added.
+- Let Home Health carry the first area-facing expression: each Area can show
+  `Helped lately` and `Could help next` so natural health decline does not erase
+  pride in contribution.
+- Let Keeps remain simple in active sessions. Show Task Keeps and Bundle
+  Keeps now; save proud care-source totals for later reflection surfaces.
+- Only attribute device, plant, pet, or routine care when the signal is
+  meaningful. Do not invent contribution just because a Home Assistant entity
+  exists.
+- Keep the emotional model bigger than tasks, but keep MVP implementation
+  narrower than the emotional model. Tasks are the first concrete expression of
+  mutual care, not the whole destination.
+- Avoid over-explaining Keeps in the main workflow. The user should feel the
+  care loop first and inspect the model later.
+- Protect the non-scarce model. A contributor's Keeps never reduce another
+  contributor's Keeps, and contribution totals should never become a ranking.
+- Protect the two-axis model. Do not collapse all care into Area Health, and do
+  not collapse all care into source totals. Homekeep needs both: places that
+  need care and contributors that carry care.
+- Protect the broker model. The home returns Keeps; Home Assistant helps provide
+  the evidence; Homekeep interprets that evidence into care.
 
 ## User-Facing Text Direction
 
@@ -85,12 +194,12 @@ implementation begins.
 The workflow review order is:
 
 1. Ready Now / Ready-Now Mode
-2. Smart Chore List
-3. Active Chore Session
-4. Optional Chore continuation and session completion
+2. Smart Task List
+3. Active Task Session
+4. Optional Task continuation and session completion
 5. Home Health and Areas
-6. Plan / Scheduled Chores
-7. Add Chore
+6. Plan / Scheduled Tasks
+7. Add Task
 8. Activity
 9. Settings and diagnostics
 
@@ -118,8 +227,8 @@ Then, later, translate the workflow into implementation instructions:
 - tests or source checks
 - acceptance criteria
 
-Do not implement the frontend until the Ready Now / Ready-Now Mode, Smart Chore
-List, Active Chore Session, and optional Chore continuation workflows have
+Do not implement the frontend until the Ready Now / Ready-Now Mode, Smart Task
+List, Active Task Session, and optional Task continuation workflows have
 approved MVP behavior.
 
 ## Questions To Answer Before Implementation
@@ -130,13 +239,13 @@ The design review should answer these questions before code starts:
 - Does Homekeep lead with a recommended session, a readiness launcher, or both?
 - How much explanation should a recommendation show before the user asks for
   more?
-- During an active Chore Session, is the experience guided one step at a time,
+- During an active Task Session, is the experience guided one step at a time,
   or shown as a compact list?
 - How should stopping after a session feel successful?
 - How visible should Home Health be on the main screen?
 - Should Home Health be a score, a status, or mostly area-level language?
-- Where should Plan / Scheduled Chores live in the navigation?
-- How lightweight should Add Chore be in the first app version?
+- Where should Plan / Scheduled Tasks live in the navigation?
+- How lightweight should Add Task be in the first app version?
 - What belongs in Settings for MVP, and what can wait?
 
 ## Later: Codex Implementation Instructions
@@ -180,9 +289,9 @@ Current prototype boundary:
 
 - mocked Ready Now suggestion data
 - mocked context chips and fuzzy/refining state
-- mocked Chore Bundle shuffle and chip-driven suggestion changes
-- mocked active Chore Session state
-- mocked timer, completion feedback, final summary, and inline optional Chores
+- mocked Task Bundle shuffle and chip-driven suggestion changes
+- mocked active Task Session state
+- mocked timer, completion feedback, final summary, and inline optional Tasks
 - local temporary UI state only
 
 Not wired yet:
@@ -221,10 +330,10 @@ evaluate whether the main loop feels right:
 
 - Ready Now / Ready-Now Mode
 - Mood-aware greeting and context chips
-- Smart Chore List presentation
-- suggested Chore Bundle confirmation
-- mocked active Chore Session behavior
-- inline optional Chores after planned session completion
+- Smart Task List presentation
+- suggested Task Bundle confirmation
+- mocked active Task Session behavior
+- inline optional Tasks after planned session completion
 - final session summary
 - Homekeep Voice System direction
 - Home Assistant sidebar app direction
@@ -235,8 +344,8 @@ not as validation of the full Homekeep app.
 The following areas still need planning or deeper review before implementation:
 
 - Home Health and Area Health as a full app view
-- Plan / Scheduled Chores
-- Add Chore UX
+- Plan / Scheduled Tasks
+- Add Task UX
 - Activity and recent history
 - Settings and diagnostics
 - full navigation model
@@ -256,19 +365,19 @@ Homekeep's core interaction depends on short-lived service response data:
 - `recommendation_id`
 - `session_id`
 - `session_item_id`
-- planned Chore surfacing state
-- optional Chore state
+- planned Task surfacing state
+- optional Task state
 
 A Homekeep app view can own the temporary UI state while leaving durable state
 inside Homekeep storage. That makes the main workflow clearer:
 
 ```text
 choose context
--> generate Smart Chore List
+-> generate Smart Task List
 -> inspect reasons and Projected Impact
--> start a Chore Session
+-> start a Task Session
 -> complete / skip
--> optional Chores appear inline after the planned bundle is complete
+-> optional Tasks appear inline after the planned bundle is complete
 -> final session summary
 ```
 
@@ -282,7 +391,7 @@ direction and should be updated as Steve answers design questions.
 Status: under review.
 
 The main screen should make Ready-Now Mode immediate. Use a hybrid layout:
-Mood-aware greeting first, then the best suggested Chore Session, with an
+Mood-aware greeting first, then the best suggested Task Session, with an
 "I'm ready" customization path available without making the screen feel busy.
 
 Decision: Right Now should balance the home's needs with the user's current
@@ -291,14 +400,14 @@ predisposition.
 Homekeep should have a respectful internal tension: the home may need care, and
 the user may have limited time, capacity, mood, or attention. The app should
 honor explicit user context, but it should also have a quiet care bias toward
-chores that meaningfully help the home when they still fit the moment. This
+tasks that meaningfully help the home when they still fit the moment. This
 gives Homekeep a small agenda: help the home get cared for. That agenda must be
 transparent in recommendation reasons, easy to correct through context chips,
 and never guilt-based, punitive, or manipulative.
 
 Good behavior:
 
-- prefer a meaningful stale/high-impact Chore when it still fits the user's
+- prefer a meaningful stale/high-impact Task when it still fits the user's
   stated time and inferred capacity
 - offer a tiny/light variant when the home needs care but the user seems low
   capacity
@@ -315,16 +424,16 @@ Avoid:
 Important Right Now tension rules:
 
 1. Use `stretch, do not shove`. Homekeep may suggest one slightly more
-   meaningful Chore than the user might choose alone, but it should stay inside
+   meaningful Task than the user might choose alone, but it should stay inside
    the user's stated time, inferred capacity, and context.
 2. Offer a softer variant of the real need. If the home needs care but the user
-   is low capacity, suggest a tiny or light version of the helpful Chore rather
+   is low capacity, suggest a tiny or light version of the helpful Task rather
    than the full catch-up.
 3. Make the nudge visible in the reason. Explain gently why this suggestion is
    a little more useful than the easiest option.
 4. Keep escape hatches beside every nudge. Context chips, randomize, remove,
    restore, skip, and clean session exit make the care bias respectful.
-5. Do not hide urgent stale Chores just because the user's current context is
+5. Do not hide urgent stale Tasks just because the user's current context is
    light. Keep meaningful care in the candidate pool, but resize the suggested
    variant to fit the moment.
 6. Use any care-debt concept internally only. User-facing copy must avoid debt,
@@ -335,8 +444,8 @@ Important Right Now tension rules:
 8. Let user correction teach tone and fit, not obedience. Repeated removals or
    dismissals in a context should lead to lighter variants or better timing, not
    permanent suppression of useful care.
-9. A Chore Bundle may include one honest `the home needs this` item when it is
-   small enough to fit, balanced by easier Chores that match the user's current
+9. A Task Bundle may include one honest `the home needs this` item when it is
+   small enough to fit, balanced by easier Tasks that match the user's current
    predisposition.
 10. Stop cleanly. Ending a session must always feel successful, even when
     Homekeep can still recommend more.
@@ -347,53 +456,86 @@ Short design principle:
 Homekeep is gently opinionated, never coercive.
 ```
 
-Suggested Chore Engine direction:
+Suggested Task Engine direction:
 
 - Use a two-stage engine: hard constraints first, then scoring.
 - Keep `home need` and `user fit` separate internally so the app can balance
   Home Health/Staleness against the user's current readiness.
 - Allow a bounded care nudge toward useful home needs, but cap it so it never
   overrides explicit Time, Area, or Mood choices.
-- Prefer small Chore Variants over rejecting useful care when the full Chore is
+- Prefer small Task Variants over rejecting useful care when the full Task is
   too much for the moment.
-- Exclude Chores just removed, skipped, dismissed, snoozed, or completed in the
+- Exclude Tasks just removed, skipped, dismissed, snoozed, or completed in the
   current flow.
-- Make optional Chores stricter than the main suggested bundle: smaller,
+- Make optional Tasks stricter than the main suggested bundle: smaller,
   better-fit, useful, and bounded.
 - Explain one human reason, not the scoring math.
 - Avoid repetitive bundles and incoherent mixed-area bundles.
 - Keep shuffle stable within a family of good fits, not random.
 - Learn conservatively from correction signals. Soften, resize, defer, or
   retime before suppressing useful care.
-- Treat the time entered when creating a Chore as a starting estimate, not the
+- Treat the time entered when creating a Task as a starting estimate, not the
   final truth. Homekeep should learn from real active-session duration and adapt
   the recommendation length to current Mood/Readiness, inferred Capacity, and
   recent session momentum.
-- Use adaptive duration to resize care, not shame the user. If the full Chore is
-  too much for the moment, prefer a tiny/light Chore Variant or shorter pass.
+- Use adaptive duration to resize care, not shame the user. If the full Task is
+  too much for the moment, prefer a tiny/light Task Variant or shorter pass.
+
+Decision: Right Now is the human contribution gateway into mutual care.
+
+Right Now is not merely the task screen. It is the place where a human says,
+`I am here, I can contribute now, what would help?`
+
+The home has ongoing care from plants, pets, devices, routines, time, and prior
+human work. Right Now is specifically for the human who wants to join that care
+flow at a scale that fits this moment.
+
+Implications:
+
+- the greeting should feel like an invitation to contribute, not a command
+- Time, Mood, and Area are contribution-fit controls, not productivity filters
+- the suggested Task Bundle is an invitation to join the home's care flow, not
+  an assignment
+- the recommendation should show how the human contribution fits beside
+  existing care sources when useful
+- the primary action should feel like accepting a care moment, not starting a
+  work queue
+- active session feedback should proudly show the person's contribution
+- the ending summary should say what the human added to the home, not only what
+  they completed
+- Right Now should connect back to Area Health contribution, showing how this
+  person is joining the humans, pets, plants, devices, and routines that already
+  help the home
+
+Useful design phrase:
+
+```text
+Right Now helps a person join the home's care flow at the scale that fits this
+moment.
+```
 
 Decision: Ready Now layout order should be:
 
 ```text
 Greeting
 Context chips
-Suggested Chore Bundle
+Suggested Task Bundle
 Compact Home Health / Area Health lines inside the bundle
 ```
 
 This lets the screen start human, gives the user quick control over context,
-then presents the best suggested Chore Bundle with health context attached to
+then presents the best suggested Task Bundle with health context attached to
 the recommendation.
 
-Decision: When a Chore Session is active, Ready Now should become the active
+Decision: When a Task Session is active, Ready Now should become the active
 session view.
 
 The user should not have to navigate to a separate screen to continue a session.
-While a Chore Session is active, Ready Now should show the active session state.
+While a Task Session is active, Ready Now should show the active session state.
 After the session is complete, Ready Now should return to the normal greeting,
-context chips, and suggested Chore Bundle layout.
+context chips, and suggested Task Bundle layout.
 
-Decision: Visually, Homekeep should show only one active Chore Session at a
+Decision: Visually, Homekeep should show only one active Task Session at a
 time.
 
 The UI should not present multiple active sessions, stacked session cards, or a
@@ -402,7 +544,7 @@ that session until it ends. This applies to the mocked prototype and should
 remain the default expectation for the real app unless a later workflow
 explicitly introduces multi-session behavior.
 
-Decision: If Homekeep cannot generate a suggested Chore Bundle, Ready Now should
+Decision: If Homekeep cannot generate a suggested Task Bundle, Ready Now should
 show a gentle no-suggestion state.
 
 The user should keep the same context chips visible so they can adjust time,
@@ -412,7 +554,7 @@ other context. If applicable, the normal shuffle/regenerate affordance can
 remain available, but the main recovery path should be changing visible context.
 
 Capacity is the internal replacement for a visible Energy control. It describes
-what a Chore Bundle can reasonably ask of the user, not how the user feels.
+what a Task Bundle can reasonably ask of the user, not how the user feels.
 Use `auto`, `low`, `steady`, `mobile`, and `strong`.
 
 Mood maps to Capacity by default:
@@ -425,9 +567,9 @@ Mood maps to Capacity by default:
 
 Capacity should be evaluated against effort, movement, setup friction,
 duration, and interruption tolerance. Low Capacity should prefer short,
-low-effort, low-transition Chores. Mobile Capacity can include walking between
-rooms, light carrying, and visible reset work. Strong Capacity can include
-heavier, longer, overdue, or more physically involved Chores.
+low-effort, low-transition Tasks. Mobile Capacity can include walking between
+rooms, light carrying, and visible lift work. Strong Capacity can include
+heavier, longer, overdue, or more physically involved Tasks.
 
 Mood also maps to the internal Goal by default:
 
@@ -463,37 +605,37 @@ Mocked Ready Now prototype flow:
 
 ```text
 Ready Now suggestion
--> confirm Chore Bundle
--> mocked active Chore Session
--> start Chores in any order
--> complete Chores
--> completed Chores stay visible with a soft done state
--> optional Chores appear inline in the active session list
+-> confirm Task Bundle
+-> mocked active Task Session
+-> start Tasks in any order
+-> complete Tasks
+-> completed Tasks stay visible with a soft done state
+-> optional Tasks appear inline in the active session list
 -> final session summary
 -> return to Ready Now
 ```
 
-The mocked flow should include visible Keeps, Chore-level start/complete
-actions, the active Chore timer state, the small completion effect, and the
-inline optional Chore continuation. Backend service wiring can come later.
+The mocked flow should include visible Keeps, Task-level start/complete
+actions, the active Task timer state, the small completion effect, and the
+inline optional Task continuation. Backend service wiring can come later.
 
 Mock behavior should preserve real usage expectations:
 
 - bundle confirmation starts a plausible active session state
-- only one Chore can be ongoing at a time
-- starting a Chore changes its state to ongoing
-- completing a Chore keeps it visible as a near-normal Chore row with a soft
+- only one Task can be ongoing at a time
+- starting a Task changes its state to ongoing
+- completing a Task keeps it visible as a near-normal Task row with a soft
   congratulatory done state
-- the timer appears only while a Chore is ongoing
-- completing the final planned Chore adds a short list of optional Chores
+- the timer appears only while a Task is ongoing
+- completing the final planned Task adds a short list of optional Tasks
   directly into the active session list
-- optional Chores can be started, completed, or skipped like other session
-  Chores
+- optional Tasks can be started, completed, or skipped like other session
+  Tasks
 - disabled/no-op controls should be limited to features intentionally not wired
   in the first mock, such as backend redraw logic
 
 Decision: The main shuffle button in the first mocked Ready Now prototype should
-swap to another mocked Chore Bundle.
+swap to another mocked Task Bundle.
 
 The shuffle button should not be a dead control in the Ready Now mock. It should
 visually exercise the real usage expectation by changing the suggested bundle to
@@ -508,7 +650,7 @@ The chips should not be decorative. When the user changes time, mood, or area,
 the mock should show the inline selector, run the fuzzy/refining state, and
 then swap to a plausible mocked suggestion that reflects the changed context.
 
-Decision: The first mocked Ready Now prototype should include `4-5` mocked Chore
+Decision: The first mocked Ready Now prototype should include `4-5` mocked Task
 Bundle variants.
 
 The variants should cover different time, inferred Capacity, mood, and
@@ -529,38 +671,38 @@ Example mock Areas:
 - `Laundry`
 - `Living room`
 
-Decision: In the mocked Ready Now prototype, completing the final planned Chore
-should add a short list of optional Chores directly into the active session
+Decision: In the mocked Ready Now prototype, completing the final planned Task
+should add a short list of optional Tasks directly into the active session
 list.
 
-The optional Chores can use synthetic data, but they should be selected from a
+The optional Tasks can use synthetic data, but they should be selected from a
 larger candidate pool using Recommendation Engine-like scoring. The intended
 flow is: the planned bundle feels complete, completed rows stay visible, and a
-few small additional Chores appear inline without a separate `One more`
+few small additional Tasks appear inline without a separate `One more`
 reveal/accept step. The mock does not need real backend redraw or service
 eligibility logic yet.
 
 Mock data decisions:
 
-- Use `4-5` Chore Bundle variants.
+- Use `4-5` Task Bundle variants.
 - Use mostly single-area bundles so Area Health impact is easy to understand.
 - Include one multi-area bundle to test bundle-level area display and mixed-area
   behavior.
 - Use realistic synthetic areas: `Kitchen`, `Entryway`, `Bathroom`, `Laundry`,
   and `Living room`.
-- Use realistic synthetic chores such as `Clear dishes`, `Wipe counters`,
-  `Take out compost`, `Shake entry rug`, `Reset bathroom sink`, `Start a small
+- Use realistic synthetic tasks such as `Clear dishes`, `Wipe counters`,
+  `Take out compost`, `Shake entry rug`, `Clear bathroom sink`, `Start a small
   laundry load`, and `Clear coffee table`.
 - Include varied bundle sizes: one short `5 min` bundle, a couple of `10-15
   min` bundles, and one fuller `20-25 min` bundle.
 - Include varied Mood and Capacity contexts: auto, low, quiet, focused, restless,
   and ready.
-- Include Keeps per Chore and visible full-reset Keeps opportunities.
+- Include Keeps per Task and visible Bundle Keeps opportunities.
 - Include Home Health and Area Health mock numbers that line up with the
   suggested bundle, such as `Home 74`, `Kitchen 48`, and `Kitchen 24`.
 - Include one no-suggestion mock state.
-- Include `2-3` mocked optional Chores with Keeps.
-- Choose mocked optional Chores through stricter Recommendation Engine-like
+- Include `2-3` mocked optional Tasks with Keeps.
+- Choose mocked optional Tasks through stricter Recommendation Engine-like
   scoring rather than a fixed visible list.
 - Keep all data synthetic and privacy-safe.
 - Avoid generic labels, lorem ipsum, fake entity IDs, private household details,
@@ -568,17 +710,17 @@ Mock data decisions:
 
 Mock interaction decisions:
 
-- Main shuffle swaps to a different mocked Chore Bundle.
-- Context chip changes swap to a plausible mocked Chore Bundle after the
+- Main shuffle swaps to a different mocked Task Bundle.
+- Context chip changes swap to a plausible mocked Task Bundle after the
   fuzzy/refining state.
 - Bundle confirmation starts the mocked active session.
-- The mocked active session uses real-feeling Chore states: ready, ongoing,
+- The mocked active session uses real-feeling Task states: ready, ongoing,
   completed.
-- Only one Chore can be ongoing at a time.
-- The timer appears only while a Chore is ongoing.
-- Completed Chores stay visible as near-normal Chore rows with a soft
+- Only one Task can be ongoing at a time.
+- The timer appears only while a Task is ongoing.
+- Completed Tasks stay visible as near-normal Task rows with a soft
   congratulatory done state.
-- Completing the final planned Chore appends optional Chores inline.
+- Completing the final planned Task appends optional Tasks inline.
 - The final summary can return to Ready Now after the optional list is handled.
 
 The visual model should feel closer to a modern voice assistant surface than to
@@ -594,7 +736,7 @@ Greeting goals:
 
 - make the first screen feel human and current
 - reflect the user's selected or inferred Mood Context
-- gently frame the kind of Chore Session that may fit the moment
+- gently frame the kind of Task Session that may fit the moment
 - keep the user in control by making mood easy to override
 - avoid guilt, pressure, or exaggerated cheerfulness
 - use a substantial set of possible greeting strings rather than a single
@@ -621,20 +763,20 @@ I'm ready
 -> optionally accept or override Mood: Auto
 -> infer Capacity from Mood and context
 -> infer Goal from Mood and context
--> generate Smart Chore List
--> start a Chore Bundle or single Chore
+-> generate Smart Task List
+-> start a Task Bundle or single Task
 ```
 
 The UI should show only a few recommendations and make the reason for each one
 clear without becoming a report.
 
-Suggested Chore Session display:
+Suggested Task Session display:
 
 - Show the collapsed version by default.
-- The collapsed view should include an evocative Chore Bundle title, estimated
+- The collapsed view should include an evocative Task Bundle title, estimated
   time, compact context, short reason, primary bundle-selection action, shuffle
   action, and expand affordance.
-- Do not show the full Chore Bundle contents by default. Let the user expand
+- Do not show the full Task Bundle contents by default. Let the user expand
   when they want details.
 - Expanded details should open inline below the suggestion, not in a separate
   detail view. The user should remain anchored on Ready Now.
@@ -647,27 +789,27 @@ Suggested Chore Session display:
 - Use one shuffle button only. It should remain visible in a consistent
   location whether the suggestion is collapsed or expanded, and it should never
   be duplicated.
-- The main action on the suggested Chore Session should confirm the bundle
+- The main action on the suggested Task Session should confirm the bundle
   selection. It should not imply that the user has started doing the first
-  Chore yet.
-- After the user confirms a bundle, Homekeep should move into an active Chore
-  Session where the user can start or complete individual Chores in the order
+  Task yet.
+- After the user confirms a bundle, Homekeep should move into an active Task
+  Session where the user can start or complete individual Tasks in the order
   they choose.
-- Expanded Chore Bundle details should show each Chore with its estimated time.
+- Expanded Task Bundle details should show each Task with its estimated time.
   The time estimate should help the user trust the overall session fit without
   making the list feel dense or managerial.
-- Expanded Chore Bundle details should show the Keeps available for each Chore.
+- Expanded Task Bundle details should show the Keeps available for each Task.
   Keeps should be visible while suggesting bundles, not only after completion.
-- Full-reset Keeps should be shown at the bundle level, such as
-  `4 Keeps for the full reset`.
-- In the suggested bundle card, show full-reset Keeps before the visible Chore
-  list. This care-together signal is part of the offer and should be understood before the user
-  scans the individual Chores.
-- Area display should be conditional. If all Chores in the bundle share the
+- Bundle Keeps should be shown at the bundle level, such as
+  `4 bundle Keeps`.
+- In the suggested bundle card, show Bundle Keeps before the visible Task list.
+  This care-together signal is part of the offer and should be understood before
+  the user scans the individual Tasks.
+- Area display should be conditional. If all Tasks in the bundle share the
   same Home Assistant Area, show that area at the bundle level only. If the
   bundle spans multiple Home Assistant Areas, show the relevant area on each
-  Chore row so the user understands where each step happens.
-- Expanded Chore rows should include a small pre-start remove affordance. This
+  Task row so the user understands where each step happens.
+- Expanded Task rows should include a small pre-start remove affordance. This
   should feel lightweight and optional, letting the user tune a suggestion
   before starting without turning the bundle into a full editor.
 
@@ -680,23 +822,23 @@ Pre-start edit direction:
 - Keep the original recommendation recoverable through shuffle or visible
   context changes.
 - Avoid allowing edits that break service/session validity.
-- Removing a Chore before starting should happen instantly with row-level
+- Removing a Task before starting should happen instantly with row-level
   restore, not a confirmation dialog. This keeps tuning fast and reversible
   without adding a duplicate temporary undo toast.
-- Do not include per-Chore swap in the MVP. Use the shuffle action when the user
+- Do not include per-Task swap in the MVP. Use the shuffle action when the user
   wants a different suggestion.
-- By default, removing a Chore before starting should affect only the current
+- By default, removing a Task before starting should affect only the current
   unsaved suggestion. It should not automatically train future recommendations.
 - The UI may offer an optional explicit preference signal, such as
   `Suggest this less in short sessions`, when the user wants Homekeep to
   remember a context-specific pattern. This should be user-chosen, reversible,
   and phrased as a preference rather than a punishment.
-- Do not show an undo toast when the removed Chore remains visible with
+- Do not show an undo toast when the removed Task remains visible with
   row-level restore. The row itself is the recovery path.
 - Optional context-specific preference learning can come later in a separate,
   explicit preference surface if Homekeep can describe the context clearly.
 - Preference examples may include `less in short sessions`, `less when Capacity
-  is low`, `less for evening resets`, or `less in this Home Assistant Area`.
+  is low`, `less for evening bundles`, or `less in this Home Assistant Area`.
   Do not offer a context-specific preference when the context would be vague or
   misleading.
 - Do not rely on temporary toast state for reversibility when the removed row
@@ -704,7 +846,7 @@ Pre-start edit direction:
 
 Projected Impact direction:
 
-- Make the benefit of a suggested Chore Session easy to understand at a glance.
+- Make the benefit of a suggested Task Session easy to understand at a glance.
 - Show impact as encouragement, not as a grade or judgment.
 - Keep the display simple enough to scan quickly.
 - Use positive motion, progress, or Keeps-like language where it helps the
@@ -733,14 +875,14 @@ Chosen impact presentation:
   `Kitchen 24 · Big kitchen boost`.
 - Keep the presentation compact enough for mobile.
 
-Chore Bundle title direction:
+Task Bundle title direction:
 
 - Titles should be evocative, memorable, and inviting.
 - A user should be able to remember the title later.
 - A user should feel that choosing the bundle is pleasant, not like accepting a
   punishment list.
-- Titles should sound like a small household mission, reset, or useful moment,
-  not a raw list of chores.
+- Titles should sound like a small household mission, lift, or useful moment,
+  not a raw list of tasks.
 - Titles must stay truthful to the bundle contents.
 - Titles must avoid guilt, shame, or exaggerated hype.
 
@@ -755,14 +897,14 @@ Good title qualities:
 
 Draft title examples:
 
-- `Kitchen Reset`
+- `Kitchen Lift`
 - `Tiny Trash Run`
 - `Countertop Comeback`
 - `Entryway Fresh Start`
 - `Laundry Launch`
 - `Quiet Bathroom Refresh`
 - `Five-Minute Floor Rescue`
-- `Evening Reset`
+- `Evening Lift`
 
 Draft greeting directions:
 
@@ -776,23 +918,23 @@ Draft greeting directions:
 Example greeting pattern:
 
 ```text
-Good evening. Want a small reset that fits this moment?
+Good evening. Want a small bundle that fits this moment?
 ```
 
 The greeting should not replace the core action. It should frame the Ready Now
-screen and help the user feel met before choosing or starting a Chore Session.
+screen and help the user feel met before choosing or starting a Task Session.
 
 Chosen direction:
 
 - Ready Now uses a hybrid layout.
 - Top: substantial Mood Context greeting.
-- Middle: best suggested Chore Session or helpful empty state.
-- Primary action: confirm the suggested Chore Bundle when available.
-- Homekeep should auto-generate the best suggested Chore Session when the app
+- Middle: best suggested Task Session or helpful empty state.
+- Primary action: confirm the suggested Task Bundle when available.
+- Homekeep should auto-generate the best suggested Task Session when the app
   opens, using inferred or default context.
 - Secondary action: "I'm ready" or equivalent customization path for changing
-  time and mood before generating a Smart Chore List.
-- Include a light shuffle action that regenerates the Smart Chore List using the
+  time and mood before generating a Smart Task List.
+- Include a light shuffle action that regenerates the Smart Task List using the
   current visible context. It should feel easy and low-pressure, not like rejecting
   Homekeep's recommendation.
 - Visual style should evoke a modern voice assistant rather than a card-heavy
@@ -831,7 +973,7 @@ Auto-generation behavior:
 Refining state direction:
 
 - Keep the current suggestion visible until the new result is ready.
-- During refinement, the current best suggested Chore Session may become softly
+- During refinement, the current best suggested Task Session may become softly
   fuzzy/blurred to show that it is being reconsidered.
 - Show subtle motion or text such as `Finding a better fit`.
 - Do not include an assistant orb/pulse in the MVP. The safer first version is
@@ -847,14 +989,14 @@ Shuffle action direction:
 - Use a recognizable shuffle icon.
 - Keep the button compact and approachable.
 - Add a tooltip or accessible label such as `Shuffle suggestions`.
-- Regenerate the Smart Chore List with the current chip context.
+- Regenerate the Smart Task List with the current chip context.
 - Use the same fuzzy/refining state while the new list is generated.
 - Avoid punitive wording such as `reject`, `dismiss`, or `not good`.
 - Avoid making shuffle the dominant action over confirming the suggested
   bundle.
 - Keep shuffle always visible on the suggested session surface, including when
   details are expanded.
-- Shuffle should regenerate immediately, even if the user has removed Chores
+- Shuffle should regenerate immediately, even if the user has removed Tasks
   from the current suggestion. Do not ask for confirmation.
 - Consider mood-aware microcopy such as `Try another fit`, `Shuffle`, or
   `Find another`.
@@ -871,26 +1013,26 @@ Bundle-selection action copy directions:
 
 Draft bundle-selection action strings:
 
-- `Choose this reset`
+- `Start this bundle`
 - `Use this bundle`
 - `This works`
 - `Set this up`
 - `Let's use this`
 - `Pick this one`
-- `Ready this reset`
+- `Start this bundle`
 
 The app should choose from this set based on context, with enough variation to
 feel alive but not random or distracting.
 
-### Active Chore Session
+### Active Task Session
 
 Status: under review.
 
-Once a Chore Session starts, the app should switch into a focused active
+Once a Task Session starts, the app should switch into a focused active
 session view.
 
-The active session should show all selected Chores, but gently highlight the
-best first Chore. The user can start or complete Chores in any order. Homekeep
+The active session should show all selected Tasks, but gently highlight the
+best first Task. The user can start or complete Tasks in any order. Homekeep
 may suggest the next best step, but it must not lock the user into a sequence.
 
 Active sessions should feel more dynamic and rewarding than the selection
@@ -900,10 +1042,10 @@ a dynamic timer/chrono treatment where it helps the session feel alive.
 Gamification direction:
 
 - make progress visible and satisfying
-- show Keeps, impact, or reward effects for completed Chores
-- show Keeps for completed Chores and completed bundles
+- show Keeps, impact, or reward effects for completed Tasks
+- show Keeps for completed Tasks and completed bundles
 - keep rewards positive and non-punitive
-- make small Chores feel worthwhile
+- make small Tasks feel worthwhile
 - never punish stopping
 - never imply failure for skipping, snoozing, or ending
 - avoid competitive pressure or streak-loss mechanics
@@ -911,10 +1053,10 @@ Gamification direction:
 - connect rewards to Home Health, Area Health, Projected Impact, or session
   progress
 - celebrate the completed suggested bundle more clearly than an individual
-  Chore, because that is the main recommended reset being fulfilled
-- after optional Chores are added, make each optional completion feel
+  Task, because that is the main recommendation being fulfilled
+- after optional Tasks are added, make each optional completion feel
   gradually warmer without turning it into a scoreboard
-- make completing the originally suggested Chore Bundle intact more rewarding
+- make completing the originally suggested Task Bundle intact more rewarding
   than completing an edited bundle, without making edits feel wrong
 
 Keeps direction:
@@ -924,42 +1066,75 @@ Keeps direction:
   wage, or productivity scoring.
 - Frame Keeps as coming from the home as a whole, not from individual Home
   Assistant Areas.
-- Award Keeps for care completed, not for speed, optimization, streaks, or
-  performance.
-- Show Keeps per Chore when suggesting a bundle and when the session is active.
-- Show full-reset Keeps as harmony for a coherent suggested bundle, not as a
-  pressure reward for obeying the app. Use language such as `4 Keeps for the
-  full reset`.
-- Optional Chores can add Keeps, but must not create another reward loop.
+- Treat Keeps as care circulating through the home. Humans care for the home;
+  plants can care for air, humidity, shade, beauty, and presence; purifiers can
+  care for air quality; pets and pet routines can reflect care for another
+  living inhabitant; quiet-hour and comfort routines can protect rest and
+  household rhythm; a coffee machine can care through comfort, ritual, and good
+  coffee.
+- In future mutual-care features, Keeps may be associated with care sources such
+  as `human_care`, `plant_care`, `pet_care`, `device_care`, `air_care`,
+  `comfort_care`, `quiet_care`, and `routine_care`. These are explanation
+  categories, not currencies, accounts, or rankings.
+- Home Assistant devices can participate in care attribution. A laundry Task
+  can split or share Keeps between the person doing the human parts of the
+  Task and the washing machine doing the machine part. The UI should make this
+  feel like collaboration in the home, not like a competition between humans and
+  devices.
+- Example future copy: `Fern helped the air today`, `Bedroom air stayed
+  lighter`, `The purifier kept things steady`, `Watering helped the room
+  breathe`, `The washer carried part of this bundle`, `The coffee helped the
+  morning start kindly`, and `The home kept a little more comfort today`.
+- Return or recognize Keeps for care completed, not for speed, optimization,
+  streaks, or performance.
+- Show Keeps per Task when suggesting a bundle and when the session is active.
+- Show Bundle Keeps as harmony for a coherent suggested bundle, not as a
+  pressure reward for obeying the app. Use language such as `4 bundle Keeps`.
+- Optional Tasks can add Keeps, but must not create another reward loop.
 - Do not subtract Keeps for removing, skipping, snoozing, ending, or stopping.
-- Edited bundles can still receive Chore Keeps and a smaller full-reset Keeps
+- Edited bundles can still receive Task Keeps and a smaller Bundle Keeps
   opportunity when appropriate.
+- Keeps use a non-scarce care model: they are the home noticing care, not a
+  currency that runs out. A plant helping the air does not reduce the Keeps
+  available to a person. A coffee machine making good coffee does not take Keeps
+  away from the washing machine. More care sources means more care can be
+  noticed.
+- Do not design Keeps around scarcity: no spending, trading, stealing,
+  depletion, exchange rates, shops, debt, or source-vs-source competition.
 - Keep Keeps math simple enough to explain in one line.
 - Do not show a persistent running total of Keeps received in the active session
-  MVP. Show Keeps per Chore and full-reset Keeps opportunities instead.
+  MVP. Show Keeps per Task and Bundle Keeps opportunities instead.
+- Future reflection surfaces should proudly display total Keeps by care source:
+  humans, pets, plants, devices, air/comfort systems, quiet routines, and other
+  meaningful contributors. This should feel like the home appreciating its care
+  network, not a leaderboard or ranking.
+- Care-source totals should be grouped and named warmly, such as `Humans`,
+  `Plants`, `Pets`, `Devices`, `Air`, `Comfort`, and `Routines`, with the
+  option to show individual contributors like a coffee machine, washer, fern,
+  purifier, or pet when the data is meaningful.
 - Use Keeps sparingly in prose and avoid transactional language such as `earn`,
   `earned`, `spend`, `bank`, or `redeem`.
 - Prefer quiet reciprocal language, such as `The home gives a little back`.
 - Keep Keeps visuals soft; avoid coins, trophies, badges everywhere, or
   scoreboard metaphors.
-- Use Keeps to help tiny Chores feel like they count.
+- Use Keeps to help tiny Tasks feel like they count.
 - Let Home Health say where care helps and Keeps say care happened; do not make
   them compete.
-- Keeps may support a quiet daily or weekly reflection later, such as `You
-  helped the kitchen feel lighter this week`, but should not become a
-  leaderboard, ranking, or total-chasing surface.
+- Keeps may support a proud daily or weekly reflection later, such as `The home
+  was cared for from many sides this week`, but should not become a leaderboard,
+  ranking, or total-chasing surface.
 
 Best-first highlight direction:
 
-- gently highlight the recommended first Chore
+- gently highlight the recommended first Task
 - explain the highlight briefly, such as `good first step`
-- allow any Chore to be started first
-- update the suggested next Chore after completions, skips, or manual starts
+- allow any Task to be started first
+- update the suggested next Task after completions, skips, or manual starts
 - keep the highlight helpful, not commanding
 
 Dynamic session elements:
 
-- encouraging Start button copy for individual Chores
+- encouraging Start button copy for individual Tasks
 - visible session progress
 - dynamic chrono/timer treatment
 - completion effects that are satisfying but not excessive
@@ -968,57 +1143,57 @@ Dynamic session elements:
 
 Completion feedback:
 
-- Completing a Chore should trigger a quick reward effect.
+- Completing a Task should trigger a quick reward effect.
 - The effect should be immediate, satisfying, and lightweight.
-- Do not interrupt the user with a full summary after every Chore.
+- Do not interrupt the user with a full summary after every Task.
 - Show Keeps or impact gained briefly, then return focus to the remaining
-  Chores and suggested next step.
+  Tasks and suggested next step.
 - Respect reduced-motion preferences in the eventual implementation.
-- Completed Chores should stay visible inline, almost as-is, so the user can see
+- Completed Tasks should stay visible inline, almost as-is, so the user can see
   the session history without opening anything.
-- Completed Chore rows should keep the Chore name, Area, duration, and Keeps
+- Completed Task rows should keep the Task name, Area, duration, and Keeps
   line, remove active controls, and add a soft congratulatory signal such as
   `Nice, done`.
-- Do not put completed Chores behind an expand/collapse control in the active
+- Do not put completed Tasks behind an expand/collapse control in the active
   session.
 
 Completed-bundle continuation:
 
-- After the final planned Chore is completed, add a short list of optional
-  Chores directly into the active session list instead of showing `Done for
+- After the final planned Task is completed, add a short list of optional
+  Tasks directly into the active session list instead of showing `Done for
   now` / `One more` buttons.
-- Keep completed planned Chores visible above the optional Chores.
+- Keep completed planned Tasks visible above the optional Tasks.
 - Show a subtle session progress line, such as `2 of 3 planned done · optional
   care available`.
-- Add a persistent inline milestone row when the suggested reset is complete,
-  such as `Suggested reset complete · The home feels lighter`.
-- Visually separate the optional Chores with a compact inline divider, such as
+- Add a persistent inline milestone row when the suggested bundle is complete,
+  such as `Suggested bundle complete · The home feels lighter`.
+- Visually separate the optional Tasks with a compact inline divider, such as
   `A few more that fit`.
-- Include a tiny explanation for why the optional Chores appeared, such as
+- Include a tiny explanation for why the optional Tasks appeared, such as
   `Picked for small effort, current fit, and useful home lift`.
 - Do not automatically exit the user from the flow.
-- Keep an exit action available once optional Chores appear so optional really
+- Keep an exit action available once optional Tasks appear so optional really
   means optional.
 - Use positive momentum language, not pressure.
 - Shift idle support copy after planned completion toward `Stop here, or pick
   one more small thing.`
 - Show a clear celebration flash when the suggested bundle is done before the
-  optional Chores appear.
-- Optional Chores should be small, useful, and easy to skip.
-- Use softer skip copy such as `Not now` on optional Chores.
-- Optional Chore completion feedback should ramp gently as additional optional
-  Chores are completed.
-- Optional Chores should be generated from the same Recommendation Engine
+  optional Tasks appear.
+- Optional Tasks should be small, useful, and easy to skip.
+- Use softer skip copy such as `Not now` on optional Tasks.
+- Optional Task completion feedback should ramp gently as additional optional
+  Tasks are completed.
+- Optional Tasks should be generated from the same Recommendation Engine
   principles as the main suggestion, but with stricter bounds: small duration,
   mood/time fit, no recent skip/remove/dismiss/snooze, useful Home Health or
   Area Health impact, and no chaining forever.
-- Optional Chores can bias toward useful overdue Chores when they fit the
+- Optional Tasks can bias toward useful overdue Tasks when they fit the
   current context, especially small tasks with high Projected Impact.
 - Overdue bias must preserve the light optional feeling. Do not offer large
-  overdue Chores that feel like a second session unless a tiny/light variant is
+  overdue Tasks that feel like a second session unless a tiny/light variant is
   available.
-- Do not offer Chores the user just removed, skipped, snoozed, or dismissed.
-- Do not use guilt-based overdue language. Phrase overdue optional Chores as
+- Do not offer Tasks the user just removed, skipped, snoozed, or dismissed.
+- Do not use guilt-based overdue language. Phrase overdue optional Tasks as
   positive opportunities, not obligations.
 
 Final summary:
@@ -1026,7 +1201,7 @@ Final summary:
 - Exiting the completed session should show a short final
   celebration/summary before returning to Ready Now.
 - The summary should feel positive and complete, not like a report card.
-- Include completed Chores, Keeps received, full-reset Keeps if received, and friendly
+- Include completed Tasks, Keeps received, Bundle Keeps if received, and friendly
   Home/Area impact where available.
 - Keep it brief enough to read at a glance.
 - Make stopping feel like success.
@@ -1037,19 +1212,19 @@ Final summary:
 
 Timer behavior:
 
-- The active session timer should run only when a Chore is `ongoing`.
+- The active session timer should run only when a Task is `ongoing`.
 - Confirming a bundle should not start the timer.
 - Viewing, reordering mentally, choosing, pausing, or deciding what to do next
-  should not count as active chore time.
-- When no Chore is ongoing, show the session as ready or paused rather than
+  should not count as active task time.
+- When no Task is ongoing, show the session as ready or paused rather than
   timing the user.
 - The timer should support the user, not pressure them.
-- Pause should be combined with the Chore Session timer/chrono control. When
-  the user pauses, Homekeep pauses the current ongoing Chore rather than
+- Pause should be combined with the Task Session timer/chrono control. When
+  the user pauses, Homekeep pauses the current ongoing Task rather than
   presenting Pause as a separate primary action.
 - The timer should clearly show paused state and offer a simple way to resume
-  the same Chore.
-- Completing a Chore should use a separate prominent Complete button. Stopping
+  the same Task.
+- Completing a Task should use a separate prominent Complete button. Stopping
   or pausing the timer should not be overloaded with completion choices.
 
 Required actions:
@@ -1058,17 +1233,17 @@ Required actions:
 - skip
 - pause
 - end
-- optional Chore start/complete/skip after planned completion
+- optional Task start/complete/skip after planned completion
 
 Action visibility:
 
-- Start and Complete should be the prominent Chore-level actions.
+- Start and Complete should be the prominent Task-level actions.
 - Skip should be tucked behind a secondary or overflow action.
-- Skip must remain available after a Chore has started. Skipping an ongoing
-  Chore stops that Chore's timer, marks it skipped rather than completed, and
-  moves the session toward the next pending Chore when one exists.
-- Do not offer Snooze on active-session Chores. Snooze remains a
-  recommendation or planning-level `later` action, not an in-session chore
+- Skip must remain available after a Task has started. Skipping an ongoing
+  Task stops that Task's timer, marks it skipped rather than completed, and
+  moves the session toward the next pending Task when one exists.
+- Do not offer Snooze on active-session Tasks. Snooze remains a
+  recommendation or planning-level `later` action, not an in-session task
   control.
 - The surface should feel encouraging and focused on progress, not cluttered
   with exception handling.
@@ -1087,8 +1262,8 @@ It should help the user understand where attention matters:
 
 - whole-home status
 - Home Assistant Areas that need care
-- chores that are stale enough to matter
-- Projected Impact from the offered Chore Session
+- tasks that are stale enough to matter
+- Projected Impact from the offered Task Session
 
 Health should be presented as useful context, not a grade.
 
@@ -1110,9 +1285,9 @@ Decision: Home Health and Area Health use a `0-100` scale where higher is
 healthier.
 
 Area Health should communicate `how much would this area benefit from care
-right now?` rather than `what percent of chores are done?` It is a household
+right now?` rather than `what percent of tasks are done?` It is a household
 status signal, not a personal score. In MVP, the score comes from the derived
-health of enabled Chores in that Home Assistant Area, weighted by each Chore's
+health of enabled Tasks in that Home Assistant Area, weighted by each Task's
 health impact and driven mostly by Staleness.
 
 Preferred presentation:
@@ -1122,7 +1297,7 @@ Preferred presentation:
 - short area-level language beside the number, such as `Kitchen could use care`
   or `Entryway is holding steady`
 - small area trends where useful
-- projected improvement numbers when a suggested Chore Bundle would help an
+- projected improvement numbers when a suggested Task Bundle would help an
   area, such as `Kitchen 24`
 
 Suggested Area Health labels:
@@ -1131,7 +1306,7 @@ Suggested Area Health labels:
 - `75-89`: `Holding steady`
 - `60-74`: `Starting to build up`
 - `40-59`: `Could use care`
-- `0-39`: `Needs a reset`
+- `0-39`: `Needs care`
 
 Example Area Health language:
 
@@ -1169,7 +1344,7 @@ showing every area all the time. Prefer a compact Area Health strip tied to the
 current suggestion, such as:
 
 ```text
-Kitchen 48 · 24 with this reset
+Kitchen 48 · 24 with this bundle
 Entryway 82 · steady
 ```
 
@@ -1212,27 +1387,27 @@ layout, trends, or explanations.
 Live Test 2 decision: include Home Health visibility/navigation in the pass.
 The test should verify that Home Health is reachable from the Homekeep app,
 opens clearly, and can return to Right Now without crowding the recommendation
-flow. This does not expand the pass to Plan, Add Chore, Activity, Settings,
+flow. This does not expand the pass to Plan, Add Task, Activity, Settings,
 diagnostics, service wiring, or full Home Health behavior validation.
 
 Decision: Right Now should show compact Home Health context only when it helps
 explain the current recommendation.
 
 Do not make Home Health an always-visible status strip on Right Now. If the
-suggested Chore Bundle is clearly driven by an attention-worthy Area Health
+suggested Task Bundle is clearly driven by an attention-worthy Area Health
 state, stale care, or a meaningful Projected Impact, show compact context inside
 the suggestion. If the suggestion is neutral, light, or self-explanatory, let
 the suggestion stand without extra health context.
 
 The whole-home number gives the satisfying sense that the home is being cared
-for. The area number explains why the current Chore Bundle matters. The UI
+for. The area number explains why the current Task Bundle matters. The UI
 should avoid turning this into a large dashboard section.
 
 Recommended Ready Now treatment:
 
 ```text
 Home 74 · Mostly steady
-Kitchen 48 · This reset helps most
+Kitchen 48 · This bundle helps most
 ```
 
 Recommended expanded-bundle treatment:
@@ -1242,7 +1417,7 @@ Kitchen 24 · Big kitchen boost
 ```
 
 Decision: On Ready Now, the compact Home Health and Area Health treatment should
-live inside the suggested Chore Bundle, visible in the collapsed bundle state.
+live inside the suggested Task Bundle, visible in the collapsed bundle state.
 
 This keeps health context directly attached to the recommendation it explains.
 It also prevents Ready Now from becoming a dashboard made of separate health cards.
@@ -1252,10 +1427,10 @@ a standalone analytics section.
 Recommended collapsed bundle structure:
 
 ```text
-Evening Kitchen Reset
+Evening Kitchen Lift
 12 min · calm · Kitchen
 Home 74 · Mostly steady
-Kitchen 48 · This reset helps most
+Kitchen 48 · This bundle helps most
 Fits your time and gives the kitchen a visible lift.
 ```
 
@@ -1284,7 +1459,7 @@ report.
 Healthy, steady, or uneventful Areas should stay compact and calm. Do not
 manufacture explanations, trends, or actions just to fill the card. Richer
 detail belongs where there is a meaningful reason: low Area Health, recent
-decline, stale high-impact Chores, a useful next care action, or a notable
+decline, stale high-impact Tasks, a useful next care action, or a notable
 recent improvement.
 
 Decision: The `Home Health` view should be organized primarily as a
@@ -1334,8 +1509,8 @@ Each Area Health card should show:
 - what the user can do to help the area
 - primary visible area action
 - recent care or recent improvement when useful
-- next upcoming Chore for healthy areas
-- one main contributing Chore for areas below `70`, plus a compact `more ways
+- next upcoming Task for healthy areas
+- one main contributing Task for areas below `70`, plus a compact `more ways
   to help` line when there are additional contributors
 - suggested next care opportunity when appropriate
 
@@ -1387,7 +1562,7 @@ Area visibility rules:
 - hidden Areas should not appear in the Home Health card list
 - hidden Areas should not drive Home Health UI emphasis
 - hidden Areas should be treated as unmanaged by Homekeep
-- hiding an Area should not delete existing Chores or change Home Assistant
+- hiding an Area should not delete existing Tasks or change Home Assistant
   itself
 - use safe neutral copy such as `Hide from Home Health`
 
@@ -1401,7 +1576,7 @@ subject to the user's hidden-area configuration.
 Decision: Hidden Areas should be considered unmanaged by Homekeep.
 
 When an Area is hidden in Homekeep configuration, Homekeep should not use that
-Area for Home Health, Area Health, Ready Now suggestions, Bonus Chores, or
+Area for Home Health, Area Health, Ready Now suggestions, Bonus Tasks, or
 Homekeep-managed direct care actions. The Area may still exist normally in Home
 Assistant, but it is outside Homekeep's managed care surface.
 
@@ -1409,22 +1584,22 @@ Unmanaged Area rules:
 
 - exclude from Home Health cards
 - exclude from whole-home health calculations where practical
-- exclude from recommendation and Bonus Chore eligibility
+- exclude from recommendation and Bonus Task eligibility
 - exclude from Homekeep UI emphasis and area health summaries
 - do not delete or modify the Home Assistant Area
-- mark existing Homekeep Chores in that Area inactive, not deleted
+- mark existing Homekeep Tasks in that Area inactive, not deleted
 
-Decision: Chores in hidden/unmanaged Areas should become inactive and
+Decision: Tasks in hidden/unmanaged Areas should become inactive and
 recoverable.
 
-When a managed Area is hidden from Homekeep, existing Homekeep Chores assigned
+When a managed Area is hidden from Homekeep, existing Homekeep Tasks assigned
 to that Area should become inactive. They should not be suggested, shown as
 active care opportunities, or counted toward Home Health while the Area is
 unmanaged.
 
-If the user re-includes the Area in Homekeep later, those inactive Chores should
+If the user re-includes the Area in Homekeep later, those inactive Tasks should
 be recoverable and can become active again. Homekeep should preserve enough
-metadata to restore them without forcing the user to recreate their chore setup.
+metadata to restore them without forcing the user to recreate their task setup.
 
 Decision: Hide and re-include Area controls should live in Settings only.
 
@@ -1444,7 +1619,7 @@ Managed Areas config rules:
 - select all Areas by default
 - newly created Home Assistant Areas should become selected/managed by default
 - unselecting an Area makes it unmanaged
-- reselecting an Area makes it managed again and can recover inactive Chores
+- reselecting an Area makes it managed again and can recover inactive Tasks
 - use clear copy such as `Managed Areas`
 
 Decision: Hide Home Health freshness by default unless data is stale.
@@ -1470,29 +1645,29 @@ Health may be out of date
 Health is catching up
 ```
 
-Decision: Area cards below `70` should show one main contributing Chore plus a
+Decision: Area cards below `70` should show one main contributing Task plus a
 small `more ways to help` line.
 
-A contributing Chore is a Chore that is currently pulling the Area Health down
+A contributing Task is a Task that is currently pulling the Area Health down
 or would provide a clear Projected Impact if completed. It should be explainable
 through Staleness, Area Health impact, Projected Impact, or a useful small
 variant.
 
-Show one top contributing Chore visibly so the card has a clear next action.
+Show one top contributing Task visibly so the card has a clear next action.
 Represent the remaining contributors as a compact line, such as `2 more ways to
 help`, only when there are genuinely useful extra contributors. Do not list
-`2-3` Chores by default on every Area card, because that turns Home Health into
+`2-3` Tasks by default on every Area card, because that turns Home Health into
 another overdue list. This keeps the cards calm and scannable while still
 indicating that the area has more useful care options when that is true.
 
-Decision: Tapping `2 more ways to help` should expand the extra Chores inline
+Decision: Tapping `2 more ways to help` should expand the extra Tasks inline
 inside the Area Health card.
 
-Do not open a separate Chore list view for this interaction. Inline expansion
+Do not open a separate Task list view for this interaction. Inline expansion
 keeps the user in the area context and makes the extra options feel like
 supporting details, not a second workflow.
 
-Inline expansion should show the remaining contributing Chores compactly:
+Inline expansion should show the remaining contributing Tasks compactly:
 
 ```text
 2 more ways to help
@@ -1500,15 +1675,15 @@ Wipe counters · 8
 Take out compost · 6
 ```
 
-Tapping any expanded Chore should open that Chore's details, with the same
-direct single-Chore start rules as the main contributing Chore.
+Tapping any expanded Task should open that Task's details, with the same
+direct single-Task start rules as the main contributing Task.
 
-Decision: Inline extra Chores should collapse again when another Area card's
+Decision: Inline extra Tasks should collapse again when another Area card's
 `more ways to help` section is expanded.
 
-Only one Area card should show expanded extra Chores at a time. This keeps the
+Only one Area card should show expanded extra Tasks at a time. This keeps the
 vertical Home Health view calm and prevents multiple area cards from growing
-into a long chore list.
+into a long task list.
 
 Decision: Area cards should be open by default with details visible.
 
@@ -1518,32 +1693,32 @@ hierarchy to keep the page scannable.
 
 Open card details:
 
-- areas below `70` show one main contributing Chore and a compact `more ways to
+- areas below `70` show one main contributing Task and a compact `more ways to
   help` line
-- healthy areas show recent care and next upcoming Chore
+- healthy areas show recent care and next upcoming Task
 - all cards keep the number, status label, and small trend visible
 - details should stay compact enough that the list remains easy to scan
 
 Decision: Only areas below a certain health threshold should show contributing
-Chore details.
+Task details.
 
-Healthy areas should not be forced to expose contributing Chores because that
+Healthy areas should not be forced to expose contributing Tasks because that
 can make the whole home feel like a problem list. When an area is healthy, its
 card can simply show the number, friendly status, and recent care or steady
 state.
 
-Decision: Show contributing Chore details for areas below `70`.
+Decision: Show contributing Task details for areas below `70`.
 
 This keeps the area list calmer. Areas can show `Starting to build up` without
-immediately exposing a chore breakdown, while lower-health areas show the
-specific Chores that would help.
+immediately exposing a task breakdown, while lower-health areas show the
+specific Tasks that would help.
 
 Contributor explanations should stay short and inspectable. Prefer reasons
 that connect directly to derived Homekeep values:
 
-- the Chore is stale enough to pull the area down
-- the Chore has high Area Health impact
-- the Chore offers clear Projected Impact for the area
+- the Task is stale enough to pull the area down
+- the Task has high Area Health impact
+- the Task offers clear Projected Impact for the area
 - a small variant would provide useful care without turning the area into a
   problem list
 
@@ -1551,16 +1726,132 @@ Avoid explanations that sound like judgment, diagnosis, or a hidden model the
 user cannot correct. `Kitchen could use care because counters are overdue` is
 better than `Kitchen health is poor due to neglected maintenance`.
 
+Decision: Area Health should proudly show who and what helped the area.
+
+Area Health naturally trends down as care gets stale. That decline should feel
+like a normal rhythm of the home, not a failure. The UI should balance
+`what needs care now` with `who helped keep this area well`.
+
+Each Area Health card should be able to show recent area contributors when the
+data is meaningful:
+
+- humans who completed Tasks in that Area
+- pets whose routines are tied to that Area
+- plants contributing air, humidity, presence, or comfort in that Area
+- devices such as purifiers, washers, dryers, dishwashers, vacuums, humidifiers,
+  dehumidifiers, HVAC, grow lights, coffee machines, or other Home Assistant
+  entities that contributed care
+- routines that protected quiet, comfort, air, light, or household rhythm
+
+This should be proud and warm. People, pets, plants, and devices are part of the
+home's care network, and the UI should make that visible.
+
+Suggested Area Health contribution UI:
+
+- `Helped lately` row with small contributor chips
+- `Care sources` mini summary when an Area is expanded
+- `Kept this area steady` line for healthy Areas
+- `Recent help` line for lower-health Areas so decline does not erase
+  contribution
+- optional contributor detail drawer in the future, not required for MVP
+
+Example contributor chips:
+
+```text
+Helped lately: You 12 Keeps · Washer 5 · Fern 3
+```
+
+```text
+Kept this area steady: Purifier · Fern · Quiet hours
+```
+
+```text
+Recent help: You, the washer, and the drying rack moved laundry along.
+```
+
+Area Health should not only explain why the number is lower. It should also
+explain why the area is not lower:
+
+```text
+Kitchen 64 · Starting to build up
+Coffee, dishes, and the purifier helped this area hold together.
+Counters would help most next.
+```
+
+```text
+Laundry 72 · Holding steady
+You and the washer carried this room this week.
+Next: Put away clean laundry · tomorrow
+```
+
+Contribution display rules:
+
+- show contribution as appreciation, not ranking
+- never imply that a person, pet, plant, or device failed because Area Health
+  drifted down
+- do not sort contributors as winners and losers
+- use warm source names like `Humans`, `Plants`, `Pets`, `Devices`, `Air`,
+  `Comfort`, and `Routines`
+- show individual contributors only when useful and not noisy
+- keep the top action focused on what helps next
+- make recent contribution visible even when the area still needs care
+- use Home Assistant entity/device names only when they are friendly enough;
+  otherwise map them to safer display labels
+
+Recommendation: Area Health cards should visually separate `Helped lately` from
+`Could help next`. This keeps pride and action from competing:
+
+```text
+[icon] Kitchen                    64
+Starting to build up · -3
+Helped lately: Coffee machine · Purifier · You
+Could help next: Wipe counters · 8
+[Care for this area]
+```
+
+Future reflection surfaces should use Area Health contribution history to show
+that health is a living rhythm:
+
+```text
+The kitchen drifted down, but it was cared for from many sides.
+Coffee helped the morning. The purifier kept air moving. You cleared dishes.
+```
+
+Future data-shape note, not MVP implementation:
+
+```text
+CareSource:
+  source_id
+  source_type: human | pet | plant | device | air | comfort | quiet | routine
+  display_name
+  home_assistant_entity_id: string | null
+
+CareContribution:
+  contribution_id
+  source_id
+  area_id: string | null
+  care_kind
+  keeps
+  happened_at
+  related_chore_id: string | null
+  related_session_id: string | null
+```
+
+This model should stay explainable and local-first. Care contribution records
+should use friendly display labels and avoid storing private calendar text,
+sensitive device details, or personal routines beyond what is needed to explain
+care.
+
 Decision: All areas should be expandable.
 
 Areas at `70+` should still be expandable for context, but they should not show
-contributing Chore details unless they drop below `70`. Healthy area expansion can
+contributing Task details unless they drop below `70`. Healthy area expansion can
 show steady-state information, recent care, or why the area is doing well.
 
 Decision: Healthy expanded areas should show both recent care and the next
-upcoming Chore.
+upcoming Task.
 
-Recent care explains why the area is healthy. The next upcoming Chore gives
+Recent care explains why the area is healthy. The next upcoming Task gives
 useful planning context without making the area feel like a problem.
 
 Example healthy expanded area:
@@ -1580,28 +1871,28 @@ Wipe counters · 8
 Take out compost · 6
 ```
 
-Decision: Tapping a contributing Chore should open Chore details only.
+Decision: Tapping a contributing Task should open Task details only.
 
-The Chore details view should include a button to start that Chore directly as
-a single-Chore flow. This direct start should not generate a Chore Bundle, and
-it should not offer full-reset Keeps.
+The Task details view should include a button to start that Task directly as
+a single-Task flow. This direct start should not generate a Task Bundle, and
+it should not offer Bundle Keeps.
 
-This keeps Area Health exploratory first. The user can understand why the Chore
+This keeps Area Health exploratory first. The user can understand why the Task
 matters before acting, but still has a clear direct path if they want to care
 for that area immediately.
 
-Direct Chore start from Area Health:
+Direct Task start from Area Health:
 
-- starts only the selected Chore
+- starts only the selected Task
 - does not create a suggested bundle around it
-- does not include full-reset Keeps
-- can still show the Chore's own Keeps and Projected Impact
+- does not include Bundle Keeps
+- can still show the Task's own Keeps and Projected Impact
 - should show a small `Done for now` / `One more` ending when finished
-- should not interrupt an active Chore Session without a clear confirmation
+- should not interrupt an active Task Session without a clear confirmation
   state
 
-Direct Chore details should use a softer primary action label than
-`Start this Chore`.
+Direct Task details should use a softer primary action label than
+`Start this Task`.
 
 Preferred label direction:
 
@@ -1610,19 +1901,19 @@ Preferred label direction:
 - `Care for this`
 - `Help this area`
 
-The label should still be clear that tapping it begins the selected Chore
-directly. Avoid labels that imply a bundle, such as `Start reset` or
+The label should still be clear that tapping it begins the selected Task
+directly. Avoid labels that imply a bundle, such as `Start bundle` or
 `Choose this bundle`.
 
-Decision: Home Health should stay focused on Chore details and direct
-single-Chore starts.
+Decision: Home Health should stay focused on Task details and direct
+single-Task starts.
 
-Do not add a primary action to generate a Chore Bundle from a selected area in
+Do not add a primary action to generate a Task Bundle from a selected area in
 the Home Health view. Bundle generation should stay centered in Ready Now /
-Ready-Now Mode and the Smart Chore List flow.
+Ready-Now Mode and the Smart Task List flow.
 
 The Home Health view should help the user inspect areas, understand what is
-affecting health, and optionally act on a single Chore. It should not become a
+affecting health, and optionally act on a single Task. It should not become a
 parallel recommendation builder.
 
 Decision: Each Area Health card should have a primary visible action like
@@ -1632,12 +1923,12 @@ The primary area action should make the card feel actionable at a glance. It
 should help the user move from understanding an area's health to helping that
 area.
 
-Decision: Tapping `Care for this area` should open the top contributing Chore
+Decision: Tapping `Care for this area` should open the top contributing Task
 details directly.
 
-This gives the user one clear next step from an area card. The Chore details
-view can explain why that Chore helps the area and offer the soft direct start
-action. It must not silently create a Chore Bundle or imply full-reset Keeps.
+This gives the user one clear next step from an area card. The Task details
+view can explain why that Task helps the area and offer the soft direct start
+action. It must not silently create a Task Bundle or imply Bundle Keeps.
 
 Pre-Live-Test-2 planning default: use Codex recommendations for remaining
 Home Health questions needed before the second Right Now live test.
@@ -1672,7 +1963,7 @@ Dishes are carrying the most staleness.
 ```
 
 Decision: Healthy areas above `70` should keep a softer primary action that
-opens the next upcoming Chore details.
+opens the next upcoming Task details.
 
 Healthy areas should remain actionable without feeling urgent. Use softer action
 labels such as `Keep it steady` or `See next care` instead of the stronger
@@ -1700,40 +1991,40 @@ Decision: The panel navigation label for the dedicated health view should be
 `Home Health` is broader than `Areas` and less vague than `Health`. The view can
 still be organized primarily as a list of Home Assistant Areas.
 
-Decision: After finishing a single Chore started from Area Health, Homekeep
+Decision: After finishing a single Task started from Area Health, Homekeep
 should show a small `Done for now` / `One more` ending first.
 
 This ending should be lighter than the full suggested-bundle ending because the
-user completed a single direct Chore, not an intact Chore Bundle.
+user completed a single direct Task, not an intact Task Bundle.
 
-Single-Chore ending rules:
+Single-Task ending rules:
 
-- show completion feedback for the Chore
-- show the Chore's Keeps received
+- show completion feedback for the Task
+- show the Task's Keeps received
 - show `Done for now` and `One more`
-- do not show full-reset Keeps
+- do not show Bundle Keeps
 - let `Done for now` return to the previous Area Health context or Ready Now
-- let `One more` offer a small eligible Bonus Chore, using the same optional
-  Bonus Chore model as other endings
+- let `One more` offer a small eligible Bonus Task, using the same optional
+  Bonus Task model as other endings
 - keep the copy low-pressure and clear that stopping is successful
 
-Decision: `One more` after a single Area Health Chore may choose from any
+Decision: `One more` after a single Area Health Task may choose from any
 eligible area, but should tilt toward the current area.
 
 The current area should receive a preference boost because the user is already
 thinking about that part of the home. This should not be a hard filter. If a
-better small eligible Bonus Chore exists elsewhere, Homekeep may offer it.
+better small eligible Bonus Task exists elsewhere, Homekeep may offer it.
 
-Bonus Chore eligibility from Area Health should consider:
+Bonus Task eligibility from Area Health should consider:
 
 - current area preference
 - low effort fit
 - high Projected Impact
 - overdue care when it still feels light
 - recent skips, snoozes, removals, and dismissals
-- whether the Chore was just completed
+- whether the Task was just completed
 
-Avoid offering another Chore in the same area if it would make the flow feel
+Avoid offering another Task in the same area if it would make the flow feel
 like a hidden bundle or a second session.
 
 The expanded view should still avoid grade-like treatment. It should answer
@@ -1805,37 +2096,37 @@ Avoid:
 - shame wording such as dirty, bad, neglected, or behind
 - exposing scoring formulas in the main UI
 
-### Plan / Scheduled Chores
+### Plan / Scheduled Tasks
 
 Status: draft.
 
 Plan should feel like setting aside intentional future care, not generating a
-Smart Chore List for later.
+Smart Task List for later.
 
 ```text
 Plan
 -> choose a future time
--> choose or create set Chores
+-> choose or create set Tasks
 -> optionally group them into a planned care item
--> save the planned Chores
+-> save the planned Tasks
 -> surface them on Ready Now when relevant
 ```
 
-Decision: Users should not plan generated Smart Chore Bundles for the future.
+Decision: Users should not plan generated Smart Task Bundles for the future.
 
-Generated Chore Bundles belong to Ready Now / Ready-Now Mode, when the user is
+Generated Task Bundles belong to Ready Now / Ready-Now Mode, when the user is
 actually ready to do household care. If the user wants a generated bundle, they
 should wait until they are ready and use Ready Now.
 
-Plan is for set Chores or planned household projects the user already knows
+Plan is for set Tasks or planned household projects the user already knows
 they want to do, such as painting the house Saturday morning.
 
-Decision: Plan should support longer project-style Chores, while Ready Now
+Decision: Plan should support longer project-style Tasks, while Ready Now
 stays focused on short generated care bundles.
 
 Ready Now answers `what can I do right now?` with generated, context-aware
-Chore Bundles. Plan answers `what do I already know I need or want to do
-later?` with intentional set Chores or projects. Plan may include longer work
+Task Bundles. Plan answers `what do I already know I need or want to do
+later?` with intentional set Tasks or projects. Plan may include longer work
 such as painting, garage cleanup, seasonal prep, or other household projects
 that do not fit the Ready Now generated-bundle model.
 
@@ -1859,15 +2150,15 @@ Friday evening
 Laundry · 30 min
 ```
 
-Planned Chores should not silently start. When the planned time is near, Ready Now
+Planned Tasks should not silently start. When the planned time is near, Ready Now
 can surface them as intentional planned work.
 
-Decision: Planned Chores should appear on Ready Now only when they are relevant
+Decision: Planned Tasks should appear on Ready Now only when they are relevant
 soon, but creation and management should live in Plan.
 
-Ready Now should surface saved planned Chores when they are close and actionable,
+Ready Now should surface saved planned Tasks when they are close and actionable,
 such as `Painting is planned for Saturday morning`. The full workflow for
-creating, inspecting, editing, deleting, and managing planned Chores belongs in
+creating, inspecting, editing, deleting, and managing planned Tasks belongs in
 the Plan view. This keeps Ready Now useful without turning it into a calendar.
 
 Decision: Planning should use quick time chips first, with an optional natural
@@ -1886,20 +2177,20 @@ When the quick options are not enough, the user can choose `Custom time` and
 enter a natural date/time. This keeps common planning fast without removing
 precision.
 
-### Add Chore
+### Add Task
 
 Status: draft.
 
-Adding a Chore should be available from the Homekeep app, but it should not
-interrupt an active Chore Session.
+Adding a Task should be available from the Homekeep app, but it should not
+interrupt an active Task Session.
 
-`homekeep.create_chore` creates a durable Chore definition. It must not rely on
-Home Assistant To-do create write-through, and it must not create a Chore
+`homekeep.create_chore` creates a durable Task definition. It must not rely on
+Home Assistant To-do create write-through, and it must not create a Task
 Session by itself.
 
 Questions to settle:
 
-- Should Add Chore start as a quick capture field, a full structured form, or a
+- Should Add Task start as a quick capture field, a full structured form, or a
   two-step quick-capture-to-details flow?
 - Which fields are required in the first UI pass?
 
@@ -1928,7 +2219,7 @@ Managed Areas settings behavior:
 - select all Areas by default
 - automatically select newly created Home Assistant Areas by default
 - unselected Areas become unmanaged by Homekeep
-- reselecting an Area can recover inactive Chores for that Area
+- reselecting an Area can recover inactive Tasks for that Area
 - changes affect Homekeep behavior only; they do not modify Home Assistant
   Areas
 
@@ -1937,7 +2228,7 @@ Decision: Managed Areas changes should require a `Save` button.
 Selecting or unselecting Areas should update the pending settings state, but
 Homekeep should not apply management changes until the user saves. This makes
 the choice intentional, especially because unselecting an Area makes it
-unmanaged and marks its Homekeep Chores inactive.
+unmanaged and marks its Homekeep Tasks inactive.
 
 The Settings UI should clearly distinguish pending changes from saved Homekeep
 behavior.
@@ -1946,7 +2237,7 @@ Decision: Saving Managed Areas changes that remove Areas should show a
 confirmation message before applying.
 
 The confirmation should explain the consequence plainly: removed Areas become
-unmanaged by Homekeep, and existing Chores in those Areas become inactive but
+unmanaged by Homekeep, and existing Tasks in those Areas become inactive but
 recoverable if the Area is managed again later. The confirmation should not
 sound alarming because the change is reversible.
 
@@ -1954,7 +2245,7 @@ Example confirmation:
 
 ```text
 Remove 2 areas from Homekeep?
-Their chores will become inactive, but they can come back if you manage those
+Their tasks will become inactive, but they can come back if you manage those
 areas again.
 ```
 
@@ -2019,9 +2310,9 @@ Purpose:
 Contains:
 
 - Ready-Now setup
-- current Smart Chore List
-- active Chore Session, when present
-- inline optional Chore continuation, when the planned session is complete
+- current Smart Task List
+- active Task Session, when present
+- inline optional Task continuation, when the planned session is complete
 
 ### Home Health
 
@@ -2034,9 +2325,9 @@ Contains:
 - one vertical column of large Home Assistant Area cards
 - Area Health number, status, trend, and health-based tint
 - Home Assistant configured Area icon
-- one main contributing Chore for areas below `70`
+- one main contributing Task for areas below `70`
 - compact `more ways to help` inline expansion
-- direct Chore details and single-Chore starts
+- direct Task details and single-Task starts
 
 Does not contain:
 
@@ -2048,12 +2339,12 @@ Does not contain:
 ### Plan
 
 Purpose:
-: Create and manage intentional future Chores and household projects.
+: Create and manage intentional future Tasks and household projects.
 
 Contains:
 
 - target time window input
-- planned set Chores
+- planned set Tasks
 - planned household projects
 - optional Home Assistant Area
 - saved planned items
@@ -2061,7 +2352,7 @@ Contains:
 
 Does not contain:
 
-- generated Smart Chore Bundle planning
+- generated Smart Task Bundle planning
 - Recommendation Engine bundle proposals for the future
 - refresh buttons
 
@@ -2072,8 +2363,8 @@ Purpose:
 
 Contains:
 
-- recent Chore completions
-- recent Chore Sessions
+- recent Task completions
+- recent Task Sessions
 - skipped, snoozed, and dismissed items
 - lightweight Session-History Learning signals when useful
 
@@ -2111,7 +2402,7 @@ Design guidance:
 - Use Home Health as context, not judgment.
 - Prefer clear actions over explanatory paragraphs.
 - Keep each screen focused on one household job.
-- Make the active Chore Session visually distinct from planning and history.
+- Make the active Task Session visually distinct from planning and history.
 
 The interface should feel more like a gentle operational panel than a decorative
 landing page.
@@ -2125,20 +2416,20 @@ product feel before service wiring.
 Unless a review note is explicitly scoped to one screen or component, visual
 feedback from this live review applies globally to the Homekeep app. Treat these
 notes as design-system direction for future Ready Now, active session, Bonus
-Chore, Home Health, Plan, Activity, Settings, diagnostics, empty states, and
+Task, Home Health, Plan, Activity, Settings, diagnostics, empty states, and
 error/stale-state surfaces.
 
 Review goals:
 
 - confirm the first impression feels like Homekeep, not a generic dashboard
 - check whether the Ready Now visual hierarchy leads naturally from greeting to
-  context to suggested Chore Bundle
+  context to suggested Task Bundle
 - verify the screen works on mobile and desktop without text collisions,
   crowded controls, or oversized decorative sections
 - confirm Home Health, Area Health, Projected Impact, and Keeps feel supportive
   rather than punitive
-- confirm the active Chore Session state feels distinct from setup and planning
-- confirm inline optional Chores feel positive, optional, and complete
+- confirm the active Task Session state feels distinct from setup and planning
+- confirm inline optional Tasks feel positive, optional, and complete
 - identify copy or motion that feels too chatty, too quiet, too cute, too
   clinical, or too much like a productivity score
 
@@ -2164,9 +2455,9 @@ Change before service wiring:
   tokens where possible, darker translucent layered surfaces, softer borders,
   and less white/pale green treatment so the app feels embedded in the HA dark
   UI rather than pasted over it.
-- The Suggested Chore Bundle card needs a typography pass. Font sizes and line
+- The Suggested Task Bundle card needs a typography pass. Font sizes and line
   heights should be revised relative to each other so the bundle title, reason,
-  metadata chips, health/impact line, Chore rows, and action buttons have a
+  metadata chips, health/impact line, Task rows, and action buttons have a
   clearer hierarchy and do not feel mismatched. Apply this rule broadly across
   the app wherever similar content appears: headings, supporting text, chips,
   rows, timers, summaries, and buttons should use a consistent type scale and
@@ -2175,31 +2466,31 @@ Change before service wiring:
   and implementation term, not a label the user needs to see above the main
   greeting. The opening screen should lead with the greeting and context
   controls.
-- Do not mention the specific Chore Bundle name in the invitation/greeting text.
-  The greeting should invite the moment and set tone; the Suggested Chore Bundle
+- Do not mention the specific Task Bundle name in the invitation/greeting text.
+  The greeting should invite the moment and set tone; the Suggested Task Bundle
   card should carry the bundle title and specific recommendation details. Apply
   this broadly to future recommendation surfaces so headings and invitation copy
   do not repeat each other.
 - Generate the Right Now greeting once when Right Now loads, and regenerate it
   only when the user changes meaningful top-level readiness context such as
   time or mood. The greeting should be mood/readiness aware and
-  stay separate from the specific Chore Bundle title. Do not change the greeting
+  stay separate from the specific Task Bundle title. Do not change the greeting
   on every shuffle or ordinary recommendation swap unless the user's
   top-level context meaningfully changed. Let the bundle card carry
   recommendation-specific details.
 - Remove redundant section labels when the UI object is already clear. For
-  example, do not show `Suggested Chore Bundle` above the suggested bundle card;
+  example, do not show `Suggested Task Bundle` above the suggested bundle card;
   the card title, content, and action should make its purpose obvious. Use status
   labels only when they add real state, such as a refining/loading message.
 - Do not add a separate invitation line above the recommendation card title.
   The page-level greeting already sets the tone; the card should lead directly
-  with the Chore Bundle title, reason, metadata, included Chores, and action.
+  with the Task Bundle title, reason, metadata, included Tasks, and action.
 - Place the randomize/shuffle control with the filters and context chips, not
   inside the recommendation card. It changes the suggestion inputs/result set,
   so it belongs with the controls for shaping the current moment. Apply this
   broadly to future recommendation surfaces.
 - In recommendation cards, combine the Area and health-gain metadata into one
-  scoped impact chip. For single-area Chore Bundles, show the area and gain
+  scoped impact chip. For single-area Task Bundles, show the area and gain
   together, such as `Kitchen 24`. For mixed-area bundles, use a truthful
   whole-home or mixed-area scope, such as `Home 3`, rather than showing a
   separate area chip that competes with the health chip. Do not use
@@ -2210,23 +2501,23 @@ Change before service wiring:
 - Fold the Projected Impact into the primary recommendation action instead of
   showing it as a separate chip. Use a compact emphasis button: projected benefit
   on the left, action icon on the right, stronger background color than secondary
-  controls. The button may use an accessible label such as `Choose this reset`,
+  controls. The button may use an accessible label such as `Start this bundle`,
   but visible text should emphasize the projected benefit, such as `Kitchen 24`
   and `Big kitchen boost`.
-- Place the projected-benefit/start action in the suggested Chore Bundle card
+- Place the projected-benefit/start action in the suggested Task Bundle card
   header, aligned to the top-right of the title/reason block on wider screens.
-  It should not sit below the visible Chore list, because that list has variable
+  It should not sit below the visible Task list, because that list has variable
   height and makes the primary action drift.
-- Do not hide the suggested Chores behind an expand/details control in the
-  suggestion card. A Chore Bundle is a set of Chores, so the card should show
+- Do not hide the suggested Tasks behind an expand/details control in the
+  suggestion card. A Task Bundle is a set of Tasks, so the card should show
   the bundle contents by default while keeping the layout compact enough to
   scan. Expansion can be reserved for deeper explanations elsewhere, not for
-  revealing the core Chores being suggested.
-- Suggested Chores in a Chore Bundle should be selected by default. The user is
+  revealing the core Tasks being suggested.
+- Suggested Tasks in a Task Bundle should be selected by default. The user is
   accepting a pre-built recommendation, not assembling the bundle from scratch.
-  Make included Chores visibly checked/selected and let the user remove
+  Make included Tasks visibly checked/selected and let the user remove
   exceptions.
-- Removed Chores should stay visible in the suggested bundle with a clear
+- Removed Tasks should stay visible in the suggested bundle with a clear
   removed visual style. Do not make them disappear from the card. Use muted
   treatment, a removed indicator, and an easy restore action so the user can
   understand what changed and reverse it in place. Do not also show a duplicate
@@ -2259,7 +2550,7 @@ Change before service wiring:
   context permits. Do not expose an explicit `all the time` option. If the user
   does not choose a duration, Mood Context/readiness should drive bundle length:
   `low` and `quiet` bias shorter, `focused` and `restless` bias useful
-  mid-sized resets, and `ready` can bias fuller Chore Bundles.
+  mid-sized bundles, and `ready` can bias fuller Task Bundles.
 - On Right Now, the default Area context should be automatic, not a preselected
   Area that looks user-chosen. Let the Recommendation Engine pick the best Area
   from Home Health, Staleness, time, inferred Capacity, Mood Context, and fit.
@@ -2268,7 +2559,7 @@ Change before service wiring:
   recommendation may still show the chosen recommendation Area in metadata, but
   the Area control itself should distinguish `Auto` from a user-selected Area.
 - Add one compact fit explanation line in the suggested bundle card, such as
-  `Picked for a quiet 10-minute reset in the Bathroom`. It should explain how
+  `Picked for a quiet 10-minute task bundle in the Bathroom`. It should explain how
   visible filters and inferred readiness shaped the bundle without becoming a
   technical score breakdown.
 - When Area is explicit, the fit line should acknowledge that choice directly,
@@ -2277,10 +2568,10 @@ Change before service wiring:
   little when Mood is `auto`, but explicit Time and Area choices should remain
   intact.
 - Label the shuffle control as `Try another fit` in tooltip/accessibility copy.
-- Removed physical Chores should act as short-lived feedback. If the user
-  removes a heavier or longer Chore before starting, soften inferred Capacity
+- Removed physical Tasks should act as short-lived feedback. If the user
+  removes a heavier or longer Task before starting, soften inferred Capacity
   for the next shuffle.
-- Show an included-count indicator near full-reset Keeps after removal, such as
+- Show an included-count indicator near Bundle Keeps after removal, such as
   `2 of 3 included`.
 - If explicit filters overconstrain the suggestion, show a specific empty state,
   such as `Nothing fits Bathroom with this mood right now.`
@@ -2291,20 +2582,20 @@ Change before service wiring:
 Right-now card next-build recommendations:
 
 1. Make the recommendation surface feel less like a conventional card. With
-   Chores visible by default, use darker translucent layering, softer borders,
+   Tasks visible by default, use darker translucent layering, softer borders,
    and fewer nested boxed rows so the bundle reads as one coherent suggestion.
-2. Add a compact bundle count, such as `3 chores · 15 min`, so the visible list
+2. Add a compact bundle count, such as `3 tasks · 15 min`, so the visible list
    feels intentional and the user understands the bundle size immediately.
-3. Make selected Chore indicators quieter than completion indicators. Included
-   Chores should read as selected/included, not already completed.
-4. Keep removed Chores visible but compact and clearly excluded, with restore
+3. Make selected Task indicators quieter than completion indicators. Included
+   Tasks should read as selected/included, not already completed.
+4. Keep removed Tasks visible but compact and clearly excluded, with restore
    available on the row.
 5. Keep the primary button feeling like the next step. Visible text should lead
    with the projected benefit, while the right-side icon carries the action.
    The accessible label should still name the action.
-6. Show full-reset Keeps information before the Chore list in a quiet,
-   compact treatment. When a Chore is deselected, the UI should indicate that
-   full-reset Keeps or projected benefit is no longer active instead of
+6. Show Bundle Keeps information before the Task list in a quiet,
+   compact treatment. When a Task is deselected, the UI should indicate that
+   Bundle Keeps or projected benefit is no longer active instead of
    pretending the original bundle reward still applies. Do not show this as a
    negative number; the user has not lost received Keeps.
 7. Tighten reason text so it answers `why this now?` in one short human
@@ -2314,7 +2605,7 @@ Right-now card next-build recommendations:
    same design family, clearly different roles.
 9. Recheck mobile scan order after the visual pass. The right-now card should
    still read naturally on a narrow screen: invite, title/reason, bundle size,
-   included Chores, projected-benefit action.
+   included Tasks, projected-benefit action.
 
 ## MVP App View
 
@@ -2322,14 +2613,14 @@ The first app-view implementation should stay narrow:
 
 1. Sidebar entry opens Homekeep.
 2. Ready Now view supports Ready-Now Mode.
-3. Ready Now view can render a Smart Chore List response.
-4. Starting a recommendation switches to active Chore Session state.
-5. Active Chore Session supports complete, skip, pause, and end.
-6. Completing the planned Chores adds a short inline optional Chore list.
-7. The optional Chore list is bounded and cannot chain indefinitely.
+3. Ready Now view can render a Smart Task List response.
+4. Starting a recommendation switches to active Task Session state.
+5. Active Task Session supports complete, skip, pause, and end.
+6. Completing the planned Tasks adds a short inline optional Task list.
+7. The optional Task list is bounded and cannot chain indefinitely.
 8. Overview sensors and To-do projections remain available to Home Assistant.
 
-Plan / Scheduled Chores and Home Health can follow once the Ready Now flow is
+Plan / Scheduled Tasks and Home Health can follow once the Ready Now flow is
 solid.
 
 ## Implementation Phases
@@ -2352,10 +2643,10 @@ solid.
 
 - Build the sidebar app shell.
 - Implement Ready-Now setup controls.
-- Render Smart Chore List results.
+- Render Smart Task List results.
 - Start a recommendation and store temporary UI identifiers only in the app
   view state.
-- Switch into active Chore Session controls.
+- Switch into active Task Session controls.
 
 ### Phase D: Home Assistant Projections
 
@@ -2365,7 +2656,7 @@ solid.
 ### Phase E: Expand Views
 
 - Add Home Health view.
-- Add Plan / Scheduled Chores view.
+- Add Plan / Scheduled Tasks view.
 - Add Activity view.
 - Add Settings and diagnostics only where they support real use.
 
